@@ -19,6 +19,7 @@ import Button from '../../components/Button';
 import Logo from '../../components/Logo';
 import { useEnterToSubmit } from '../../hooks/useKeyboardShortcuts';
 import { useGoogleAuth, getFirebaseAuthData } from '../../utils/googleAuth';
+import { isAppleAuthAvailable, signInWithApple, getFirebaseAuthDataFromApple } from '../../utils/appleAuth';
 
 /**
  * Register screen component with email/password registration
@@ -29,9 +30,21 @@ const RegisterScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
 
   // Initialize Google Auth
   const { request, response, promptAsync } = useGoogleAuth();
+
+  // Check Apple auth availability
+  useEffect(() => {
+    checkAppleAuth();
+  }, []);
+
+  const checkAppleAuth = async () => {
+    const available = await isAppleAuthAvailable();
+    setAppleAvailable(available);
+  };
 
   /**
    * Handle Google authentication response
@@ -102,6 +115,26 @@ const RegisterScreen = ({ navigation }) => {
       console.error('Error starting Google sign-in:', err);
       Alert.alert('Error', 'Failed to start Google sign-in. Please try again.');
       setGoogleLoading(false);
+    }
+  };
+
+  /**
+   * Handle Apple Sign In
+   */
+  const handleAppleSignIn = async () => {
+    try {
+      setAppleLoading(true);
+      const appleAuth = await signInWithApple();
+      const firebaseData = getFirebaseAuthDataFromApple(appleAuth);
+      await dispatch(loginWithFirebase(firebaseData)).unwrap();
+      // Navigation is handled by RootNavigator
+    } catch (err) {
+      console.error('Apple sign-in failed:', err);
+      if (err.message !== 'Apple sign-in was canceled') {
+        Alert.alert('Sign In Failed', err.message || 'Failed to sign in with Apple. Please try again.');
+      }
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -251,12 +284,16 @@ const RegisterScreen = ({ navigation }) => {
                 style={styles.socialButton}
               />
 
-              <Button
-                title="Sign up with Apple"
-                variant="outline"
-                onPress={() => {}}
-                icon="apple"
-              />
+              {appleAvailable && (
+                <Button
+                  title="Sign up with Apple"
+                  variant="outline"
+                  onPress={handleAppleSignIn}
+                  loading={appleLoading}
+                  disabled={appleLoading || loading || googleLoading}
+                  icon="apple"
+                />
+              )}
             </View>
           );
         }}
