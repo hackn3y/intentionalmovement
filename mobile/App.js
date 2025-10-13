@@ -72,11 +72,11 @@ export default function App() {
     });
 
     return () => {
-      if (notificationListener) {
-        Notifications.removeNotificationSubscription(notificationListener);
+      if (notificationListener?.remove) {
+        notificationListener.remove();
       }
-      if (responseListener) {
-        Notifications.removeNotificationSubscription(responseListener);
+      if (responseListener?.remove) {
+        responseListener.remove();
       }
     };
   }, []);

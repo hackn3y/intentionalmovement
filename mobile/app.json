@@ -32,12 +32,28 @@
       },
       "navigationBar": {
         "backgroundColor": "#1a1a1a"
-      }
+      },
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
-    "sdkVersion": "54.0.0"
+    "sdkVersion": "54.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "intentional-movement-corp"
+      }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ec4899"
+        }
+      ]
+    ],
+    "scheme": "intentionalmovement"
   }
 }

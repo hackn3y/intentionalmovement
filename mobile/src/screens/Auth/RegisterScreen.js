@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
-import { register, clearError } from '../../store/slices/authSlice';
+import { register, clearError, loginWithFirebase } from '../../store/slices/authSlice';
 import { registerSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Logo from '../../components/Logo';
 import { useEnterToSubmit } from '../../hooks/useKeyboardShortcuts';
+import { useGoogleAuth, getFirebaseAuthData } from '../../utils/googleAuth';
 
 /**
  * Register screen component with email/password registration
@@ -26,6 +28,25 @@ const RegisterScreen = ({ navigation }) => {
   const { loading, error } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Initialize Google Auth
+  const { request, response, promptAsync } = useGoogleAuth();
+
+  /**
+   * Handle Google authentication response
+   */
+  useEffect(() => {
+    if (response?.type === 'success') {
+      handleGoogleSignIn(response.authentication);
+    } else if (response?.type === 'error') {
+      console.error('Google auth error:', response.error);
+      Alert.alert('Authentication Error', 'Failed to sign in with Google. Please try again.');
+      setGoogleLoading(false);
+    } else if (response?.type === 'dismiss' || response?.type === 'cancel') {
+      setGoogleLoading(false);
+    }
+  }, [response]);
 
   /**
    * Handle registration submit
@@ -42,6 +63,45 @@ const RegisterScreen = ({ navigation }) => {
       // Navigation is handled by RootNavigator
     } catch (err) {
       console.error('Registration failed:', err);
+    }
+  };
+
+  /**
+   * Handle Google Sign In
+   * @param {Object} authentication - Google authentication data
+   */
+  const handleGoogleSignIn = async (authentication) => {
+    try {
+      setGoogleLoading(true);
+      const firebaseData = await getFirebaseAuthData(authentication);
+      await dispatch(loginWithFirebase(firebaseData)).unwrap();
+      // Navigation is handled by RootNavigator
+    } catch (err) {
+      console.error('Google sign-in failed:', err);
+      Alert.alert('Sign In Failed', err.message || 'Failed to sign in with Google. Please try again.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  /**
+   * Initiate Google Sign In flow
+   */
+  const handleGooglePress = async () => {
+    try {
+      if (!request) {
+        Alert.alert(
+          'Configuration Required',
+          'Google Sign-In is not configured. Please add your Google Web Client ID to the mobile app .env file.'
+        );
+        return;
+      }
+      setGoogleLoading(true);
+      await promptAsync();
+    } catch (err) {
+      console.error('Error starting Google sign-in:', err);
+      Alert.alert('Error', 'Failed to start Google sign-in. Please try again.');
+      setGoogleLoading(false);
     }
   };
 
@@ -184,7 +244,9 @@ const RegisterScreen = ({ navigation }) => {
               <Button
                 title="Sign up with Google"
                 variant="outline"
-                onPress={() => {}}
+                onPress={handleGooglePress}
+                loading={googleLoading}
+                disabled={googleLoading || loading}
                 icon="google"
                 style={styles.socialButton}
               />

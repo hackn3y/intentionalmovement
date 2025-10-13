@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 
@@ -71,8 +72,7 @@ const Input = ({
       >
         {leftIcon && (
           <View style={styles.leftIconContainer}>
-            {/* Icon component would go here */}
-            <Text style={styles.icon}>{leftIcon}</Text>
+            <Ionicons name={leftIcon} size={20} color={colors.gray[500]} />
           </View>
         )}
 
@@ -105,8 +105,7 @@ const Input = ({
             onPress={onRightIconPress}
             activeOpacity={0.7}
           >
-            {/* Icon component would go here */}
-            <Text style={styles.icon}>{rightIcon}</Text>
+            <Ionicons name={rightIcon} size={20} color={colors.gray[500]} />
           </TouchableOpacity>
         )}
       </View>

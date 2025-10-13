@@ -46,7 +46,7 @@ const createAssetFromUrl = async (url, options = {}) => {
     const asset = await muxVideo.assets.create({
       input: [{ url }],
       playback_policy: [options.playbackPolicy || 'public'],
-      mp4_support: options.mp4Support || 'standard',
+      // mp4_support removed - deprecated for basic assets
       max_resolution_tier: options.maxResolution || '1080p',
       test: process.env.NODE_ENV !== 'production',
       ...options
@@ -80,7 +80,7 @@ const createDirectUpload = async (options = {}) => {
     const upload = await muxVideo.uploads.create({
       new_asset_settings: {
         playback_policy: [options.playbackPolicy || 'public'],
-        mp4_support: options.mp4Support || 'standard',
+        // mp4_support removed - deprecated for basic assets
         max_resolution_tier: options.maxResolution || '1080p',
         test: process.env.NODE_ENV !== 'production'
       },

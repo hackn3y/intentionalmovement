@@ -6,7 +6,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  FlatList,
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
@@ -216,12 +215,11 @@ const PostDetailScreen = ({ route, navigation }) => {
           <Text style={styles.commentsTitle}>Comments</Text>
 
           {currentPost.comments && currentPost.comments.length > 0 ? (
-            <FlatList
-              data={currentPost.comments}
-              renderItem={renderComment}
-              keyExtractor={(item) => item._id || item.id || String(Math.random())}
-              scrollEnabled={false}
-            />
+            currentPost.comments.map((item) => (
+              <View key={item._id || item.id || String(Math.random())}>
+                {renderComment({ item })}
+              </View>
+            ))
           ) : (
             <EmptyState
               icon="💬"

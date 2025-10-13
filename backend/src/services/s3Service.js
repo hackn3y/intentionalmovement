@@ -34,8 +34,8 @@ exports.uploadFile = async (file, folder = 'uploads') => {
       Bucket: BUCKET_NAME,
       Key: fileName,
       Body: file.buffer,
-      ContentType: file.mimetype,
-      ACL: 'public-read'
+      ContentType: file.mimetype
+      // Note: ACL removed - bucket uses bucket policy for public access
     };
 
     const result = await s3.upload(params).promise();
@@ -203,8 +203,7 @@ exports.uploadImage = async (file, folder = 'images', options = {}) => {
       Bucket: BUCKET_NAME,
       Key: fileName,
       Body: imageBuffer,
-      ContentType: `image/${format}`,
-      ACL: 'public-read'
+      ContentType: `image/${format}`
     };
 
     const result = await s3.upload(params).promise();
@@ -224,8 +223,7 @@ exports.uploadImage = async (file, folder = 'images', options = {}) => {
         Bucket: BUCKET_NAME,
         Key: thumbnailName,
         Body: thumbnailBuffer,
-        ContentType: `image/${format}`,
-        ACL: 'public-read'
+        ContentType: `image/${format}`
       };
 
       const thumbnailResult = await s3.upload(thumbnailParams).promise();
@@ -262,8 +260,7 @@ exports.uploadVideo = async (file, folder = 'videos') => {
       Bucket: BUCKET_NAME,
       Key: fileName,
       Body: file.buffer,
-      ContentType: file.mimetype,
-      ACL: 'public-read'
+      ContentType: file.mimetype
     };
 
     const result = await s3.upload(params).promise();
@@ -319,8 +316,7 @@ exports.copyFile = async (sourceKey, destinationKey) => {
     const params = {
       Bucket: BUCKET_NAME,
       CopySource: `${BUCKET_NAME}/${sourceKey}`,
-      Key: destinationKey,
-      ACL: 'public-read'
+      Key: destinationKey
     };
 
     const result = await s3.copyObject(params).promise();
