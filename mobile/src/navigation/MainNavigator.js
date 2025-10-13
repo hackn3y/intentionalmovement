@@ -15,7 +15,7 @@ const Tab = createBottomTabNavigator();
  * Main tab navigator
  */
 const MainNavigator = () => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const unreadCount = useSelector((state) => state.messages.unreadCount);
 
   return (
@@ -23,11 +23,11 @@ const MainNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.gray[500],
+        tabBarInactiveTintColor: isDarkMode ? colors.gray[400] : colors.gray[500],
         tabBarStyle: {
-          backgroundColor: colors.white,
+          backgroundColor: colors.card,
           borderTopWidth: 1,
-          borderTopColor: colors.gray[200],
+          borderTopColor: colors.border,
           paddingTop: 5,
           paddingBottom: 5,
           height: 60,

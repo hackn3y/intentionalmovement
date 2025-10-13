@@ -3,9 +3,7 @@ const router = express.Router();
 const purchaseController = require('../controllers/purchaseController');
 const { verifyToken } = require('../middleware/auth');
 
-// Stripe webhook (no auth required)
-router.post('/webhook', express.raw({ type: 'application/json' }), purchaseController.handleWebhook);
-
+// Webhook is handled in server.js before JSON middleware
 // User routes (require authentication)
 router.use(verifyToken);
 

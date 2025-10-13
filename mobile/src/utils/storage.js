@@ -27,6 +27,11 @@ export const storage = {
    */
   set: async (key, value) => {
     try {
+      // If value is null or undefined, remove the item instead
+      if (value === null || value === undefined) {
+        await AsyncStorage.removeItem(key);
+        return true;
+      }
       await AsyncStorage.setItem(key, value);
       return true;
     } catch (error) {
@@ -135,6 +140,11 @@ export const storage = {
    */
   setObject: async (key, value) => {
     try {
+      // If value is null or undefined, remove the item instead
+      if (value === null || value === undefined) {
+        await AsyncStorage.removeItem(key);
+        return true;
+      }
       await AsyncStorage.setItem(key, JSON.stringify(value));
       return true;
     } catch (error) {

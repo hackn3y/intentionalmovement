@@ -27,6 +27,8 @@ const Challenge = require('./Challenge')(sequelize);
 const ChallengeParticipant = require('./ChallengeParticipant')(sequelize);
 const Subscription = require('./Subscription')(sequelize);
 const Report = require('./Report')(sequelize);
+const ProgramReview = require('./ProgramReview')(sequelize);
+const AuditLog = require('./AuditLog')(sequelize);
 
 // Define associations
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
@@ -107,6 +109,16 @@ Subscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 User.hasMany(Report, { foreignKey: 'reporterId', as: 'reportsMade' });
 Report.belongsTo(User, { foreignKey: 'reporterId', as: 'reporter' });
 
+// Program Reviews
+User.hasMany(ProgramReview, { foreignKey: 'userId', as: 'reviews' });
+ProgramReview.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Program.hasMany(ProgramReview, { foreignKey: 'programId', as: 'reviews' });
+ProgramReview.belongsTo(Program, { foreignKey: 'programId', as: 'program' });
+
+// Audit Logs
+User.hasMany(AuditLog, { foreignKey: 'userId', as: 'auditLogs' });
+AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   sequelize,
   User,
@@ -123,5 +135,7 @@ module.exports = {
   Challenge,
   ChallengeParticipant,
   Subscription,
-  Report
+  Report,
+  ProgramReview,
+  AuditLog
 };

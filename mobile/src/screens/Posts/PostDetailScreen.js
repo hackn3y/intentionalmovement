@@ -131,11 +131,13 @@ const PostDetailScreen = ({ route, navigation }) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <ScrollView
         style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -276,6 +278,9 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: SIZES.xl,
+  },
   postHeader: {
     padding: SIZES.md,
     borderBottomWidth: 1,
@@ -382,6 +387,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   commentInputContainer: {
     flexDirection: 'row',
     padding: SIZES.md,
+    paddingBottom: Platform.OS === 'ios' ? SIZES.md : SIZES.lg,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.card,
@@ -391,6 +397,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   commentInput: {
     flex: 1,
     marginBottom: 0,
+    backgroundColor: colors.background,
   },
   postButton: {
     marginTop: 0,

@@ -1,4 +1,9 @@
 require('dotenv').config();
+
+// Validate environment variables before starting the server
+const validateEnv = require('./utils/validateEnv');
+validateEnv();
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -15,6 +20,7 @@ const routes = require('./routes');
 const { initializeSocket } = require('./socket');
 const errorHandler = require('./middleware/errorHandler');
 const requestLogger = require('./middleware/requestLogger');
+const requestIdMiddleware = require('./middleware/requestId');
 
 const app = express();
 const server = http.createServer(app);
@@ -73,8 +79,15 @@ app.use(helmet({
   xssFilter: true,
 }));
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+
+// Stripe webhook - must be before express.json() to receive raw body
+app.post('/api/purchases/webhook', express.raw({ type: 'application/json' }), require('./controllers/purchaseController').handleWebhook);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Request ID tracking middleware (must come before requestLogger)
+app.use(requestIdMiddleware);
 
 // Request logging middleware
 app.use(requestLogger);

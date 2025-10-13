@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { User, Follow, Post, Purchase, Program, Achievement, UserAchievement } = require('../models');
+const AchievementService = require('../services/achievementService');
 
 // Get user profile
 exports.getUserProfile = async (req, res, next) => {
@@ -224,6 +225,11 @@ exports.followUser = async (req, res, next) => {
       followingId: id
     });
 
+    // Check for social achievements (for the user being followed)
+    AchievementService.checkSocialAchievements(id).catch(err => {
+      console.error('Achievement check error:', err);
+    });
+
     res.status(201).json({ message: 'Successfully followed user' });
   } catch (error) {
     next(error);
@@ -347,6 +353,74 @@ exports.getUserStats = async (req, res, next) => {
         achievements: achievementCount,
         totalLikes
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Upload profile image
+exports.uploadProfileImage = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Ensure user can only update their own profile
+    if (req.user.id !== id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized to update this profile' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Construct the image URL
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    await user.update({ profileImage: imageUrl });
+
+    res.json({
+      message: 'Profile image uploaded successfully',
+      profileImage: imageUrl
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Upload cover image
+exports.uploadCoverImage = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Ensure user can only update their own profile
+    if (req.user.id !== id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Unauthorized to update this profile' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Construct the image URL
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    await user.update({ coverImage: imageUrl });
+
+    res.json({
+      message: 'Cover image uploaded successfully',
+      coverImage: imageUrl
     });
   } catch (error) {
     next(error);

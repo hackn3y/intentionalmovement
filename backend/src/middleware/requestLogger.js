@@ -13,6 +13,7 @@ const requestLogger = (req, res, next) => {
 
   // Log incoming request
   logger.info('Incoming request', {
+    requestId: req.requestId,
     method: req.method,
     url: req.url,
     ip: req.ip || req.connection.remoteAddress,
@@ -28,6 +29,7 @@ const requestLogger = (req, res, next) => {
 
     // Log response
     logger.info('Outgoing response', {
+      requestId: req.requestId,
       method: req.method,
       url: req.url,
       statusCode: res.statusCode,
@@ -45,6 +47,7 @@ const requestLogger = (req, res, next) => {
     // Only log if json() wasn't called (to avoid duplicate logs)
     if (res.json === originalJson) {
       logger.info('Response completed', {
+        requestId: req.requestId,
         method: req.method,
         url: req.url,
         statusCode: res.statusCode,

@@ -22,6 +22,12 @@ class SocketService {
     try {
       const token = await storage.get('token');
 
+      // Don't attempt to connect if there's no token
+      if (!token) {
+        console.log('No token available, skipping socket connection');
+        return;
+      }
+
       this.socket = io(SOCKET_URL, {
         auth: {
           token,

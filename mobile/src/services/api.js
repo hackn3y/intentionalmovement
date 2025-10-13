@@ -5,6 +5,23 @@ import { storage } from '../utils/storage';
 // Debug: Log API URL
 console.log('API_URL configured as:', API_URL);
 
+// In-memory token cache to avoid async storage delays
+let tokenCache = null;
+
+/**
+ * Set token in cache (called after login/register)
+ */
+export const setTokenCache = (token) => {
+  tokenCache = token;
+};
+
+/**
+ * Clear token cache (called on logout)
+ */
+export const clearTokenCache = () => {
+  tokenCache = null;
+};
+
 /**
  * Axios instance with base configuration
  */
@@ -22,12 +39,27 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const token = await storage.get('token');
+      // First try the in-memory cache for immediate availability
+      let token = tokenCache;
+      console.log('Token from cache:', token ? 'YES' : 'NO');
+
+      // If not in cache, get from storage
+      if (!token) {
+        token = await storage.get('token');
+        console.log('Token from storage:', token ? 'YES' : 'NO');
+        if (token) {
+          tokenCache = token; // Cache it for next time
+        }
+      }
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('Authorization header set');
+      } else {
+        console.log('No token available for request');
       }
     } catch (error) {
-      console.error('Error getting token from storage:', error);
+      console.error('Error getting token:', error);
     }
     return config;
   },

@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User } = require('../models');
 const admin = require('firebase-admin');
+const response = require('../utils/response');
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -21,7 +22,7 @@ exports.register = async (req, res, next) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({ error: 'Email or username already exists' });
+      return response.conflict(res, 'Email or username already exists');
     }
 
     const user = await User.create({
@@ -33,11 +34,7 @@ exports.register = async (req, res, next) => {
 
     const token = generateToken(user.id);
 
-    res.status(201).json({
-      message: 'User registered successfully',
-      user,
-      token
-    });
+    return response.created(res, { user, token }, 'User registered successfully');
   } catch (error) {
     next(error);
   }
@@ -51,28 +48,24 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ where: { email } });
 
     if (!user || !user.password) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return response.unauthorized(res, 'Invalid credentials');
     }
 
     const isValidPassword = await user.comparePassword(password);
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return response.unauthorized(res, 'Invalid credentials');
     }
 
     if (!user.isActive) {
-      return res.status(403).json({ error: 'Account is disabled' });
+      return response.forbidden(res, 'Account is disabled');
     }
 
     await user.update({ lastActiveAt: new Date() });
 
     const token = generateToken(user.id);
 
-    res.json({
-      message: 'Login successful',
-      user,
-      token
-    });
+    return response.success(res, { user, token }, 'Login successful');
   } catch (error) {
     next(error);
   }
@@ -106,11 +99,7 @@ exports.firebaseAuth = async (req, res, next) => {
 
     const token = generateToken(user.id);
 
-    res.json({
-      message: 'Authentication successful',
-      user,
-      token
-    });
+    return response.success(res, { user, token }, 'Authentication successful');
   } catch (error) {
     next(error);
   }
@@ -124,7 +113,7 @@ exports.logout = async (req, res, next) => {
       await req.user.update({ fcmToken: null });
     }
 
-    res.json({ message: 'Logged out successfully' });
+    return response.success(res, null, 'Logged out successfully');
   } catch (error) {
     next(error);
   }
@@ -139,12 +128,12 @@ exports.refreshToken = async (req, res, next) => {
     const user = await User.findByPk(decoded.userId);
 
     if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'Invalid token' });
+      return response.unauthorized(res, 'Invalid token');
     }
 
     const newToken = generateToken(user.id);
 
-    res.json({ token: newToken });
+    return response.success(res, { token: newToken }, 'Token refreshed successfully');
   } catch (error) {
     next(error);
   }
@@ -159,12 +148,12 @@ exports.forgotPassword = async (req, res, next) => {
 
     if (!user) {
       // Don't reveal if email exists
-      return res.json({ message: 'If the email exists, a reset link has been sent' });
+      return response.success(res, null, 'If the email exists, a reset link has been sent');
     }
 
     // TODO: Implement email sending with reset token
     // For now, just return success
-    res.json({ message: 'If the email exists, a reset link has been sent' });
+    return response.success(res, null, 'If the email exists, a reset link has been sent');
   } catch (error) {
     next(error);
   }
@@ -176,7 +165,7 @@ exports.resetPassword = async (req, res, next) => {
     const { token, newPassword } = req.body;
 
     // TODO: Verify reset token and update password
-    res.json({ message: 'Password reset successful' });
+    return response.success(res, null, 'Password reset successful');
   } catch (error) {
     next(error);
   }
@@ -185,7 +174,7 @@ exports.resetPassword = async (req, res, next) => {
 // Get current user
 exports.getCurrentUser = async (req, res, next) => {
   try {
-    res.json({ user: req.user });
+    return response.success(res, { user: req.user }, 'User retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -209,7 +198,7 @@ exports.updateProfile = async (req, res, next) => {
     if (username && username !== req.user.username) {
       const existingUser = await User.findOne({ where: { username } });
       if (existingUser) {
-        return res.status(400).json({ error: 'Username already taken' });
+        return response.badRequest(res, 'Username already taken');
       }
     }
 
@@ -226,10 +215,7 @@ exports.updateProfile = async (req, res, next) => {
 
     await req.user.update(updateData);
 
-    res.json({
-      message: 'Profile updated successfully',
-      user: req.user
-    });
+    return response.success(res, { user: req.user }, 'Profile updated successfully');
   } catch (error) {
     next(error);
   }

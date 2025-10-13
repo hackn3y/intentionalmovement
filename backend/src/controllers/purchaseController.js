@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Purchase, Program, User } = require('../models');
 const stripeService = require('../services/stripeService');
+const AchievementService = require('../services/achievementService');
 
 // Get user's purchase history
 exports.getPurchases = async (req, res, next) => {
@@ -180,6 +181,11 @@ exports.confirmPurchase = async (req, res, next) => {
       // Increment enrollment count
       await purchase.program.increment('enrollmentCount');
 
+      // Check for purchase-related achievements
+      AchievementService.checkPurchaseAchievements(purchase.userId).catch(err => {
+        console.error('Achievement check error:', err);
+      });
+
       res.json({
         message: 'Purchase confirmed successfully',
         purchase
@@ -244,6 +250,11 @@ async function handlePaymentSuccess(paymentIntent) {
     if (purchase.program) {
       await purchase.program.increment('enrollmentCount');
     }
+
+    // Check for purchase-related achievements
+    AchievementService.checkPurchaseAchievements(purchase.userId).catch(err => {
+      console.error('Achievement check error:', err);
+    });
 
     // TODO: Send confirmation email
     // TODO: Send push notification

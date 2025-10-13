@@ -170,8 +170,8 @@ export const notificationService = {
    * @param {Object} subscription - Subscription object
    */
   removeNotificationSubscription: (subscription) => {
-    if (subscription) {
-      Notifications.removeNotificationSubscription(subscription);
+    if (subscription && subscription.remove) {
+      subscription.remove();
     }
   },
 

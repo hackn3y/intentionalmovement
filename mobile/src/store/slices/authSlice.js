@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 import { storage } from '../../utils/storage';
+import { setTokenCache, clearTokenCache } from '../../services/api';
 
 /**
  * Login user with email and password
@@ -13,10 +14,21 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      await storage.set('token', response.data.token);
-      await storage.set('user', JSON.stringify(response.data.user));
-      return response.data;
+      console.log('Login response:', response.data);
+      // Backend wraps response in data object: response.data.data.token
+      const token = response.data.data?.token || response.data.token;
+      const user = response.data.data?.user || response.data.user;
+      console.log('Token from response:', token);
+      // Set token in cache immediately for instant availability
+      setTokenCache(token);
+      console.log('Token set in cache');
+      // Then save to persistent storage
+      await storage.set('token', token);
+      await storage.set('user', JSON.stringify(user));
+      console.log('Token saved to storage');
+      return { token, user };
     } catch (error) {
+      console.error('Login error:', error);
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
@@ -31,10 +43,21 @@ export const register = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData);
-      await storage.set('token', response.data.token);
-      await storage.set('user', JSON.stringify(response.data.user));
-      return response.data;
+      console.log('Register response:', response.data);
+      // Backend wraps response in data object: response.data.data.token
+      const token = response.data.data?.token || response.data.token;
+      const user = response.data.data?.user || response.data.user;
+      console.log('Token from response:', token);
+      // Set token in cache immediately for instant availability
+      setTokenCache(token);
+      console.log('Token set in cache');
+      // Then save to persistent storage
+      await storage.set('token', token);
+      await storage.set('user', JSON.stringify(user));
+      console.log('Token saved to storage');
+      return { token, user };
     } catch (error) {
+      console.error('Register error:', error);
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
@@ -88,6 +111,9 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
+      // Clear token cache
+      clearTokenCache();
+      // Clear storage
       await storage.remove('token');
       await storage.remove('user');
       return null;

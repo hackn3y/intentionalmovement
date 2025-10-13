@@ -2,12 +2,31 @@
 node_modules/
 */node_modules/
 
-# Environment variables
+# Environment variables - NEVER COMMIT THESE!
 .env
 .env.local
+.env.development
+.env.production
 .env.*.local
-*/. env
+*/.env
 */.env.local
+*/.env.development
+*/.env.production
+**/.env
+**/.env.local
+
+# Firebase - Contains private keys
+firebase-service-account.json
+**/firebase-service-account.json
+google-services.json
+GoogleService-Info.plist
+
+# AWS credentials
+.aws/
+credentials
+config
+*accessKeys.csv
+*_accessKeys.csv
 
 # Build outputs
 dist/

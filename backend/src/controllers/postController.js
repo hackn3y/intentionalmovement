@@ -1,5 +1,7 @@
 const { Op } = require('sequelize');
-const { Post, User, Comment, Like, Follow } = require('../models');
+const { Post, User, Comment, Like, Follow, Report } = require('../models');
+const response = require('../utils/response');
+const AchievementService = require('../services/achievementService');
 
 // Get feed (paginated)
 exports.getFeed = async (req, res, next) => {
@@ -101,11 +103,20 @@ exports.createPost = async (req, res, next) => {
       return res.status(400).json({ error: 'Content is required' });
     }
 
+    // Handle uploaded image
+    let finalMediaUrl = mediaUrl;
+    let finalMediaType = mediaType || 'none';
+
+    if (req.file) {
+      finalMediaUrl = `/uploads/${req.file.filename}`;
+      finalMediaType = 'image';
+    }
+
     const post = await Post.create({
       userId: req.user.id,
       content,
-      mediaType: mediaType || 'none',
-      mediaUrl,
+      mediaType: finalMediaType,
+      mediaUrl: finalMediaUrl,
       thumbnailUrl,
       hashtags: hashtags || [],
       visibility: visibility || 'public'
@@ -120,6 +131,11 @@ exports.createPost = async (req, res, next) => {
           attributes: ['id', 'username', 'displayName', 'profileImage', 'isVerified']
         }
       ]
+    });
+
+    // Check for post-related achievements
+    AchievementService.checkPostAchievements(req.user.id).catch(err => {
+      console.error('Achievement check error:', err);
     });
 
     res.status(201).json({
@@ -282,6 +298,11 @@ exports.likePost = async (req, res, next) => {
 
     // Increment like count
     await post.increment('likeCount');
+
+    // Check for engagement achievements (for the post author)
+    AchievementService.checkEngagementAchievements(post.userId).catch(err => {
+      console.error('Achievement check error:', err);
+    });
 
     res.status(201).json({
       message: 'Post liked successfully',
@@ -454,6 +475,94 @@ exports.repost = async (req, res, next) => {
       message: 'Post reposted successfully',
       post: createdRepost
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Report post
+exports.reportPost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { reason, description } = req.body;
+
+    const validReasons = ['spam', 'harassment', 'inappropriate_content', 'hate_speech', 'violence', 'other'];
+
+    if (!reason || !validReasons.includes(reason)) {
+      return response.badRequest(res, 'Invalid or missing reason. Valid reasons: ' + validReasons.join(', '));
+    }
+
+    const post = await Post.findByPk(id);
+
+    if (!post) {
+      return response.notFound(res, 'Post not found');
+    }
+
+    // Check if user already reported this post
+    const existingReport = await Report.findOne({
+      where: {
+        reporterId: req.user.id,
+        contentType: 'post',
+        contentId: id
+      }
+    });
+
+    if (existingReport) {
+      return response.conflict(res, 'You have already reported this post');
+    }
+
+    const report = await Report.create({
+      reporterId: req.user.id,
+      contentType: 'post',
+      contentId: id,
+      reason,
+      description: description || null,
+      status: 'pending'
+    });
+
+    return response.created(res, { report }, 'Post reported successfully. Our moderation team will review it soon.');
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Share post (get shareable link and metadata)
+exports.sharePost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const post = await Post.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'username', 'displayName', 'profileImage', 'isVerified']
+        }
+      ]
+    });
+
+    if (!post) {
+      return response.notFound(res, 'Post not found');
+    }
+
+    if (post.isHidden || post.visibility === 'private') {
+      return response.forbidden(res, 'This post cannot be shared');
+    }
+
+    // Increment share count
+    await post.increment('shareCount');
+
+    // Generate shareable data
+    const shareData = {
+      url: `${process.env.APP_URL || 'http://localhost:3000'}/posts/${id}`,
+      title: `Post by ${post.user.displayName}`,
+      description: post.content.substring(0, 200) + (post.content.length > 200 ? '...' : ''),
+      image: post.mediaUrl || post.user.profileImage,
+      postId: id,
+      shareCount: post.shareCount + 1
+    };
+
+    return response.success(res, shareData, 'Post share data retrieved successfully');
   } catch (error) {
     next(error);
   }

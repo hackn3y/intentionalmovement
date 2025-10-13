@@ -41,7 +41,7 @@ const WelcomeScreen = ({ navigation }) => {
       >
         {/* Hero Section with Gradient */}
         <LinearGradient
-          colors={['#ec4899', '#db2777', '#be185d']}
+          colors={['#10b981', '#059669', '#047857']}
           style={styles.heroGradient}
         >
           <View style={styles.heroSection}>
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   valueTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: COLORS.dark,
+    color: '#ec4899',
     textAlign: 'center',
     marginBottom: SIZES.md,
     lineHeight: FONT_SIZES.lg * 1.4,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.primary + '15',
+    backgroundColor: '#fce7f3',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SIZES.sm,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    color: COLORS.dark,
+    color: '#ec4899',
     textAlign: 'center',
     marginBottom: SIZES.xs,
   },
@@ -258,10 +258,11 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     marginBottom: SIZES.md,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#ec4899',
   },
   secondaryButton: {
     marginBottom: SIZES.lg,
+    borderColor: '#ec4899',
   },
   disclaimer: {
     fontSize: FONT_SIZES.xs,

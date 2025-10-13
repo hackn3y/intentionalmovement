@@ -29,6 +29,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
+      },
+      "navigationBar": {
+        "backgroundColor": "#1a1a1a"
       }
     },
     "web": {

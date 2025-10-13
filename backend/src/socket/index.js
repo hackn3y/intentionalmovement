@@ -57,6 +57,8 @@ const initializeSocket = (io) => {
         const receiverSocketId = connectedUsers.get(receiverId);
         if (receiverSocketId) {
           io.to(receiverSocketId).emit('new_message', messageWithSender);
+          // Send delivery confirmation to sender
+          socket.emit('message_delivered', { messageId: message.id, deliveredAt: new Date() });
         }
 
         // Send back to sender for confirmation

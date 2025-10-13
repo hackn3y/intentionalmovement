@@ -8,14 +8,16 @@ const {
   validateUpdateProfile,
   validateEmail
 } = require('../middleware/validation');
+const { authRateLimit } = require('../middleware/userRateLimit');
 
-router.post('/register', validateUserRegistration, authController.register);
-router.post('/login', validateUserLogin, authController.login);
-router.post('/firebase-auth', authController.firebaseAuth);
+// Apply strict rate limiting to authentication endpoints
+router.post('/register', authRateLimit, validateUserRegistration, authController.register);
+router.post('/login', authRateLimit, validateUserLogin, authController.login);
+router.post('/firebase-auth', authRateLimit, authController.firebaseAuth);
 router.post('/logout', verifyToken, authController.logout);
-router.post('/refresh-token', authController.refreshToken);
-router.post('/forgot-password', validateEmail, authController.forgotPassword);
-router.post('/reset-password', authController.resetPassword);
+router.post('/refresh-token', authRateLimit, authController.refreshToken);
+router.post('/forgot-password', authRateLimit, validateEmail, authController.forgotPassword);
+router.post('/reset-password', authRateLimit, authController.resetPassword);
 router.get('/me', verifyToken, authController.getCurrentUser);
 router.put('/profile', verifyToken, validateUpdateProfile, authController.updateProfile);
 

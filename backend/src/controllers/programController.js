@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { Program, Purchase, Progress, User } = require('../models');
+const AchievementService = require('../services/achievementService');
 
 // Get all programs (marketplace)
 exports.getPrograms = async (req, res, next) => {
@@ -352,6 +353,11 @@ exports.updateProgramProgress = async (req, res, next) => {
         lastAccessedAt: new Date()
       });
     }
+
+    // Check for progress-related achievements
+    AchievementService.checkProgressAchievements(userId, id).catch(err => {
+      console.error('Achievement check error:', err);
+    });
 
     res.json({
       message: 'Progress updated successfully',
