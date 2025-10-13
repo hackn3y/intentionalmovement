@@ -4,7 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Intentional Movement Corp is a mobile-first platform combining social community features with program sales for fitness and wellness. The app enables users to connect, share their movement journey, and purchase fitness/wellness programs.
+Intentional Movement Corp is a mobile-first platform combining social community features with program sales for fitness and wellness. The platform embraces the philosophy of "Planted Mind, Moving Body" and focuses on intentional living, personal development, and holistic lifestyle improvement.
+
+**Brand Identity**:
+- Tagline: "Planted Mind, Moving Body"
+- Primary color: Hot Pink (#ec4899)
+- Background: Light Pink (#fdf2f8)
+- Voice: Inspirational, sophisticated, aspirational
+- Messaging: "Elevate Your LifeStyle" - Creating a life of achievement, success, class, health, and elevation
+
+The app enables users to connect, share their movement journey, and purchase fitness/wellness programs.
 
 ## Repository Structure
 
@@ -121,6 +130,18 @@ npm run build:mobile:android # Build mobile app for Android
 - Stripe React Native SDK for payment processing
 - Socket.io client for real-time updates
 - Push notifications configured via Expo Notifications
+- Hot pink (#ec4899) primary color theme with light pink (#fdf2f8) backgrounds
+- Brand logo displayed using image assets (mobile/assets/logo.png)
+
+**Branding Implementation**:
+- Logo Component (`mobile/src/components/Logo.js`): Displays brand logo image instead of text
+- Welcome Screen (`mobile/src/screens/Auth/WelcomeScreen.js`): Modern gradient design with brand messaging
+  - Hot pink gradient hero section
+  - "Elevate Your LifeStyle" main tagline
+  - "Embrace the Power of Intentional Living" subtitle
+  - Feature cards showcasing wellness programs, personal development, community, and progress tracking
+  - Scrollable layout optimized for mobile web browsers
+- Color constants defined in `mobile/src/config/constants.js`
 
 **Directory Structure**:
 - `src/components/`: Reusable UI components (Button, Input, PostCard, ProgramCard, etc.)
@@ -236,9 +257,14 @@ Socket.io is used for real-time updates:
 ### Port Configuration
 - Backend runs on port 3001 by default
 - Admin dashboard runs on port 3000
-- Mobile Expo dev server typically uses ports 19000-19006
-- CORS is configured to allow requests from localhost:3000 and localhost:19006
-- Rate limiting is enabled on all `/api/*` routes in backend
+- Mobile Expo dev server typically uses port 8081 (Metro Bundler)
+- CORS is configured to allow requests from:
+  - localhost:3000 (admin dashboard)
+  - localhost:8081 (Expo Metro Bundler)
+  - localhost:8091, localhost:8092 (alternative Expo ports)
+  - localhost:19006 (Expo web)
+- CORS settings defined in `backend/.env` (CORS_ORIGIN) and `backend/src/server.js`
+- Rate limiting is enabled on all `/api/*` routes in backend (100 requests per 15 minutes)
 
 ### Important Workspace Notes
 - **Admin dashboard is NOT in npm workspaces** (intentionally removed from root package.json)
@@ -305,3 +331,53 @@ PORT=3002
 - Clear node_modules and reinstall: `rm -rf node_modules && npm run install:all`
 - Ensure you're using Node.js v16 or higher
 - Check that workspaces are correctly configured
+
+**CORS errors on mobile app:**
+- Ensure port 8081 is included in CORS_ORIGIN in `backend/.env`
+- After updating .env, kill all node processes and restart servers
+- Verify CORS configuration in server logs on startup
+
+## Git and GitHub
+
+**Repository**: https://github.com/hackn3y/intentionalmovement
+
+### Git Configuration
+- Main branch: `master`
+- Remote: `origin` pointing to GitHub repository
+- .gitignore configured to exclude:
+  - node_modules, .env files, build outputs
+  - Database files (*.db, *.sqlite, *.sqlite3)
+  - Uploads and temp directories
+  - OS files, IDE files, cache directories
+  - Windows reserved filenames (nul)
+
+### Common Git Commands
+```bash
+# Check status
+git status
+
+# Stage changes
+git add .
+
+# Commit changes
+git commit -m "Your commit message"
+
+# Push to GitHub
+git push origin master
+
+# Pull latest changes
+git pull origin master
+
+# Create a new branch
+git checkout -b feature/your-feature-name
+
+# View remote
+git remote -v
+```
+
+### Best Practices
+- Always test changes locally before committing
+- Write clear, descriptive commit messages
+- Keep commits focused on a single feature or fix
+- Never commit .env files or sensitive credentials
+- Pull latest changes before starting new work
