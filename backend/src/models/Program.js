@@ -168,15 +168,17 @@ module.exports = (sequelize) => {
   }, {
     timestamps: true,
     indexes: [
-      {
-        fields: ['slug']
-      },
-      {
-        fields: ['category']
-      },
-      {
-        fields: ['isPublished']
-      }
+      { fields: ['slug'] },
+      { fields: ['category'] },
+      { fields: ['isPublished'] },
+      { fields: ['isFeatured'] },
+      { fields: ['price'] },
+      { fields: ['rating'] },
+      { fields: ['enrollmentCount'] },
+      { fields: ['createdAt'] },
+      { fields: ['isPublished', 'isFeatured'] }, // Composite for featured program queries
+      { fields: ['isPublished', 'category'] }, // Composite for category filtering
+      { fields: ['isPublished', 'rating'] } // Composite for sorting by rating
     ]
   });
 

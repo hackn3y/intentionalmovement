@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const programController = require('../controllers/programController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
+const { cacheMiddleware } = require('../middleware/cache');
 
-// Public routes
-router.get('/', verifyToken, programController.getPrograms);
-router.get('/:id', verifyToken, programController.getProgram);
+// Public routes (with caching)
+router.get('/', verifyToken, cacheMiddleware(5 * 60 * 1000), programController.getPrograms);
+router.get('/:id', verifyToken, cacheMiddleware(10 * 60 * 1000), programController.getProgram);
 
 // User routes (require authentication)
 router.get('/my/purchased', verifyToken, programController.getMyPrograms);

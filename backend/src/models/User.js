@@ -108,6 +108,15 @@ module.exports = (sequelize) => {
     }
   }, {
     timestamps: true,
+    indexes: [
+      { fields: ['email'] },
+      { fields: ['username'] },
+      { fields: ['firebaseUid'] },
+      { fields: ['role'] },
+      { fields: ['isActive'] },
+      { fields: ['lastActiveAt'] },
+      { fields: ['createdAt'] }
+    ],
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {

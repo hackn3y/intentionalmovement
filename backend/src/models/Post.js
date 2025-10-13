@@ -93,12 +93,15 @@ module.exports = (sequelize) => {
   }, {
     timestamps: true,
     indexes: [
-      {
-        fields: ['userId']
-      },
-      {
-        fields: ['createdAt']
-      }
+      { fields: ['userId'] },
+      { fields: ['createdAt'] },
+      { fields: ['visibility'] },
+      { fields: ['isHidden'] },
+      { fields: ['isReported'] },
+      { fields: ['isRepost'] },
+      { fields: ['originalPostId'] },
+      { fields: ['userId', 'createdAt'] }, // Composite index for user timeline queries
+      { fields: ['visibility', 'isHidden', 'createdAt'] } // Composite index for feed queries
     ]
   });
 

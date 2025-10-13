@@ -11,6 +11,7 @@ import { store } from './src/store';
 import RootNavigator from './src/navigation/RootNavigator';
 import { STRIPE_PUBLISHABLE_KEY } from './src/config/constants';
 import { ThemeProvider } from './src/context/ThemeContext';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 // Only import StripeProvider on native platforms
 let StripeProvider;
@@ -112,18 +113,20 @@ export default function App() {
   );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <ThemeProvider>
-          {Platform.OS === 'web' ? (
-            content
-          ) : (
-            <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-              {content}
-            </StripeProvider>
-          )}
-        </ThemeProvider>
-      </Provider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Provider store={store}>
+          <ThemeProvider>
+            {Platform.OS === 'web' ? (
+              content
+            ) : (
+              <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+                {content}
+              </StripeProvider>
+            )}
+          </ThemeProvider>
+        </Provider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }

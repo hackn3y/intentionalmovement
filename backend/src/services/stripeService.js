@@ -1,3 +1,10 @@
+/**
+ * Stripe Service
+ * Handles all Stripe payment processing functionality
+ *
+ * @module services/stripeService
+ */
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Subscription price IDs (these should be created in Stripe Dashboard)
@@ -7,7 +14,17 @@ const SUBSCRIPTION_PRICES = {
   elite: process.env.STRIPE_ELITE_PRICE_ID
 };
 
-// Get or create Stripe customer
+/**
+ * Get existing Stripe customer or create a new one
+ * @param {Object} user - User object from database
+ * @param {string} user.id - User ID
+ * @param {string} user.email - User email
+ * @param {string} user.displayName - User display name
+ * @param {string} user.username - Username
+ * @param {string} [user.stripeCustomerId] - Existing Stripe customer ID
+ * @returns {Promise<string>} Stripe customer ID
+ * @throws {Error} If customer creation or retrieval fails
+ */
 exports.getOrCreateCustomer = async (user) => {
   try {
     // If user already has a Stripe customer ID, return it
@@ -38,7 +55,16 @@ exports.getOrCreateCustomer = async (user) => {
   }
 };
 
-// Create payment intent for one-time purchase
+/**
+ * Create a Stripe payment intent for one-time purchases
+ * @param {Object} params - Payment intent parameters
+ * @param {number} params.amount - Amount in cents (e.g., 999 for $9.99)
+ * @param {string} [params.currency='usd'] - Currency code
+ * @param {string} params.customerId - Stripe customer ID
+ * @param {Object} [params.metadata] - Additional metadata to attach
+ * @returns {Promise<Object>} Stripe PaymentIntent object
+ * @throws {Error} If payment intent creation fails
+ */
 exports.createPaymentIntent = async ({ amount, currency, customerId, metadata }) => {
   try {
     const paymentIntent = await stripe.paymentIntents.create({
