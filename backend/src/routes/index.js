@@ -1,0 +1,28 @@
+const express = require('express');
+const router = express.Router();
+
+// Import route modules
+const authRoutes = require('./auth');
+const userRoutes = require('./users');
+const postRoutes = require('./posts');
+const messageRoutes = require('./messages');
+const programRoutes = require('./programs');
+const purchaseRoutes = require('./purchases');
+const achievementRoutes = require('./achievements');
+const challengeRoutes = require('./challenges');
+const subscriptionRoutes = require('./subscriptions');
+const adminRoutes = require('./admin');
+
+// Mount routes
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/posts', postRoutes);
+router.use('/messages', messageRoutes);
+router.use('/programs', programRoutes);
+router.use('/purchases', purchaseRoutes);
+router.use('/achievements', achievementRoutes);
+router.use('/challenges', challengeRoutes);
+router.use('/subscriptions', subscriptionRoutes);
+router.use('/admin', adminRoutes);
+
+module.exports = router;
