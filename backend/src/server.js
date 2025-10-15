@@ -38,20 +38,25 @@ try {
   const requestIdMiddleware = require('./middleware/requestId');
   console.log('Middleware loaded');
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'],
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
-});
+  console.log('Creating Express app...');
+  const app = express();
+  console.log('Creating HTTP server...');
+  const server = http.createServer(app);
+  console.log('Creating Socket.IO...');
+  const io = socketIo(server, {
+    cors: {
+      origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'],
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
+  console.log('Socket.IO created');
 
-// Middleware
+  // Middleware
 
-// Trust proxy - required for Railway/Heroku/any reverse proxy
-app.set('trust proxy', 1);
+  console.log('Configuring middleware...');
+  // Trust proxy - required for Railway/Heroku/any reverse proxy
+  app.set('trust proxy', 1);
 
 app.use(compression());
 
