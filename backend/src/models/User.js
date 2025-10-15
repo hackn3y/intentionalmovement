@@ -87,36 +87,38 @@ module.exports = (sequelize) => {
       allowNull: true
     },
     // Subscription fields
-    subscriptionTier: {
-      type: DataTypes.ENUM('free', 'basic', 'premium'),
-      defaultValue: 'free',
-      allowNull: true // Allow null for backwards compatibility with existing database
-    },
-    subscriptionStatus: {
-      type: DataTypes.ENUM('active', 'trialing', 'canceled', 'expired', 'past_due'),
-      defaultValue: 'active',
-      allowNull: true // Allow null for backwards compatibility with existing database
-    },
-    stripeSubscriptionId: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    subscriptionStartDate: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-    subscriptionEndDate: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-    trialEndsAt: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-    cancelAtPeriodEnd: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
+    // TEMPORARY: Commented out until production database migration is run
+    // These columns don't exist in production PostgreSQL yet
+    // subscriptionTier: {
+    //   type: DataTypes.ENUM('free', 'basic', 'premium'),
+    //   defaultValue: 'free',
+    //   allowNull: true // Allow null for backwards compatibility with existing database
+    // },
+    // subscriptionStatus: {
+    //   type: DataTypes.ENUM('active', 'trialing', 'canceled', 'expired', 'past_due'),
+    //   defaultValue: 'active',
+    //   allowNull: true // Allow null for backwards compatibility with existing database
+    // },
+    // stripeSubscriptionId: {
+    //   type: DataTypes.STRING,
+    //   allowNull: true
+    // },
+    // subscriptionStartDate: {
+    //   type: DataTypes.DATE,
+    //   allowNull: true
+    // },
+    // subscriptionEndDate: {
+    //   type: DataTypes.DATE,
+    //   allowNull: true
+    // },
+    // trialEndsAt: {
+    //   type: DataTypes.DATE,
+    //   allowNull: true
+    // },
+    // cancelAtPeriodEnd: {
+    //   type: DataTypes.BOOLEAN,
+    //   defaultValue: false
+    // },
     lastActiveAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW
