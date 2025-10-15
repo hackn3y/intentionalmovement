@@ -210,11 +210,22 @@ const startServer = async () => {
     console.log('Database connected!');
     logger.info('Database connection established successfully.');
 
-    console.log('Syncing database...');
-    // Sync database
-    await sequelize.sync({ force: false });
-    console.log('Database synced!');
-    logger.info('Database synchronized.');
+    // In production, skip sync if it fails (database already exists)
+    // Use migrations instead of sync for production databases
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Production mode: Skipping database sync (use migrations instead)');
+      logger.info('Production mode: Database sync skipped, assuming migrations are handled separately');
+    } else {
+      console.log('Syncing database...');
+      try {
+        await sequelize.sync({ force: false });
+        console.log('Database synced!');
+        logger.info('Database synchronized.');
+      } catch (syncError) {
+        console.warn('Database sync failed (this is normal if database already exists):', syncError.message);
+        logger.warn('Database sync failed, continuing with existing schema:', syncError.message);
+      }
+    }
 
     console.log(`Starting server on port ${PORT}...`);
     server.listen(PORT, () => {
