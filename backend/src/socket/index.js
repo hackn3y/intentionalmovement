@@ -6,26 +6,42 @@ const connectedUsers = new Map();
 const initializeSocket = (io) => {
   io.use(async (socket, next) => {
     try {
+      console.log('=== SOCKET AUTH START ===');
       const token = socket.handshake.auth.token || socket.handshake.query.token;
+      console.log('Token received:', !!token);
 
       if (!token) {
+        console.error('No token provided');
         return next(new Error('Authentication token required'));
       }
 
+      console.log('Verifying JWT token...');
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('Token decoded, userId:', decoded.userId);
+
+      console.log('Fetching user from database...');
       const user = await User.findByPk(decoded.userId, {
         attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
       });
+      console.log('User found:', !!user);
 
       if (!user) {
+        console.error('User not found for id:', decoded.userId);
         return next(new Error('User not found'));
       }
 
       socket.userId = user.id;
       socket.user = user;
+      console.log('Socket authentication successful for user:', user.username);
       next();
     } catch (error) {
-      console.error('Socket authentication error:', error.message);
+      console.error('=== SOCKET AUTH ERROR ===');
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      if (error.original) {
+        console.error('Original error:', error.original);
+      }
       next(new Error('Authentication error'));
     }
   });
