@@ -36,6 +36,7 @@ const PostDetailScreen = ({ route, navigation }) => {
   const { colors, isDarkMode } = useTheme();
   const { postId, focusComment } = route.params;
   const { currentPost, loading } = useSelector((state) => state.posts);
+  const currentUser = useSelector((state) => state.auth.user);
   const [refreshing, setRefreshing] = useState(false);
   const commentInputRef = useRef(null);
   const styles = getStyles(colors, isDarkMode);
@@ -58,7 +59,24 @@ const PostDetailScreen = ({ route, navigation }) => {
     setTimeout(() => setRefreshing(false), 1000);
   }, [loadPost]);
 
+  // Check if this is the current user's own post
+  const isOwnPost = !!(
+    currentUser && currentPost?.user && (
+      (currentUser.id && currentPost.user.id && String(currentUser.id) === String(currentPost.user.id)) ||
+      (currentUser.id && currentPost.user._id && String(currentUser.id) === String(currentPost.user._id)) ||
+      (currentUser._id && currentPost.user.id && String(currentUser._id) === String(currentPost.user.id)) ||
+      (currentUser._id && currentPost.user._id && String(currentUser._id) === String(currentPost.user._id)) ||
+      (currentUser.id && currentPost.userId && String(currentUser.id) === String(currentPost.userId)) ||
+      (currentUser._id && currentPost.userId && String(currentUser._id) === String(currentPost.userId))
+    )
+  );
+
   const handleLikeToggle = async () => {
+    // Don't allow users to like their own posts
+    if (isOwnPost) {
+      return;
+    }
+
     try {
       if (currentPost?.isLiked) {
         await dispatch(unlikePost(postId)).unwrap();
@@ -188,11 +206,19 @@ const PostDetailScreen = ({ route, navigation }) => {
 
         {/* Post Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleLikeToggle}>
-            <Text style={[styles.actionIcon, currentPost.isLiked && styles.liked]}>
+          <TouchableOpacity
+            style={[styles.actionButton, isOwnPost && styles.actionButtonDisabled]}
+            onPress={handleLikeToggle}
+            disabled={isOwnPost}
+          >
+            <Text style={[
+              styles.actionIcon,
+              currentPost.isLiked && styles.liked,
+              isOwnPost && styles.actionIconDisabled
+            ]}>
               {currentPost.isLiked ? '❤️' : '🤍'}
             </Text>
-            <Text style={styles.actionText}>
+            <Text style={[styles.actionText, isOwnPost && styles.actionTextDisabled]}>
               {formatters.formatCompactNumber(currentPost.likeCount || currentPost.likesCount || 0)} Likes
             </Text>
           </TouchableOpacity>
@@ -334,9 +360,15 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     alignItems: 'center',
     marginRight: SIZES.lg,
   },
+  actionButtonDisabled: {
+    opacity: 0.5,
+  },
   actionIcon: {
     fontSize: FONT_SIZES.lg,
     marginRight: SIZES.xs,
+  },
+  actionIconDisabled: {
+    opacity: 0.5,
   },
   liked: {
     color: COLORS.danger,
@@ -345,6 +377,9 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: isDarkMode ? colors.gray[400] : colors.gray[600],
     fontWeight: '500',
+  },
+  actionTextDisabled: {
+    color: colors.gray[400],
   },
   commentsSection: {
     padding: SIZES.md,
