@@ -254,7 +254,8 @@ const HomeScreen = ({ navigation }) => {
         onPress={handleCreatePost}
         activeOpacity={0.8}
       >
-        <Text style={styles.fabIcon}>+</Text>
+        <Text style={styles.fabIcon}>✏️</Text>
+        <Text style={styles.fabLabel}>Post</Text>
       </TouchableOpacity>
     </View>
   );
@@ -299,12 +300,15 @@ const getStyles = (colors) => StyleSheet.create({
     position: 'absolute',
     bottom: SIZES.xl,
     right: SIZES.xl,
-    width: 56,
-    height: 56,
+    paddingHorizontal: SIZES.md,
+    paddingVertical: SIZES.sm,
+    minHeight: 56,
     borderRadius: 28,
     backgroundColor: colors.primary,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: SIZES.xs,
     elevation: 4,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 },
@@ -312,9 +316,15 @@ const getStyles = (colors) => StyleSheet.create({
     shadowRadius: 4,
   },
   fabIcon: {
-    fontSize: 32,
+    fontSize: 20,
     color: colors.white,
-    fontWeight: '300',
+    lineHeight: 20,
+  },
+  fabLabel: {
+    fontSize: FONT_SIZES.md,
+    color: colors.white,
+    fontWeight: '600',
+    lineHeight: 20,
   },
 });
 
