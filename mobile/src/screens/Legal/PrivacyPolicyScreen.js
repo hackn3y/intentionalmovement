@@ -1,25 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import WebScrollView from '../../components/WebScrollView';
-
-const COLORS = {
-  primary: '#ec4899',
-  light: '#fdf2f8',
-  white: '#ffffff',
-  dark: '#1f2937',
-  gray: '#6b7280',
-};
-
-const SIZES = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-};
+import { useTheme } from '../../context/ThemeContext';
+import { SIZES } from '../../config/constants';
 
 const PrivacyPolicyScreen = () => {
+  const { colors, isDarkMode } = useTheme();
+  const styles = getStyles(colors, isDarkMode);
+
   return (
     <WebScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Privacy Policy</Text>
@@ -323,10 +311,10 @@ const PrivacyPolicyScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors, isDarkMode) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.background,
   },
   content: {
     padding: SIZES.lg,
@@ -335,19 +323,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.sm,
     textAlign: 'center',
   },
   lastUpdated: {
     fontSize: 14,
-    color: COLORS.gray,
+    color: isDarkMode ? colors.gray[400] : colors.gray[600],
     textAlign: 'center',
     marginBottom: SIZES.xxl,
   },
   intro: {
     fontSize: 16,
-    color: COLORS.dark,
+    color: colors.text,
     lineHeight: 24,
     marginBottom: SIZES.xl,
   },
@@ -357,25 +345,25 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.md,
   },
   subsectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.dark,
+    color: colors.text,
     marginTop: SIZES.md,
     marginBottom: SIZES.sm,
   },
   paragraph: {
     fontSize: 15,
-    color: COLORS.dark,
+    color: colors.text,
     lineHeight: 22,
     marginBottom: SIZES.md,
   },
   bullet: {
     fontSize: 15,
-    color: COLORS.dark,
+    color: colors.text,
     lineHeight: 22,
     marginBottom: SIZES.sm,
     paddingLeft: SIZES.md,
@@ -386,12 +374,12 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: SIZES.xl,
     padding: SIZES.lg,
-    backgroundColor: COLORS.light,
+    backgroundColor: isDarkMode ? colors.gray[800] : colors.gray[100],
     borderRadius: 12,
   },
   footerText: {
     fontSize: 14,
-    color: COLORS.gray,
+    color: isDarkMode ? colors.gray[400] : colors.gray[600],
     lineHeight: 20,
     textAlign: 'center',
     fontStyle: 'italic',
