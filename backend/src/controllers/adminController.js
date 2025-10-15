@@ -593,6 +593,10 @@ exports.getAnalytics = async (req, res, next) => {
       }
     });
 
+    // Generate time-series data (daily for last 30 days)
+    const userGrowth = await generateTimeSeriesData(User, start, end, 'users');
+    const revenueData = await generateTimeSeriesRevenue(start, end);
+
     res.json({
       analytics: {
         period: { startDate: start, endDate: end },
@@ -600,13 +604,130 @@ exports.getAnalytics = async (req, res, next) => {
         newPosts,
         newPurchases,
         newSubscriptions,
-        revenue: revenue || 0
-      }
+        revenue: parseFloat(revenue) || 0
+      },
+      userGrowth,
+      revenue: revenueData
     });
   } catch (error) {
     next(error);
   }
 };
+
+// Generate time-series data for user growth
+async function generateTimeSeriesData(Model, startDate, endDate, label) {
+  const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+  // If period is more than 60 days, group by week
+  // If period is more than 180 days, group by month
+  // Otherwise, group by day
+
+  if (days > 180) {
+    // Group by month
+    const data = await sequelize.query(`
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon') as month,
+        COUNT(*)::int as ${label}
+      FROM "${Model.tableName}"
+      WHERE "createdAt" BETWEEN :start AND :end
+      GROUP BY DATE_TRUNC('month', "createdAt")
+      ORDER BY DATE_TRUNC('month', "createdAt")
+    `, {
+      replacements: { start: startDate, end: endDate },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return data;
+  } else if (days > 60) {
+    // Group by week
+    const data = await sequelize.query(`
+      SELECT
+        TO_CHAR(DATE_TRUNC('week', "createdAt"), 'Mon DD') as month,
+        COUNT(*)::int as ${label}
+      FROM "${Model.tableName}"
+      WHERE "createdAt" BETWEEN :start AND :end
+      GROUP BY DATE_TRUNC('week', "createdAt")
+      ORDER BY DATE_TRUNC('week', "createdAt")
+    `, {
+      replacements: { start: startDate, end: endDate },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return data;
+  } else {
+    // Group by day - for 30 days or less, show last 7 days for readability
+    const displayStart = days <= 30 ? new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000) : startDate;
+
+    const data = await sequelize.query(`
+      SELECT
+        TO_CHAR("createdAt", 'Mon DD') as month,
+        COUNT(*)::int as ${label}
+      FROM "${Model.tableName}"
+      WHERE "createdAt" BETWEEN :start AND :end
+      GROUP BY DATE_TRUNC('day', "createdAt"), TO_CHAR("createdAt", 'Mon DD')
+      ORDER BY DATE_TRUNC('day', "createdAt")
+    `, {
+      replacements: { start: displayStart, end: endDate },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return data;
+  }
+}
+
+// Generate time-series data for revenue
+async function generateTimeSeriesRevenue(startDate, endDate) {
+  const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+  if (days > 180) {
+    // Group by month
+    const data = await sequelize.query(`
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon') as month,
+        COALESCE(SUM(amount), 0)::float as revenue
+      FROM "Purchases"
+      WHERE "createdAt" BETWEEN :start AND :end
+        AND status = 'completed'
+      GROUP BY DATE_TRUNC('month', "createdAt")
+      ORDER BY DATE_TRUNC('month', "createdAt")
+    `, {
+      replacements: { start: startDate, end: endDate },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return data;
+  } else if (days > 60) {
+    // Group by week
+    const data = await sequelize.query(`
+      SELECT
+        TO_CHAR(DATE_TRUNC('week', "createdAt"), 'Mon DD') as month,
+        COALESCE(SUM(amount), 0)::float as revenue
+      FROM "Purchases"
+      WHERE "createdAt" BETWEEN :start AND :end
+        AND status = 'completed'
+      GROUP BY DATE_TRUNC('week', "createdAt")
+      ORDER BY DATE_TRUNC('week', "createdAt")
+    `, {
+      replacements: { start: startDate, end: endDate },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return data;
+  } else {
+    // Group by day - for 30 days or less, show last 7 days
+    const displayStart = days <= 30 ? new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000) : startDate;
+
+    const data = await sequelize.query(`
+      SELECT
+        TO_CHAR("createdAt", 'Mon DD') as month,
+        COALESCE(SUM(amount), 0)::float as revenue
+      FROM "Purchases"
+      WHERE "createdAt" BETWEEN :start AND :end
+        AND status = 'completed'
+      GROUP BY DATE_TRUNC('day', "createdAt"), TO_CHAR("createdAt", 'Mon DD')
+      ORDER BY DATE_TRUNC('day', "createdAt")
+    `, {
+      replacements: { start: displayStart, end: endDate },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return data;
+  }
+}
 
 // Get content moderation queue
 exports.getModerationQueue = async (req, res, next) => {
