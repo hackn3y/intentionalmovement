@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// Trigger rebuild - 2025-10-15
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
 
