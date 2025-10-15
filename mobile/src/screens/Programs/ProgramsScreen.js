@@ -187,7 +187,7 @@ const ProgramsScreen = ({ navigation }) => {
 const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
   },
   searchContainer: {
     padding: SIZES.md,

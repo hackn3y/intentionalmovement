@@ -14,10 +14,14 @@ function Analytics() {
 
   const fetchAnalytics = async () => {
     try {
-      const data = await adminService.getAnalytics();
+      // Get analytics for last 30 days
+      const endDate = new Date().toISOString();
+      const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const data = await adminService.getAnalytics(startDate, endDate);
       setAnalytics(data);
     } catch (error) {
       toast.error('Failed to load analytics');
+      console.error('Analytics error:', error);
     } finally {
       setLoading(false);
     }
@@ -31,24 +35,11 @@ function Analytics() {
     );
   }
 
-  // Sample data for demo purposes
-  const userGrowthData = analytics?.userGrowth || [
-    { month: 'Jan', users: 120 },
-    { month: 'Feb', users: 150 },
-    { month: 'Mar', users: 180 },
-    { month: 'Apr', users: 220 },
-    { month: 'May', users: 280 },
-    { month: 'Jun', users: 350 },
-  ];
+  // Use real data from backend or show message if no data
+  const analyticsData = analytics?.analytics || {};
 
-  const revenueData = analytics?.revenue || [
-    { month: 'Jan', revenue: 4200 },
-    { month: 'Feb', revenue: 5100 },
-    { month: 'Mar', revenue: 6300 },
-    { month: 'Apr', revenue: 7800 },
-    { month: 'May', revenue: 9200 },
-    { month: 'Jun', revenue: 11500 },
-  ];
+  const userGrowthData = analytics?.userGrowth || [];
+  const revenueData = analytics?.revenue || [];
 
   return (
     <div>
@@ -83,53 +74,67 @@ function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card title="Engagement Metrics">
+        <Card title="Period Summary">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Avg. Session Duration</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">12m 34s</span>
+              <span className="text-gray-600 dark:text-gray-400">New Users</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">{analyticsData.newUsers || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Daily Active Users</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">245</span>
+              <span className="text-gray-600 dark:text-gray-400">New Posts</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">{analyticsData.newPosts || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Posts per User</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">3.2</span>
+              <span className="text-gray-600 dark:text-gray-400">New Subscriptions</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">{analyticsData.newSubscriptions || 0}</span>
             </div>
           </div>
         </Card>
 
-        <Card title="Program Stats">
+        <Card title="Revenue">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Total Programs</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">12</span>
+              <span className="text-gray-600 dark:text-gray-400">Period Revenue</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">
+                ${(analyticsData.revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Completion Rate</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">68%</span>
+              <span className="text-gray-600 dark:text-gray-400">Purchases</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">{analyticsData.newPurchases || 0}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Avg. Rating</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">4.7 ⭐</span>
+              <span className="text-gray-600 dark:text-gray-400">Avg. Purchase Value</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">
+                ${analyticsData.newPurchases > 0
+                  ? ((analyticsData.revenue || 0) / analyticsData.newPurchases).toFixed(2)
+                  : '0.00'}
+              </span>
             </div>
           </div>
         </Card>
 
-        <Card title="Revenue Metrics">
+        <Card title="Date Range">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">MRR</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">$11,500</span>
+              <span className="text-gray-600 dark:text-gray-400">From</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">
+                {analyticsData.period?.startDate
+                  ? new Date(analyticsData.period.startDate).toLocaleDateString()
+                  : '-'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Avg. Order Value</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">$67.50</span>
+              <span className="text-gray-600 dark:text-gray-400">To</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">
+                {analyticsData.period?.endDate
+                  ? new Date(analyticsData.period.endDate).toLocaleDateString()
+                  : '-'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Conversion Rate</span>
-              <span className="font-bold text-gray-900 dark:text-gray-100">4.2%</span>
+              <span className="text-gray-600 dark:text-gray-400">Days</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">30</span>
             </div>
           </div>
         </Card>

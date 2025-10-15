@@ -12,6 +12,7 @@ exports.getDashboardStats = async (req, res, next) => {
       totalUsers,
       totalPosts,
       totalPurchases,
+      activePrograms,
       activeSubscriptions,
       pendingReports,
       totalRevenue
@@ -21,6 +22,7 @@ exports.getDashboardStats = async (req, res, next) => {
       // User.count({ where: { isActive: true } }),
       Post.count(),
       Purchase.count({ where: { status: 'completed' } }),
+      Program.count({ where: { isPublished: true } }),
       Subscription.count({ where: { status: 'active' } }),
       Report.count({ where: { status: 'pending' } }),
       Purchase.sum('amount', { where: { status: 'completed' } })
@@ -37,22 +39,102 @@ exports.getDashboardStats = async (req, res, next) => {
       }
     });
 
+    // Get recent activity (last 10 users, posts, purchases)
+    const [recentUsers, recentPosts, recentPurchases] = await Promise.all([
+      User.findAll({
+        attributes: ['id', 'username', 'displayName', 'createdAt'],
+        order: [['createdAt', 'DESC']],
+        limit: 5
+      }),
+      Post.findAll({
+        attributes: ['id', 'content', 'createdAt'],
+        include: [{ model: User, as: 'user', attributes: ['username', 'displayName'] }],
+        order: [['createdAt', 'DESC']],
+        limit: 5
+      }),
+      Purchase.findAll({
+        attributes: ['id', 'amount', 'createdAt'],
+        include: [
+          { model: User, as: 'user', attributes: ['username', 'displayName'] },
+          { model: Program, as: 'program', attributes: ['title'] }
+        ],
+        where: { status: 'completed' },
+        order: [['createdAt', 'DESC']],
+        limit: 3
+      })
+    ]);
+
+    // Format recent activity
+    const recentActivity = [
+      ...recentUsers.map(u => ({
+        type: 'New User',
+        description: `${u.displayName || u.username} joined`,
+        time: formatTimeAgo(u.createdAt)
+      })),
+      ...recentPosts.map(p => ({
+        type: 'New Post',
+        description: `${p.user?.displayName || p.user?.username} posted`,
+        time: formatTimeAgo(p.createdAt)
+      })),
+      ...recentPurchases.map(p => ({
+        type: 'Purchase',
+        description: `${p.user?.displayName || p.user?.username} bought ${p.program?.title}`,
+        time: formatTimeAgo(p.createdAt)
+      }))
+    ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 10);
+
+    // Get popular programs
+    const popularPrograms = await sequelize.query(`
+      SELECT
+        p.id,
+        p.title,
+        p.price,
+        COUNT(pu.id)::int as purchases
+      FROM "Programs" p
+      LEFT JOIN "Purchases" pu ON pu."programId" = p.id AND pu.status = 'completed'
+      WHERE p."isPublished" = true
+      GROUP BY p.id
+      ORDER BY purchases DESC
+      LIMIT 5
+    `, { type: sequelize.QueryTypes.SELECT });
+
     res.json({
-      stats: {
-        totalUsers,
-        activeUsers: totalUsers, // TEMPORARY: Return totalUsers since isActive column doesn't exist
-        newUsersThisMonth,
-        totalPosts,
-        totalPurchases,
-        activeSubscriptions,
-        pendingReports,
-        totalRevenue: totalRevenue || 0
-      }
+      totalUsers,
+      activeUsers: totalUsers, // TEMPORARY: Return totalUsers since isActive column doesn't exist
+      newUsersThisMonth,
+      totalPosts,
+      totalPurchases,
+      activePrograms,
+      activeSubscriptions,
+      pendingReports,
+      totalRevenue: parseFloat(totalRevenue) || 0,
+      recentActivity,
+      popularPrograms: popularPrograms.map(p => ({
+        ...p,
+        price: parseFloat(p.price)
+      }))
     });
   } catch (error) {
     next(error);
   }
 };
+
+// Helper function to format time ago
+function formatTimeAgo(date) {
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo ago`;
+  const years = Math.floor(months / 12);
+  return `${years}y ago`;
+}
 
 // Get all users (with filtering and pagination)
 exports.getUsers = async (req, res, next) => {
