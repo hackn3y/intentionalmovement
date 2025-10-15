@@ -2,12 +2,14 @@ const { Op } = require('sequelize');
 const { User, Post, Report, Purchase, Subscription, Program, Challenge, Achievement } = require('../models');
 const { sequelize } = require('../models');
 
+// Safe attributes that exist in production database
+const SAFE_USER_ATTRIBUTES = ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt'];
+
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res, next) => {
   try {
     const [
       totalUsers,
-      activeUsers,
       totalPosts,
       totalPurchases,
       activeSubscriptions,
@@ -15,7 +17,8 @@ exports.getDashboardStats = async (req, res, next) => {
       totalRevenue
     ] = await Promise.all([
       User.count(),
-      User.count({ where: { isActive: true } }),
+      // TEMPORARY: Skip isActive check since column doesn't exist in production
+      // User.count({ where: { isActive: true } }),
       Post.count(),
       Purchase.count({ where: { status: 'completed' } }),
       Subscription.count({ where: { status: 'active' } }),
@@ -37,7 +40,7 @@ exports.getDashboardStats = async (req, res, next) => {
     res.json({
       stats: {
         totalUsers,
-        activeUsers,
+        activeUsers: totalUsers, // TEMPORARY: Return totalUsers since isActive column doesn't exist
         newUsersThisMonth,
         totalPosts,
         totalPurchases,
@@ -54,7 +57,8 @@ exports.getDashboardStats = async (req, res, next) => {
 // Get all users (with filtering and pagination)
 exports.getUsers = async (req, res, next) => {
   try {
-    const { limit = 50, offset = 0, search, role, isActive } = req.query;
+    const { limit = 50, offset = 0, search } = req.query;
+    // TEMPORARY: Removed role and isActive filters since columns don't exist in production
 
     let whereClause = {};
 
@@ -66,17 +70,17 @@ exports.getUsers = async (req, res, next) => {
       ];
     }
 
-    if (role) {
-      whereClause.role = role;
-    }
-
-    if (isActive !== undefined) {
-      whereClause.isActive = isActive === 'true';
-    }
+    // TEMPORARY: Skip role and isActive filters
+    // if (role) {
+    //   whereClause.role = role;
+    // }
+    // if (isActive !== undefined) {
+    //   whereClause.isActive = isActive === 'true';
+    // }
 
     const users = await User.findAll({
       where: whereClause,
-      attributes: { exclude: ['password'] },
+      attributes: SAFE_USER_ATTRIBUTES, // Use explicit attributes instead of exclude
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['createdAt', 'DESC']]
@@ -104,7 +108,7 @@ exports.getUser = async (req, res, next) => {
     const { id } = req.params;
 
     const user = await User.findByPk(id, {
-      attributes: { exclude: ['password'] }
+      attributes: SAFE_USER_ATTRIBUTES // Use explicit attributes
     });
 
     if (!user) {
