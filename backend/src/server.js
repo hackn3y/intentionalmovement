@@ -42,15 +42,6 @@ try {
   const app = express();
   console.log('Creating HTTP server...');
   const server = http.createServer(app);
-  console.log('Creating Socket.IO...');
-  const io = socketIo(server, {
-    cors: {
-      origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'],
-      methods: ['GET', 'POST'],
-      credentials: true
-    }
-  });
-  console.log('Socket.IO created');
 
   // Middleware
 
@@ -95,6 +86,16 @@ const corsOriginChecker = (origin, callback) => {
     callback(new Error('Not allowed by CORS'));
   }
 };
+
+  console.log('Creating Socket.IO...');
+  const io = socketIo(server, {
+    cors: {
+      origin: corsOriginChecker,
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
+  console.log('Socket.IO created');
 
 console.log('Creating CORS options...');
 const corsOptions = {
