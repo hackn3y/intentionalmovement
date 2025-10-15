@@ -63,8 +63,13 @@ logger.info(`CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 // CORS origin checker with wildcard support
 console.log('Creating CORS origin checker...');
 const corsOriginChecker = (origin, callback) => {
+  console.log('CORS check for origin:', origin);
+
   // Allow requests with no origin (like mobile apps or Postman)
-  if (!origin) return callback(null, true);
+  if (!origin) {
+    console.log('No origin provided, allowing request');
+    return callback(null, true);
+  }
 
   // Check if origin matches any allowed origins (including wildcards)
   const isAllowed = allowedOrigins.some(allowedOrigin => {
@@ -74,14 +79,20 @@ const corsOriginChecker = (origin, callback) => {
         .replace(/\./g, '\\.')
         .replace(/\*/g, '.*');
       const regex = new RegExp(`^${pattern}$`);
-      return regex.test(origin);
+      const matches = regex.test(origin);
+      console.log(`Testing ${origin} against wildcard ${allowedOrigin}: ${matches}`);
+      return matches;
     }
-    return allowedOrigin === origin;
+    const matches = allowedOrigin === origin;
+    console.log(`Testing ${origin} against ${allowedOrigin}: ${matches}`);
+    return matches;
   });
 
   if (isAllowed) {
+    console.log(`CORS allowed for origin: ${origin}`);
     callback(null, true);
   } else {
+    console.error(`CORS BLOCKED origin: ${origin}`);
     logger.warn(`CORS blocked origin: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   }
