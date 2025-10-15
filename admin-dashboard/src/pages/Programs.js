@@ -79,7 +79,7 @@ function Programs() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 px-4 sm:px-0 pt-4 sm:pt-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Programs</h1>
         <button
           onClick={() => setIsCreateModalOpen(true)}
