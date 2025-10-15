@@ -16,6 +16,7 @@ import Programs from './pages/Programs';
 import Posts from './pages/Posts';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import DailyContent from './pages/DailyContent';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
                 <Route path="users" element={<Users />} />
                 <Route path="programs" element={<Programs />} />
                 <Route path="posts" element={<Posts />} />
+                <Route path="daily-content" element={<DailyContent />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />
               </Route>

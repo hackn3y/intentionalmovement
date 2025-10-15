@@ -222,4 +222,30 @@ export const adminService = {
     const response = await api.delete(`/admin/categories/${categoryId}`);
     return response.data;
   },
+
+  // Daily Content Management
+  getDailyContents: async (params = {}) => {
+    const response = await api.get('/daily-content/admin/all', { params });
+    return response.data;
+  },
+
+  getDailyContentStats: async () => {
+    const response = await api.get('/daily-content/admin/stats');
+    return response.data;
+  },
+
+  createDailyContent: async (data) => {
+    const response = await api.post('/daily-content/admin/create', data);
+    return response.data;
+  },
+
+  updateDailyContent: async (contentId, data) => {
+    const response = await api.put(`/daily-content/admin/${contentId}`, data);
+    return response.data;
+  },
+
+  deleteDailyContent: async (contentId) => {
+    const response = await api.delete(`/daily-content/admin/${contentId}`);
+    return response.data;
+  },
 };

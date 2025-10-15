@@ -12,6 +12,7 @@ const achievementRoutes = require('./achievements');
 const challengeRoutes = require('./challenges');
 const subscriptionRoutes = require('./subscriptions');
 const adminRoutes = require('./admin');
+const dailyContentRoutes = require('./dailyContent');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -24,5 +25,6 @@ router.use('/achievements', achievementRoutes);
 router.use('/challenges', challengeRoutes);
 router.use('/subscriptions', subscriptionRoutes);
 router.use('/admin', adminRoutes);
+router.use('/daily-content', dailyContentRoutes);
 
 module.exports = router;
