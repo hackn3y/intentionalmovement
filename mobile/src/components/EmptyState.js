@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
+import { SIZES, FONT_SIZES } from '../config/constants';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * Empty state component
@@ -12,6 +13,9 @@ import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
  * @param {Function} props.onAction - Action button handler
  */
 const EmptyState = ({ icon, title, message, actionText, onAction }) => {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+
   return (
     <View style={styles.container}>
       {icon && <Text style={styles.icon}>{icon}</Text>}
@@ -29,12 +33,13 @@ const EmptyState = ({ icon, title, message, actionText, onAction }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SIZES.xxl,
+    backgroundColor: colors.background,
   },
   icon: {
     fontSize: 64,
@@ -43,19 +48,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.xl,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.sm,
     textAlign: 'center',
   },
   message: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[500],
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: SIZES.xl,
     lineHeight: 24,
   },
   actionButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingVertical: SIZES.md,
     paddingHorizontal: SIZES.xl,
     borderRadius: SIZES.sm,
@@ -63,7 +68,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
-    color: COLORS.white,
+    color: colors.white,
   },
 });
 

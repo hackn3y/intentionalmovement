@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Program, Purchase, Progress, User } = require('../models');
 const AchievementService = require('../services/achievementService');
+const Fuse = require('fuse.js');
 
 // Get all programs (marketplace)
 exports.getPrograms = async (req, res, next) => {
@@ -17,13 +18,51 @@ exports.getPrograms = async (req, res, next) => {
       whereClause.isFeatured = true;
     }
 
-    if (search) {
-      whereClause[Op.or] = [
-        { title: { [Op.iLike]: `%${search}%` } },
-        { description: { [Op.iLike]: `%${search}%` } }
-      ];
+    // If search is provided, use fuzzy search
+    if (search && search.trim()) {
+      // First, get all programs matching the base filters (category, featured, published)
+      const allPrograms = await Program.findAll({
+        where: whereClause,
+        order: [
+          ['isFeatured', 'DESC'],
+          ['enrollmentCount', 'DESC'],
+          ['createdAt', 'DESC']
+        ]
+      });
+
+      // Configure Fuse.js for fuzzy searching
+      const fuseOptions = {
+        keys: [
+          { name: 'title', weight: 0.7 },
+          { name: 'description', weight: 0.2 },
+          { name: 'instructorName', weight: 0.1 }
+        ],
+        threshold: 0.4, // 0 = exact match, 1 = match anything (0.4 is generous for typos)
+        includeScore: true,
+        minMatchCharLength: 2,
+        ignoreLocation: true
+      };
+
+      const fuse = new Fuse(allPrograms.map(p => p.toJSON()), fuseOptions);
+      const searchResults = fuse.search(search.trim());
+
+      // Extract the programs from search results
+      const programs = searchResults
+        .map(result => result.item)
+        .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+
+      return res.json({
+        programs,
+        pagination: {
+          total: searchResults.length,
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          hasMore: parseInt(offset) + programs.length < searchResults.length
+        }
+      });
     }
 
+    // No search - use normal filtering
     const programs = await Program.findAll({
       where: whereClause,
       limit: parseInt(limit),

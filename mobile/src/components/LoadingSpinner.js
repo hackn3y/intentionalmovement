@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ActivityIndicator, Text, StyleSheet, Platform } from 'react-native';
-import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
+import { SIZES, FONT_SIZES } from '../config/constants';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * Loading spinner component
@@ -12,14 +13,17 @@ import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
  */
 const LoadingSpinner = ({
   size = 'large',
-  color = COLORS.primary,
+  color,
   overlay = false,
   text,
 }) => {
+  const { colors } = useTheme();
+  const spinnerColor = color || colors.primary;
+  const styles = getStyles(colors);
   // Add visible feedback for web platform
   const spinnerContent = (
     <>
-      <ActivityIndicator size={size} color={color} />
+      <ActivityIndicator size={size} color={spinnerColor} />
       {text && <Text style={styles.text}>{text}</Text>}
       {Platform.OS === 'web' && !text && <Text style={styles.text}>Loading...</Text>}
     </>
@@ -29,7 +33,7 @@ const LoadingSpinner = ({
     return (
       <View style={styles.overlayContainer}>
         <View style={styles.overlayContent}>
-          <ActivityIndicator size={size} color={color} />
+          <ActivityIndicator size={size} color={spinnerColor} />
           {text && <Text style={styles.overlayText}>{text}</Text>}
         </View>
       </View>
@@ -43,15 +47,16 @@ const LoadingSpinner = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SIZES.xl,
+    backgroundColor: colors.background,
   },
   webContainer: {
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
   },
   overlayContainer: {
     position: 'absolute',
@@ -65,7 +70,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
   },
   overlayContent: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.card,
     padding: SIZES.xxl,
     borderRadius: SIZES.md,
     alignItems: 'center',
@@ -74,13 +79,13 @@ const styles = StyleSheet.create({
   text: {
     marginTop: SIZES.md,
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[600],
+    color: colors.text,
     textAlign: 'center',
   },
   overlayText: {
     marginTop: SIZES.md,
     fontSize: FONT_SIZES.md,
-    color: COLORS.dark,
+    color: colors.text,
     fontWeight: '600',
     textAlign: 'center',
   },
