@@ -19,8 +19,8 @@ exports.getPrograms = async (req, res, next) => {
 
     if (search) {
       whereClause[Op.or] = [
-        { title: { [Op.like]: `%${search}%` } },
-        { description: { [Op.like]: `%${search}%` } }
+        { title: { [Op.iLike]: `%${search}%` } },
+        { description: { [Op.iLike]: `%${search}%` } }
       ];
     }
 
