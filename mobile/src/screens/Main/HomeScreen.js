@@ -18,6 +18,7 @@ import { useTheme } from '../../context/ThemeContext';
 import PostCard from '../../components/PostCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import UpgradeBanner from '../../components/UpgradeBanner';
 
 /**
  * Home screen with social feed
@@ -161,6 +162,18 @@ const HomeScreen = ({ navigation }) => {
       return <LoadingSpinner text="Loading posts..." />;
     }
 
+    if (filter === 'following') {
+      return (
+        <EmptyState
+          icon="👥"
+          title="No Posts from Following"
+          message="Follow other users to see their posts here, or switch to Everyone to see all posts."
+          actionText="View Everyone"
+          onAction={() => setFilter('all')}
+        />
+      );
+    }
+
     return (
       <EmptyState
         icon="📝"
@@ -176,36 +189,39 @@ const HomeScreen = ({ navigation }) => {
    * Render header
    */
   const renderHeader = () => (
-    <View style={styles.filterContainer}>
-      <TouchableOpacity
-        style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
-        onPress={() => setFilter('all')}
-      >
-        <Text
-          style={[
-            styles.filterText,
-            filter === 'all' && styles.filterTextActive,
-          ]}
+    <View>
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
+          onPress={() => setFilter('all')}
         >
-          Everyone
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          filter === 'following' && styles.filterButtonActive,
-        ]}
-        onPress={() => setFilter('following')}
-      >
-        <Text
+          <Text
+            style={[
+              styles.filterText,
+              filter === 'all' && styles.filterTextActive,
+            ]}
+          >
+            Everyone
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[
-            styles.filterText,
-            filter === 'following' && styles.filterTextActive,
+            styles.filterButton,
+            filter === 'following' && styles.filterButtonActive,
           ]}
+          onPress={() => setFilter('following')}
         >
-          Following
-        </Text>
-      </TouchableOpacity>
+          <Text
+            style={[
+              styles.filterText,
+              filter === 'following' && styles.filterTextActive,
+            ]}
+          >
+            Following
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <UpgradeBanner style={{ marginHorizontal: SIZES.md, marginVertical: SIZES.sm }} />
     </View>
   );
 
@@ -247,7 +263,7 @@ const HomeScreen = ({ navigation }) => {
 const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background,
   },
   emptyContainer: {
     flex: 1,

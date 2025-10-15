@@ -6,11 +6,20 @@ import * as Yup from 'yup';
 
 /**
  * Login validation schema
+ * Accepts email OR username
  */
 export const loginSchema = Yup.object().shape({
   email: Yup.string()
-    .email('Invalid email address')
-    .required('Email is required'),
+    .required('Email or username is required')
+    .test('email-or-username', 'Invalid email or username', (value) => {
+      if (!value) return false;
+      // If it contains @, validate as email
+      if (value.includes('@')) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }
+      // Otherwise validate as username (3-20 chars, alphanumeric + underscore)
+      return /^[a-zA-Z0-9_]{3,20}$/.test(value);
+    }),
   password: Yup.string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),

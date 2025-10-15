@@ -41,11 +41,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('AuthContext login called with:', email);
       const response = await authService.login(email, password);
+      console.log('AuthService response:', response);
       setUser(response.user);
       setIsAuthenticated(true);
+      console.log('Returning success');
       return { success: true };
     } catch (error) {
+      console.error('AuthContext login error:', error);
       return {
         success: false,
         error: error.response?.data?.message || 'Login failed'

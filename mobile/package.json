@@ -11,7 +11,12 @@
     "lint": "eslint .",
     "screenshot": "node scripts/screenshot.js",
     "screenshot:home": "node scripts/screenshot.js http://localhost:8091 screenshots/home.png",
-    "screenshot:profile": "node scripts/screenshot.js http://localhost:8091 screenshots/profile.png"
+    "screenshot:profile": "node scripts/screenshot.js http://localhost:8091 screenshots/profile.png",
+    "restart": "scripts\\restart-expo.bat",
+    "restart:clean": "scripts\\restart-expo.bat",
+    "build:pwa": "npx expo export --platform web && node scripts/post-build.js",
+    "serve:pwa": "npx serve dist -l 3000",
+    "pwa": "npm run build:pwa && npm run serve:pwa"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -42,6 +47,7 @@
     "expo-status-bar": "~3.0.8",
     "expo-web-browser": "^15.0.8",
     "formik": "^2.4.6",
+    "mixpanel-react-native": "^3.1.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
@@ -63,7 +69,14 @@
     "@types/react": "~19.1.10",
     "eslint": "^8.57.1",
     "jest": "^29.7.0",
-    "puppeteer": "^24.24.0"
+    "puppeteer": "^24.24.0",
+    "sharp": "^0.34.4",
+    "workbox-core": "^7.3.0",
+    "workbox-expiration": "^7.3.0",
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0",
+    "workbox-webpack-plugin": "^7.3.0"
   },
   "resolutions": {
     "react-native-web": "^0.21.0"

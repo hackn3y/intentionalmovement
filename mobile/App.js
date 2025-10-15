@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Provider } from 'react-redux';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
@@ -13,6 +13,8 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { STRIPE_PUBLISHABLE_KEY } from './src/config/constants';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import InstallPWA from './src/components/InstallPWA';
+import analyticsService from './src/services/analyticsService';
 
 // Only import StripeProvider on native platforms
 let StripeProvider;
@@ -48,6 +50,9 @@ function NavigationBarController() {
 
 export default function App() {
   useEffect(() => {
+    // Initialize analytics (commented out temporarily - causing issues)
+    // analyticsService.initialize();
+
     // Only register for push notifications on native platforms
     if (Platform.OS === 'web') {
       return;
@@ -121,10 +126,24 @@ export default function App() {
     },
   };
 
+  // Force light theme for navigation
+  const navigationTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: '#ffffff', // White background
+      card: '#ffffff', // White card/header background
+      border: '#fbcfe8', // Light pink borders
+      text: '#111827', // Dark text
+      primary: '#ec4899', // Hot pink primary color
+    },
+  };
+
   const content = (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer linking={linking} theme={navigationTheme}>
       <NavigationBarController />
       <RootNavigator />
+      <InstallPWA />
       <StatusBar style="auto" />
     </NavigationContainer>
   );

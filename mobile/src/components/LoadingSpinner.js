@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, Text, StyleSheet, Platform } from 'react-native';
 import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
 
 /**
@@ -16,6 +16,15 @@ const LoadingSpinner = ({
   overlay = false,
   text,
 }) => {
+  // Add visible feedback for web platform
+  const spinnerContent = (
+    <>
+      <ActivityIndicator size={size} color={color} />
+      {text && <Text style={styles.text}>{text}</Text>}
+      {Platform.OS === 'web' && !text && <Text style={styles.text}>Loading...</Text>}
+    </>
+  );
+
   if (overlay) {
     return (
       <View style={styles.overlayContainer}>
@@ -28,9 +37,8 @@ const LoadingSpinner = ({
   }
 
   return (
-    <View style={styles.container}>
-      <ActivityIndicator size={size} color={color} />
-      {text && <Text style={styles.text}>{text}</Text>}
+    <View style={[styles.container, Platform.OS === 'web' && styles.webContainer]}>
+      {spinnerContent}
     </View>
   );
 };
@@ -41,6 +49,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: SIZES.xl,
+  },
+  webContainer: {
+    backgroundColor: COLORS.light,
   },
   overlayContainer: {
     position: 'absolute',

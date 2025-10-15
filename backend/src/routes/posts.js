@@ -10,6 +10,7 @@ const {
   validatePagination
 } = require('../middleware/validation');
 const { writeRateLimit, readRateLimit } = require('../middleware/userRateLimit');
+const { canCreatePosts, checkFreeTierLimits } = require('../middleware/subscriptionMiddleware');
 
 // All post routes require authentication
 router.use(verifyToken);
@@ -20,14 +21,14 @@ router.get('/:id', validateUuidParam('id'), readRateLimit, postController.getPos
 router.get('/:id/comments', validateUuidParam('id'), validatePagination, readRateLimit, postController.getComments);
 router.get('/:id/share', validateUuidParam('id'), readRateLimit, postController.sharePost);
 
-// Write endpoints with stricter rate limiting
-router.post('/', uploadImage.single('image'), validateCreatePost, writeRateLimit, postController.createPost);
-router.put('/:id', validateUuidParam('id'), validateCreatePost, writeRateLimit, postController.updatePost);
+// Write endpoints with stricter rate limiting and subscription checks
+router.post('/', uploadImage.single('image'), validateCreatePost, canCreatePosts, writeRateLimit, postController.createPost);
+router.put('/:id', validateUuidParam('id'), validateCreatePost, canCreatePosts, writeRateLimit, postController.updatePost);
 router.delete('/:id', validateUuidParam('id'), writeRateLimit, postController.deletePost);
-router.post('/:id/like', validateUuidParam('id'), writeRateLimit, postController.likePost);
+router.post('/:id/like', validateUuidParam('id'), checkFreeTierLimits, writeRateLimit, postController.likePost);
 router.delete('/:id/like', validateUuidParam('id'), writeRateLimit, postController.unlikePost);
-router.post('/:id/comments', validateUuidParam('id'), validateCreateComment, writeRateLimit, postController.addComment);
-router.post('/:id/repost', validateUuidParam('id'), writeRateLimit, postController.repost);
+router.post('/:id/comments', validateUuidParam('id'), validateCreateComment, checkFreeTierLimits, writeRateLimit, postController.addComment);
+router.post('/:id/repost', validateUuidParam('id'), canCreatePosts, writeRateLimit, postController.repost);
 router.post('/:id/report', validateUuidParam('id'), writeRateLimit, postController.reportPost);
 
 module.exports = router;

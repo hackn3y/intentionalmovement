@@ -279,6 +279,11 @@ exports.likePost = async (req, res, next) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
+    // Prevent users from liking their own posts
+    if (post.userId === userId) {
+      return res.status(400).json({ error: 'You cannot like your own post' });
+    }
+
     // Check if already liked
     const existingLike = await Like.findOne({
       where: {

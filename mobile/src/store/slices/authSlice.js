@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
 import { storage } from '../../utils/storage';
 import { setTokenCache, clearTokenCache } from '../../services/api';
+// import analyticsService from '../../services/analyticsService';
 
 /**
  * Login user with email and password
@@ -26,6 +27,10 @@ export const login = createAsyncThunk(
       await storage.set('token', token);
       await storage.set('user', JSON.stringify(user));
       console.log('Token saved to storage');
+
+      // Track login event
+      // analyticsService.trackLogin(user);
+
       return { token, user };
     } catch (error) {
       console.error('Login error:', error);
@@ -55,6 +60,10 @@ export const register = createAsyncThunk(
       await storage.set('token', token);
       await storage.set('user', JSON.stringify(user));
       console.log('Token saved to storage');
+
+      // Track signup event
+      // analyticsService.trackSignup(user, 'email');
+
       return { token, user };
     } catch (error) {
       console.error('Register error:', error);
@@ -88,16 +97,38 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
     try {
-      const token = await storage.get('token');
-      const userStr = await storage.get('user');
+      console.log('LoadUser: Starting to load user from storage...');
+
+      // Add timeout to prevent hanging on web
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Storage timeout')), 3000)
+      );
+
+      const storagePromise = Promise.all([
+        storage.get('token'),
+        storage.get('user')
+      ]);
+
+      let token, userStr;
+      try {
+        [token, userStr] = await Promise.race([storagePromise, timeoutPromise]);
+      } catch (err) {
+        console.error('LoadUser: Storage error or timeout:', err);
+        return rejectWithValue('Storage access failed');
+      }
+
+      console.log('LoadUser: Token exists:', !!token, 'User exists:', !!userStr);
 
       if (!token || !userStr) {
+        console.log('LoadUser: No stored user found');
         return rejectWithValue('No user found');
       }
 
       const user = JSON.parse(userStr);
+      console.log('LoadUser: Successfully loaded user');
       return { token, user };
     } catch (error) {
+      console.error('LoadUser: Failed to load user:', error);
       return rejectWithValue('Failed to load user');
     }
   }
@@ -116,6 +147,8 @@ export const logout = createAsyncThunk(
       // Clear storage
       await storage.remove('token');
       await storage.remove('user');
+      // Reset analytics
+      // analyticsService.reset();
       return null;
     } catch (error) {
       return rejectWithValue('Logout failed');

@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { User } = require('../models');
 const admin = require('firebase-admin');
 const response = require('../utils/response');
+const mixpanel = require('../services/mixpanelService');
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -34,26 +35,52 @@ exports.register = async (req, res, next) => {
 
     const token = generateToken(user.id);
 
+    // Track signup event
+    mixpanel.trackSignup({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.displayName,
+      signupMethod: 'email',
+      createdAt: user.createdAt,
+    });
+
     return response.created(res, { user, token }, 'User registered successfully');
   } catch (error) {
     next(error);
   }
 };
 
-// Login user
+// Login user (with email OR username)
 exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
+    const loginIdentifier = email || username;
 
-    const user = await User.findOne({ where: { email } });
+    console.log('Login attempt:', { identifier: loginIdentifier, passwordProvided: !!password });
+
+    // Find user by email OR username
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email: loginIdentifier },
+          { username: loginIdentifier }
+        ]
+      }
+    });
+
+    console.log('User found:', !!user, 'Has password:', user ? !!user.password : false);
 
     if (!user || !user.password) {
+      console.log('Rejected: User not found or no password');
       return response.unauthorized(res, 'Invalid credentials');
     }
 
     const isValidPassword = await user.comparePassword(password);
+    console.log('Password valid:', isValidPassword);
 
     if (!isValidPassword) {
+      console.log('Rejected: Invalid password');
       return response.unauthorized(res, 'Invalid credentials');
     }
 
@@ -64,6 +91,13 @@ exports.login = async (req, res, next) => {
     await user.update({ lastActiveAt: new Date() });
 
     const token = generateToken(user.id);
+
+    // Track login event
+    mixpanel.trackLogin({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+    });
 
     return response.success(res, { user, token }, 'Login successful');
   } catch (error) {
@@ -220,3 +254,4 @@ exports.updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+

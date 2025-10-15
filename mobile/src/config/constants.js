@@ -20,25 +20,28 @@ export const POSTS_PER_PAGE = 10;
 export const MESSAGES_PER_PAGE = 20;
 export const PROGRAMS_PER_PAGE = 10;
 
-// Colors - Hot Pink theme
+// Colors - White, Pink & Emerald theme
 export const COLORS = {
-  primary: '#ec4899',      // Hot pink - primary brand color
+  primary: '#ec4899',       // Hot pink - primary brand color
   primaryLight: '#f472b6',  // Lighter pink for hover states
   primaryDark: '#db2777',   // Darker pink for pressed states
-  secondary: '#fbbf24',     // Golden yellow - accent color
+  accent: '#10b981',        // Emerald green - accent color
+  accentLight: '#34d399',   // Lighter emerald
+  accentDark: '#059669',    // Darker emerald
+  secondary: '#fbbf24',     // Golden yellow - secondary accent
   success: '#10b981',       // Green for success states
   danger: '#ef4444',        // Red for danger/delete
   warning: '#f59e0b',       // Orange for warnings
-  info: '#3b82f6',          // Blue for info
+  info: '#ec4899',          // Pink for info
   light: '#fdf2f8',         // Light pink background
   dark: '#111827',          // Dark text
   white: '#ffffff',
   black: '#000000',
   // Theme-aware properties
-  background: '#ffffff',    // Main background
-  card: '#ffffff',          // Card/surface background
+  background: '#ffffff',    // Main background (white)
+  card: '#ffffff',          // Card/surface background (white)
   text: '#111827',          // Primary text color
-  border: '#e5e7eb',        // Border color
+  border: '#fbcfe8',        // Border color (light pink)
   isDark: false,            // Light mode indicator
   gray: {
     50: '#f9fafb',
@@ -56,9 +59,12 @@ export const COLORS = {
 
 // Dark mode colors
 export const DARK_COLORS = {
-  primary: '#ec4899',      // Hot pink - same as light mode for consistency
+  primary: '#ec4899',       // Hot pink - same as light mode
   primaryLight: '#f472b6',
   primaryDark: '#db2777',
+  accent: '#10b981',        // Emerald green - same as light mode
+  accentLight: '#34d399',
+  accentDark: '#059669',
   secondary: '#fbbf24',
   success: '#34d399',
   danger: '#f87171',

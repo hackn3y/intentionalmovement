@@ -35,15 +35,18 @@ const ProfileScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { colors } = useTheme();
   const currentUser = useSelector((state) => state.auth.user);
-  // Use userId from params, but if explicitly null/undefined and we have currentUser, use currentUser.id
-  const userId = route.params?.userId !== undefined && route.params?.userId !== null
-    ? route.params.userId
+
+  // Determine userId: use params if provided and valid, otherwise use current user's id
+  const paramUserId = route.params?.userId;
+  const userId = (paramUserId !== undefined && paramUserId !== null)
+    ? paramUserId
     : currentUser?.id;
+
   const { currentProfile, loading, followLoading } = useSelector((state) => state.user);
   const [activeTab, setActiveTab] = useState('posts');
   const [refreshing, setRefreshing] = useState(false);
 
-  const isOwnProfile = !userId || currentUser?.id === userId || currentUser?._id === userId;
+  const isOwnProfile = !paramUserId || currentUser?.id === userId || currentUser?._id === userId;
   const styles = getStyles(colors);
 
   /**
@@ -54,13 +57,16 @@ const ProfileScreen = ({ route, navigation }) => {
     return () => {
       dispatch(clearCurrentProfile());
     };
-  }, [userId]);
+  }, [userId, route.params?._forceRefresh]);
 
   /**
    * Load profile data
    */
   const loadProfile = useCallback(() => {
-    dispatch(fetchUserProfile(userId));
+    // Only fetch if we have a valid userId
+    if (userId) {
+      dispatch(fetchUserProfile(userId));
+    }
   }, [dispatch, userId]);
 
   /**

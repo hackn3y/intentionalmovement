@@ -1,0 +1,35 @@
+{
+  "name": "Intentional Movement",
+  "short_name": "IntentionalMvmt",
+  "description": "Elevate Your LifeStyle - A platform for intentional living, personal development, and holistic wellness",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf2f8",
+  "theme_color": "#ec4899",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle",
+    "education"
+  ],
+  "icons": [],
+  "screenshots": [],
+  "shortcuts": [],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.intentionalmovement.app",
+      "id": "com.intentionalmovement.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/intentional-movement/id123456789"
+    }
+  ],
+  "iarc_rating_id": ""
+}

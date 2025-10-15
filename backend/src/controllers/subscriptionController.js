@@ -7,49 +7,74 @@ exports.getPlans = async (req, res, next) => {
   try {
     const plans = [
       {
+        id: 'basic_monthly',
         tier: 'basic',
-        name: 'Basic',
+        name: 'Basic Monthly',
         price: 9.99,
         currency: 'USD',
         interval: 'month',
+        priceId: process.env.STRIPE_BASIC_MONTHLY_PRICE_ID,
         features: [
-          'Access to community feed',
-          'Basic movement programs',
-          'Achievement tracking',
-          'Direct messaging'
-        ]
-      },
-      {
-        tier: 'premium',
-        name: 'Premium',
-        price: 19.99,
-        currency: 'USD',
-        interval: 'month',
-        features: [
-          'All Basic features',
-          'Access to premium programs',
+          'Create unlimited posts',
+          'Purchase up to 3 programs',
+          'Basic achievements',
           'Ad-free experience',
-          'Priority support',
-          'Exclusive challenges'
+          'Community access'
         ]
       },
       {
-        tier: 'elite',
-        name: 'Elite',
-        price: 49.99,
+        id: 'basic_yearly',
+        tier: 'basic',
+        name: 'Basic Yearly',
+        price: 99,
+        currency: 'USD',
+        interval: 'year',
+        priceId: process.env.STRIPE_BASIC_YEARLY_PRICE_ID,
+        savings: 20,
+        features: [
+          'All Basic Monthly features',
+          'Save $20 per year'
+        ]
+      },
+      {
+        id: 'premium_monthly',
+        tier: 'premium',
+        name: 'Premium Monthly',
+        price: 29.99,
         currency: 'USD',
         interval: 'month',
+        priceId: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID,
         features: [
-          'All Premium features',
-          'One-on-one coaching sessions',
-          'Custom program creation',
-          'Early access to new features',
-          'Elite community access'
+          'Unlimited program purchases',
+          'Unlimited messaging',
+          'All achievements & challenges',
+          'Exclusive content',
+          'Priority support',
+          'Early access to features',
+          'Creator tools'
+        ]
+      },
+      {
+        id: 'premium_yearly',
+        tier: 'premium',
+        name: 'Premium Yearly',
+        price: 299,
+        currency: 'USD',
+        interval: 'year',
+        priceId: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID,
+        savings: 60,
+        features: [
+          'All Premium Monthly features',
+          'Save $60 per year'
         ]
       }
     ];
 
-    res.json({ plans });
+    res.json({
+      success: true,
+      plans,
+      trialDays: 14
+    });
   } catch (error) {
     next(error);
   }
@@ -58,21 +83,29 @@ exports.getPlans = async (req, res, next) => {
 // Get user's subscription
 exports.getMySubscription = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const user = req.user;
 
-    const subscription = await Subscription.findOne({
-      where: {
-        userId,
-        status: { [Op.in]: ['active', 'past_due'] }
-      },
-      order: [['createdAt', 'DESC']]
+    const subscriptionStatus = {
+      tier: user.subscriptionTier,
+      status: user.subscriptionStatus,
+      isActive: user.isSubscriptionActive(),
+      isOnTrial: user.isOnTrial(),
+      subscriptionStartDate: user.subscriptionStartDate,
+      subscriptionEndDate: user.subscriptionEndDate,
+      trialEndsAt: user.trialEndsAt,
+      cancelAtPeriodEnd: user.cancelAtPeriodEnd,
+      stripeSubscriptionId: user.stripeSubscriptionId,
+      features: {
+        canCreatePosts: user.canCreatePosts(),
+        canSendMessages: user.canSendMessages(),
+        canPurchasePrograms: user.canPurchasePrograms()
+      }
+    };
+
+    res.json({
+      success: true,
+      subscription: subscriptionStatus
     });
-
-    if (!subscription) {
-      return res.json({ subscription: null });
-    }
-
-    res.json({ subscription });
   } catch (error) {
     next(error);
   }
@@ -303,21 +336,70 @@ exports.handleWebhook = async (req, res, next) => {
 
 // Handle subscription updated
 async function handleSubscriptionUpdated(stripeSubscription) {
+  const userId = stripeSubscription.metadata?.userId;
+  const tier = stripeSubscription.metadata?.tier;
+
+  if (!userId || !tier) {
+    console.error('Missing userId or tier in subscription metadata');
+    return;
+  }
+
+  const user = await User.findByPk(userId);
+  if (!user) {
+    console.error('User not found:', userId);
+    return;
+  }
+
+  const status = stripeSubscription.status === 'trialing' ? 'trialing' :
+                 stripeSubscription.status === 'active' ? 'active' :
+                 stripeSubscription.status;
+
+  // Update user subscription fields
+  await user.update({
+    subscriptionTier: tier,
+    subscriptionStatus: status,
+    stripeSubscriptionId: stripeSubscription.id,
+    subscriptionStartDate: new Date(stripeSubscription.current_period_start * 1000),
+    subscriptionEndDate: new Date(stripeSubscription.current_period_end * 1000),
+    trialEndsAt: stripeSubscription.trial_end ? new Date(stripeSubscription.trial_end * 1000) : null,
+    cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end || false
+  });
+
+  // Also update Subscription model for history
   const subscription = await Subscription.findOne({
     where: { stripeSubscriptionId: stripeSubscription.id }
   });
 
   if (subscription) {
     await subscription.update({
-      status: stripeSubscription.status === 'active' ? 'active' : stripeSubscription.status,
+      tier,
+      status: status,
       currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
       currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000)
     });
   }
+
+  console.log(`Subscription updated for user ${userId}: ${tier} (${status})`);
 }
 
 // Handle subscription deleted
 async function handleSubscriptionDeleted(stripeSubscription) {
+  const userId = stripeSubscription.metadata?.userId;
+
+  if (userId) {
+    const user = await User.findByPk(userId);
+    if (user) {
+      await user.update({
+        subscriptionTier: 'free',
+        subscriptionStatus: 'canceled',
+        stripeSubscriptionId: null,
+        subscriptionEndDate: new Date(),
+        cancelAtPeriodEnd: false
+      });
+      console.log(`Subscription canceled for user ${userId} - reverted to free tier`);
+    }
+  }
+
   const subscription = await Subscription.findOne({
     where: { stripeSubscriptionId: stripeSubscription.id }
   });
@@ -346,13 +428,28 @@ async function handlePaymentSucceeded(invoice) {
 // Handle payment failed
 async function handlePaymentFailed(invoice) {
   if (invoice.subscription) {
+    const stripeSubscription = await require('stripe')(process.env.STRIPE_SECRET_KEY)
+      .subscriptions.retrieve(invoice.subscription);
+
+    const userId = stripeSubscription.metadata?.userId;
+
+    if (userId) {
+      const user = await User.findByPk(userId);
+      if (user) {
+        await user.update({
+          subscriptionStatus: 'past_due'
+        });
+        console.log(`Payment failed for user ${userId} - status: past_due`);
+        // TODO: Send payment failed email
+      }
+    }
+
     const subscription = await Subscription.findOne({
       where: { stripeSubscriptionId: invoice.subscription }
     });
 
     if (subscription) {
       await subscription.update({ status: 'past_due' });
-      // TODO: Send notification to user
     }
   }
 }

@@ -86,6 +86,37 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    // Subscription fields
+    subscriptionTier: {
+      type: DataTypes.ENUM('free', 'basic', 'premium'),
+      defaultValue: 'free',
+      allowNull: false
+    },
+    subscriptionStatus: {
+      type: DataTypes.ENUM('active', 'trialing', 'canceled', 'expired', 'past_due'),
+      defaultValue: 'active',
+      allowNull: false
+    },
+    stripeSubscriptionId: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    subscriptionStartDate: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    subscriptionEndDate: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    trialEndsAt: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    cancelAtPeriodEnd: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     lastActiveAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW
@@ -115,7 +146,10 @@ module.exports = (sequelize) => {
       { fields: ['role'] },
       { fields: ['isActive'] },
       { fields: ['lastActiveAt'] },
-      { fields: ['createdAt'] }
+      { fields: ['createdAt'] },
+      { fields: ['subscriptionTier'] },
+      { fields: ['subscriptionStatus'] },
+      { fields: ['stripeSubscriptionId'] }
     ],
     hooks: {
       beforeCreate: async (user) => {
@@ -133,6 +167,41 @@ module.exports = (sequelize) => {
 
   User.prototype.comparePassword = async function(password) {
     return bcrypt.compare(password, this.password);
+  };
+
+  // Subscription helper methods
+  User.prototype.hasAccess = function(requiredTier) {
+    const tierHierarchy = { free: 0, basic: 1, premium: 2 };
+    const userTierLevel = tierHierarchy[this.subscriptionTier] || 0;
+    const requiredTierLevel = tierHierarchy[requiredTier] || 0;
+    return userTierLevel >= requiredTierLevel;
+  };
+
+  User.prototype.isSubscriptionActive = function() {
+    if (this.subscriptionStatus === 'canceled' || this.subscriptionStatus === 'expired') {
+      return false;
+    }
+    if (this.subscriptionEndDate && new Date() > new Date(this.subscriptionEndDate)) {
+      return false;
+    }
+    return true;
+  };
+
+  User.prototype.isOnTrial = function() {
+    if (!this.trialEndsAt) return false;
+    return new Date() < new Date(this.trialEndsAt) && this.subscriptionStatus === 'trialing';
+  };
+
+  User.prototype.canCreatePosts = function() {
+    return this.hasAccess('basic');
+  };
+
+  User.prototype.canSendMessages = function() {
+    return this.hasAccess('premium');
+  };
+
+  User.prototype.canPurchasePrograms = function() {
+    return this.hasAccess('basic');
   };
 
   User.prototype.toJSON = function() {

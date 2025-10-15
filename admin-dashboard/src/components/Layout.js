@@ -23,14 +23,14 @@ function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-accent-200 dark:bg-gray-900 transition-colors">
+    <div className="min-h-screen bg-pink-50 dark:bg-gray-900 transition-colors">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-10 transition-colors">
         <div className="p-6 border-b dark:border-gray-700">
-          <h1 className="text-2xl font-bold text-pink-300 dark:text-pink-300">
+          <h1 className="text-2xl font-bold font-heading text-primary-600 dark:text-primary-400">
             Intentional Movement
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Admin Dashboard</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-body">Admin Dashboard</p>
         </div>
 
         <nav className="p-4">
@@ -39,9 +39,9 @@ function Layout() {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-body ${
                     location.pathname === item.path
-                      ? 'bg-primary-50 dark:bg-pink-300 text-primary-700 dark:text-gray-900 font-medium'
+                      ? 'bg-primary-50 dark:bg-accent-500/20 text-primary-700 dark:text-accent-400 font-medium'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -56,7 +56,7 @@ function Layout() {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors">
           <button
             onClick={toggleDarkMode}
-            className="w-full mb-3 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full mb-3 px-4 py-2 text-sm font-medium font-body text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <span className="text-lg">{isDarkMode ? '☀️' : '🌙'}</span>
             <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
@@ -69,15 +69,15 @@ function Layout() {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+              <p className="text-sm font-medium font-body text-gray-900 dark:text-gray-100 truncate">
                 {user?.email}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-body">Admin</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-2 text-sm font-medium text-red-600 dark:text-pink-300 hover:bg-red-50 dark:hover:bg-pink-900/20 rounded-lg transition-colors"
+            className="w-full px-4 py-2 text-sm font-medium font-body text-red-600 dark:text-accent-400 hover:bg-red-50 dark:hover:bg-accent-900/20 rounded-lg transition-colors"
           >
             Logout
           </button>

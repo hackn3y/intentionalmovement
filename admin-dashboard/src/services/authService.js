@@ -4,11 +4,13 @@ export const authService = {
   // Login
   login: async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
-    if (response.data.token) {
-      localStorage.setItem('adminToken', response.data.token);
-      localStorage.setItem('adminUser', JSON.stringify(response.data.user));
+    console.log('authService raw response:', response.data);
+    // Backend returns { success, data: { user, token }, message }
+    if (response.data.data && response.data.data.token) {
+      localStorage.setItem('adminToken', response.data.data.token);
+      localStorage.setItem('adminUser', JSON.stringify(response.data.data.user));
     }
-    return response.data;
+    return response.data.data; // Return the nested data object
   },
 
   // Logout

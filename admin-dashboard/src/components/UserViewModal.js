@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Modal from './Modal';
 import { adminService } from '../services/adminService';
 import toast from 'react-hot-toast';
@@ -7,13 +7,7 @@ function UserViewModal({ isOpen, onClose, userId }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (isOpen && userId) {
-      fetchUserDetails();
-    }
-  }, [isOpen, userId]);
-
-  const fetchUserDetails = async () => {
+  const fetchUserDetails = useCallback(async () => {
     setLoading(true);
     try {
       const data = await adminService.getUser(userId);
@@ -23,7 +17,13 @@ function UserViewModal({ isOpen, onClose, userId }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (isOpen && userId) {
+      fetchUserDetails();
+    }
+  }, [isOpen, userId, fetchUserDetails]);
 
   if (!isOpen) return null;
 

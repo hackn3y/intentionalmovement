@@ -122,23 +122,23 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   label: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    color: colors.text,
+    color: '#111827',  // Always use dark text for labels
     marginBottom: SIZES.xs,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: isDarkMode ? colors.gray[100] : colors.gray[50],
+    backgroundColor: '#ffffff',  // Always use white background
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#d1d5db',  // Always use light gray border
     borderRadius: SIZES.sm,
     paddingHorizontal: SIZES.md,
     minHeight: 48,
     overflow: 'hidden',
   },
   inputContainerFocused: {
-    borderColor: colors.primary,
-    backgroundColor: colors.card,
+    borderColor: colors.accent || colors.primary,
+    backgroundColor: '#ffffff',  // Always use white background
   },
   inputContainerError: {
     borderColor: colors.danger || COLORS.danger,
@@ -146,7 +146,7 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   input: {
     flex: 1,
     fontSize: FONT_SIZES.md,
-    color: colors.text,
+    color: '#111827',  // Always use dark text for input
     paddingVertical: SIZES.sm,
     borderWidth: 0,
     outlineWidth: 0,

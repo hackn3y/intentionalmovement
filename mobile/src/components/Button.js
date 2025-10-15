@@ -172,21 +172,21 @@ const styles = StyleSheet.create({
 // Dynamic styles (dependent on theme colors)
 const getStyles = (colors) => StyleSheet.create({
   buttonPrimary: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent || colors.primary, // Use accent (pink) for buttons
   },
   buttonOutline: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: colors.accent || colors.primary, // Use accent (pink) for outlines
   },
   buttonTitlePrimary: {
     color: colors.white,
   },
   buttonTitleOutline: {
-    color: colors.primary,
+    color: colors.accent || colors.primary, // Use accent (pink) for text
   },
   buttonTitleText: {
-    color: colors.primary,
+    color: colors.accent || colors.primary, // Use accent (pink) for text
   },
 });
 

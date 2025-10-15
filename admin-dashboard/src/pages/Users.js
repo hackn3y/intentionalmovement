@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import UserViewModal from '../components/UserViewModal';
 import BanUserModal from '../components/BanUserModal';
+import EditSubscriptionModal from '../components/EditSubscriptionModal';
 import { adminService } from '../services/adminService';
 import toast from 'react-hot-toast';
 
@@ -11,6 +12,7 @@ function Users() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+  const [isEditSubscriptionModalOpen, setIsEditSubscriptionModalOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -44,6 +46,11 @@ function Users() {
   const openBanModal = (user) => {
     setSelectedUser(user);
     setIsBanModalOpen(true);
+  };
+
+  const openEditSubscriptionModal = (user) => {
+    setSelectedUser(user);
+    setIsEditSubscriptionModalOpen(true);
   };
 
   const handleBanUser = async (userId, reason) => {
@@ -121,6 +128,9 @@ function Users() {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Subscription
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Joined
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -155,6 +165,28 @@ function Users() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-gray-100">{user.email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => openEditSubscriptionModal(user)}
+                      className="flex flex-col items-start hover:opacity-75 transition-opacity"
+                      title="Click to edit subscription"
+                    >
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          user.subscriptionTier === 'premium'
+                            ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300'
+                            : user.subscriptionTier === 'pro'
+                            ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                        }`}
+                      >
+                        {user.subscriptionTier?.toUpperCase() || 'FREE'}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {user.subscriptionStatus || 'active'}
+                      </span>
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 dark:text-gray-100">
@@ -237,6 +269,17 @@ function Users() {
         user={selectedUser}
         onBan={handleBanUser}
         onUnban={handleUnbanUser}
+      />
+
+      {/* Edit Subscription Modal */}
+      <EditSubscriptionModal
+        isOpen={isEditSubscriptionModalOpen}
+        onClose={() => {
+          setIsEditSubscriptionModalOpen(false);
+          setSelectedUser(null);
+        }}
+        user={selectedUser}
+        onUpdate={fetchUsers}
       />
     </div>
   );

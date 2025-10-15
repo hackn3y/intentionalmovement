@@ -19,6 +19,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
+import UpgradePrompt from '../../components/UpgradePrompt';
 import { useEnterToSubmit, useEscapeToClose } from '../../hooks/useKeyboardShortcuts';
 
 /**
@@ -31,9 +32,13 @@ const CreatePostScreen = ({ route, navigation }) => {
   const { createLoading } = useSelector((state) => state.posts);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [mediaType, setMediaType] = useState(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const styles = getStyles(colors, isDarkMode);
 
   const editPost = route.params?.post;
+
+  // Check if user can create posts
+  const canCreatePosts = user?.subscriptionTier !== 'free';
 
   /**
    * Handle media picker
@@ -59,6 +64,12 @@ const CreatePostScreen = ({ route, navigation }) => {
    * @param {Object} values - Form values
    */
   const handleCreatePost = async (values) => {
+    // Check if user has permission
+    if (!canCreatePosts) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+
     try {
       const postData = { ...values };
 
@@ -73,7 +84,12 @@ const CreatePostScreen = ({ route, navigation }) => {
       // Navigate back immediately - post will appear in feed due to Redux state update
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', error || 'Failed to create post');
+      // Check if error is subscription-related
+      if (error?.includes?.('Subscription') || error?.includes?.('subscription')) {
+        setShowUpgradePrompt(true);
+      } else {
+        Alert.alert('Error', error || 'Failed to create post');
+      }
     }
   };
 
@@ -191,6 +207,14 @@ const CreatePostScreen = ({ route, navigation }) => {
         }}
         </Formik>
       </ScrollView>
+
+      {/* Upgrade Prompt */}
+      <UpgradePrompt
+        visible={showUpgradePrompt}
+        onClose={() => setShowUpgradePrompt(false)}
+        feature="Creating posts"
+        requiredTier="basic"
+      />
     </KeyboardAvoidingView>
   );
 };

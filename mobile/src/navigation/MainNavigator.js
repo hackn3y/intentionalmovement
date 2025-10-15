@@ -81,19 +81,13 @@ const MainNavigator = () => {
         }}
         listeners={({ navigation }) => ({
           tabPress: (e) => {
-            // Get the ProfileTab navigator
-            const state = navigation.getState();
-            const profileTabRoute = state.routes.find(r => r.name === 'ProfileTab');
-
-            // If we're already on ProfileTab and at the Profile screen, reset params
-            if (state.index === state.routes.indexOf(profileTabRoute)) {
-              e.preventDefault();
-              navigation.navigate('ProfileTab', {
-                screen: 'Profile',
-                params: { userId: null },
-                initial: false,
-              });
-            }
+            // Always navigate to own profile when tapping Profile tab
+            e.preventDefault();
+            navigation.navigate('ProfileTab', {
+              screen: 'Profile',
+              params: { userId: null, _forceRefresh: Date.now() },
+              initial: false,
+            });
           },
         })}
       />

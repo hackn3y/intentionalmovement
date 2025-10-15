@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
@@ -25,18 +25,27 @@ const SettingsScreen = ({ navigation }) => {
   const [notifications, setNotifications] = useState(true);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: () => dispatch(logout()),
-        },
-      ]
-    );
+    if (Platform.OS === 'web') {
+      // Use native browser confirm for web
+      const confirmed = window.confirm('Are you sure you want to logout?');
+      if (confirmed) {
+        dispatch(logout());
+      }
+    } else {
+      // Use Alert.alert for native platforms
+      Alert.alert(
+        'Logout',
+        'Are you sure you want to logout?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Logout',
+            style: 'destructive',
+            onPress: () => dispatch(logout()),
+          },
+        ]
+      );
+    }
   };
 
   const styles = getStyles(colors);
@@ -46,6 +55,13 @@ const SettingsScreen = ({ navigation }) => {
       {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
+        <SettingItem
+          title="Subscription"
+          subtitle={`${user?.subscriptionTier?.charAt(0).toUpperCase() + user?.subscriptionTier?.slice(1) || 'Free'} Plan`}
+          onPress={() => navigation.navigate('Subscription')}
+          rightElement={<Text style={styles.arrow}>›</Text>}
+          colors={colors}
+        />
         <SettingItem
           title="Edit Profile"
           subtitle="Update your profile information"
@@ -121,14 +137,14 @@ const SettingsScreen = ({ navigation }) => {
         <SettingItem
           title="Terms of Service"
           subtitle="Read our terms"
-          onPress={() => Alert.alert('Terms', 'Terms of service will open')}
+          onPress={() => navigation.navigate('TermsOfService')}
           rightElement={<Text style={styles.arrow}>›</Text>}
           colors={colors}
         />
         <SettingItem
           title="Privacy Policy"
           subtitle="Read our privacy policy"
-          onPress={() => Alert.alert('Privacy', 'Privacy policy will open')}
+          onPress={() => navigation.navigate('PrivacyPolicy')}
           rightElement={<Text style={styles.arrow}>›</Text>}
           showBorder={false}
           colors={colors}

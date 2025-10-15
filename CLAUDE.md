@@ -193,11 +193,12 @@ npm run build:mobile:android # Build mobile app for Android
 - `DarkModeContext`: Manages dark mode preference, persisted to localStorage, detects system preference on first load
 
 **Design System**:
-- Primary colors: Burgundy/maroon (`primary-600: #9d3333`)
-- Accent colors: Cream/tan (`#d4a373` for analytics charts)
-- Pink accents in dark mode (`pink-300` for branding and active states)
+- Primary colors: Teal/Emerald Green (`primary-500: #10b981`) - matching mobile app theme
+- Accent colors: Hot Pink (`accent-500: #ec4899`) - matching mobile app theme
+- Background: Light Pink (`#fdf2f8`) for light mode
 - Typography: Cinzel (headings), Arimo (body) loaded from Google Fonts
 - Dark mode toggle available in sidebar with localStorage persistence
+- Theme updated to match mobile app's "Planted Mind, Moving Body" brand identity
 
 ## Environment Variables
 
@@ -381,3 +382,4 @@ git remote -v
 - Keep commits focused on a single feature or fix
 - Never commit .env files or sensitive credentials
 - Pull latest changes before starting new work
+- you can use puppeteer to take screenshot

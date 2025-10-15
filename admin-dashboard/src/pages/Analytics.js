@@ -52,7 +52,7 @@ function Analytics() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Analytics</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Analytics</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card title="User Growth">
@@ -86,16 +86,16 @@ function Analytics() {
         <Card title="Engagement Metrics">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Avg. Session Duration</span>
-              <span className="font-bold text-gray-900">12m 34s</span>
+              <span className="text-gray-600 dark:text-gray-400">Avg. Session Duration</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">12m 34s</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Daily Active Users</span>
-              <span className="font-bold text-gray-900">245</span>
+              <span className="text-gray-600 dark:text-gray-400">Daily Active Users</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">245</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Posts per User</span>
-              <span className="font-bold text-gray-900">3.2</span>
+              <span className="text-gray-600 dark:text-gray-400">Posts per User</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">3.2</span>
             </div>
           </div>
         </Card>
@@ -103,16 +103,16 @@ function Analytics() {
         <Card title="Program Stats">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Total Programs</span>
-              <span className="font-bold text-gray-900">12</span>
+              <span className="text-gray-600 dark:text-gray-400">Total Programs</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">12</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Completion Rate</span>
-              <span className="font-bold text-gray-900">68%</span>
+              <span className="text-gray-600 dark:text-gray-400">Completion Rate</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">68%</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Avg. Rating</span>
-              <span className="font-bold text-gray-900">4.7 ⭐</span>
+              <span className="text-gray-600 dark:text-gray-400">Avg. Rating</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">4.7 ⭐</span>
             </div>
           </div>
         </Card>
@@ -120,16 +120,16 @@ function Analytics() {
         <Card title="Revenue Metrics">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">MRR</span>
-              <span className="font-bold text-gray-900">$11,500</span>
+              <span className="text-gray-600 dark:text-gray-400">MRR</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">$11,500</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Avg. Order Value</span>
-              <span className="font-bold text-gray-900">$67.50</span>
+              <span className="text-gray-600 dark:text-gray-400">Avg. Order Value</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">$67.50</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Conversion Rate</span>
-              <span className="font-bold text-gray-900">4.2%</span>
+              <span className="text-gray-600 dark:text-gray-400">Conversion Rate</span>
+              <span className="font-bold text-gray-900 dark:text-gray-100">4.2%</span>
             </div>
           </div>
         </Card>

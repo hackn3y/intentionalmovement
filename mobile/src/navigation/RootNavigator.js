@@ -71,6 +71,8 @@ const RootNavigator = () => {
   /**
    * Show loading spinner while initializing
    */
+  console.log('RootNavigator - initializing:', initializing, 'isAuthenticated:', isAuthenticated);
+
   if (initializing) {
     return <LoadingSpinner text="Loading..." />;
   }

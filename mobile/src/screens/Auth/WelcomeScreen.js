@@ -3,9 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
-  Dimensions,
   ScrollView,
+  Dimensions,
+  Platform,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
@@ -17,6 +18,8 @@ const { width, height } = Dimensions.get('window');
  * Welcome/Onboarding screen with app introduction
  */
 const WelcomeScreen = ({ navigation }) => {
+  console.log('WelcomeScreen: Component is rendering');
+
   /**
    * Navigate to login screen
    */
@@ -32,36 +35,49 @@ const WelcomeScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={true}
-        bounces={false}
-      >
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+      bounces={Platform.OS !== 'web'}
+    >
         {/* Hero Section with Gradient */}
-        <LinearGradient
-          colors={['#10b981', '#059669', '#047857']}
-          style={styles.heroGradient}
-        >
-          <View style={styles.heroSection}>
-            <View style={styles.logoContainer}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.heroGradient, { backgroundColor: '#10b981' }]}>
+            <View style={styles.heroSection}>
               <Image
-                source={require('../../../assets/logo.png')}
-                style={styles.logo}
+                source={require('../../../assets/favicon.png')}
+                style={styles.logoImage}
                 resizeMode="contain"
               />
+              <Text style={styles.mainTagline}>
+                Elevate Your LifeStyle
+              </Text>
+              <Text style={styles.subtitle}>
+                Embrace the Power of Intentional Living
+              </Text>
             </View>
-
-            <Text style={styles.mainTagline}>
-              Elevate Your LifeStyle
-            </Text>
-
-            <Text style={styles.subtitle}>
-              Embrace the Power of Intentional Living
-            </Text>
           </View>
-        </LinearGradient>
+        ) : (
+          <LinearGradient
+            colors={['#10b981', '#059669', '#047857']}
+            style={styles.heroGradient}
+          >
+            <View style={styles.heroSection}>
+              <Image
+                source={require('../../../assets/favicon.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.mainTagline}>
+                Elevate Your LifeStyle
+              </Text>
+              <Text style={styles.subtitle}>
+                Embrace the Power of Intentional Living
+              </Text>
+            </View>
+          </LinearGradient>
+        )}
 
         {/* Value Proposition */}
         <View style={styles.valueSection}>
@@ -138,36 +154,69 @@ const WelcomeScreen = ({ navigation }) => {
           </Text>
         </View>
       </ScrollView>
-    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
     backgroundColor: COLORS.light,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: SIZES.xxl * 2,
   },
   heroGradient: {
     width: '100%',
-    paddingTop: SIZES.xl,
-    paddingBottom: SIZES.lg,
+    paddingTop: SIZES.xxl,
+    paddingBottom: SIZES.xxl,
+    minHeight: Platform.OS === 'web' ? 300 : 250,
   },
   heroSection: {
     alignItems: 'center',
     paddingHorizontal: SIZES.lg,
+    paddingVertical: SIZES.md,
   },
   logoContainer: {
-    marginBottom: SIZES.md,
+    marginBottom: SIZES.sm,
   },
   logo: {
-    width: width * 0.7,
-    height: 80,
+    width: width * 0.5,
+    height: 60,
+  },
+  logoImage: {
+    width: Platform.OS === 'web' ? 400 : width * 0.8,
+    height: Platform.OS === 'web' ? 150 : 100,
+    marginBottom: SIZES.lg,
+  },
+  logoBox: {
+    backgroundColor: COLORS.white,
+    paddingVertical: SIZES.md,
+    paddingHorizontal: SIZES.lg,
+    borderRadius: SIZES.xs,
+    marginBottom: SIZES.lg,
+    alignItems: 'center',
+  },
+  logoBoxText: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  logoSubtext: {
+    fontSize: FONT_SIZES.sm,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  logoText: {
+    fontSize: FONT_SIZES.xxl,
+    fontWeight: 'bold',
+    color: COLORS.white,
+    textAlign: 'center',
+    letterSpacing: 1,
+    marginBottom: SIZES.sm,
   },
   mainTagline: {
     fontSize: FONT_SIZES.xxl,
@@ -187,8 +236,9 @@ const styles = StyleSheet.create({
   },
   valueSection: {
     paddingHorizontal: SIZES.lg,
-    paddingVertical: SIZES.lg,
+    paddingVertical: SIZES.xl,
     backgroundColor: COLORS.light,
+    minHeight: 150,
   },
   valueTitle: {
     fontSize: FONT_SIZES.lg,
@@ -207,18 +257,19 @@ const styles = StyleSheet.create({
   },
   featuresSection: {
     paddingHorizontal: SIZES.md,
-    paddingVertical: SIZES.md,
+    paddingVertical: SIZES.lg,
     backgroundColor: COLORS.light,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    minHeight: 200,
   },
   featureCard: {
     width: (width - SIZES.md * 3) / 2,
     backgroundColor: COLORS.white,
     borderRadius: SIZES.sm,
-    padding: SIZES.md,
-    marginBottom: SIZES.md,
+    padding: SIZES.sm,
+    marginBottom: SIZES.sm,
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -227,16 +278,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   featureIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#fce7f3',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SIZES.sm,
+    marginBottom: SIZES.xs,
   },
   featureIcon: {
-    fontSize: 24,
+    fontSize: 20,
   },
   featureTitle: {
     fontSize: FONT_SIZES.sm,
@@ -253,8 +304,9 @@ const styles = StyleSheet.create({
   },
   actionsSection: {
     paddingHorizontal: SIZES.lg,
-    paddingVertical: SIZES.lg,
+    paddingVertical: SIZES.xl,
     backgroundColor: COLORS.light,
+    minHeight: 150,
   },
   primaryButton: {
     marginBottom: SIZES.md,

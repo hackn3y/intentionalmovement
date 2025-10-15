@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,6 +19,7 @@ import Logo from '../../components/Logo';
 import { useEnterToSubmit } from '../../hooks/useKeyboardShortcuts';
 import { useGoogleAuth, getFirebaseAuthData } from '../../utils/googleAuth';
 import { isAppleAuthAvailable, signInWithApple, getFirebaseAuthDataFromApple } from '../../utils/appleAuth';
+import WebScrollView from '../../components/WebScrollView';
 
 /**
  * Register screen component with email/password registration
@@ -149,14 +149,16 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-      <ScrollView
+      <WebScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Logo size={60} style={styles.logo} />
+          <Logo size={Platform.OS === 'web' ? 400 : 300} style={styles.logo} />
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Sign up to get started</Text>
         </View>
@@ -311,7 +313,7 @@ const RegisterScreen = ({ navigation }) => {
           <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
           <Text style={styles.termsLink}>Privacy Policy</Text>
         </Text>
-      </ScrollView>
+      </WebScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -321,10 +323,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    flexGrow: 1,
     padding: SIZES.lg,
-    justifyContent: 'center',
+    paddingBottom: SIZES.xxl * 3,
   },
   header: {
     marginBottom: SIZES.xl,
@@ -397,7 +401,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
   },
   terms: {
@@ -407,7 +411,7 @@ const styles = StyleSheet.create({
     marginTop: SIZES.md,
   },
   termsLink: {
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
   },
 });

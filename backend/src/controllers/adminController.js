@@ -139,7 +139,7 @@ exports.getUser = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { role, isActive, isVerified } = req.body;
+    const { role, isActive, isVerified, subscriptionTier, subscriptionStatus } = req.body;
 
     const user = await User.findByPk(id);
 
@@ -159,6 +159,14 @@ exports.updateUser = async (req, res, next) => {
 
     if (isVerified !== undefined) {
       updateData.isVerified = isVerified;
+    }
+
+    if (subscriptionTier) {
+      updateData.subscriptionTier = subscriptionTier;
+    }
+
+    if (subscriptionStatus) {
+      updateData.subscriptionStatus = subscriptionStatus;
     }
 
     await user.update(updateData);

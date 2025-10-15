@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,16 +8,18 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
-import { login, clearError } from '../../store/slices/authSlice';
+import { login, clearError, loginWithFirebase } from '../../store/slices/authSlice';
 import { loginSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Logo from '../../components/Logo';
 import { useEnterToSubmit } from '../../hooks/useKeyboardShortcuts';
+import { useGoogleAuth, getFirebaseAuthData } from '../../utils/googleAuth';
 
 /**
  * Login screen component
@@ -26,6 +28,10 @@ const LoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Google Auth
+  const { request, response, promptAsync } = useGoogleAuth();
 
   /**
    * Handle login submit
@@ -56,6 +62,52 @@ const LoginScreen = ({ navigation }) => {
     navigation.navigate('ForgotPassword');
   };
 
+  /**
+   * Handle Google Sign-In
+   */
+  const handleGoogleSignIn = async () => {
+    try {
+      if (!request) {
+        Alert.alert(
+          'Configuration Required',
+          'Google Sign-In is not configured. Please contact support.'
+        );
+        return;
+      }
+
+      setGoogleLoading(true);
+      await promptAsync();
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
+      Alert.alert('Error', 'Failed to sign in with Google');
+      setGoogleLoading(false);
+    }
+  };
+
+  /**
+   * Handle Google auth response
+   */
+  useEffect(() => {
+    const handleGoogleResponse = async () => {
+      if (response?.type === 'success') {
+        try {
+          const authData = await getFirebaseAuthData(response.authentication);
+          await dispatch(loginWithFirebase(authData)).unwrap();
+          // Navigation is handled by RootNavigator
+        } catch (error) {
+          console.error('Google authentication failed:', error);
+          Alert.alert('Error', 'Failed to authenticate with Google');
+        } finally {
+          setGoogleLoading(false);
+        }
+      } else if (response?.type === 'error' || response?.type === 'dismiss') {
+        setGoogleLoading(false);
+      }
+    };
+
+    handleGoogleResponse();
+  }, [response, dispatch]);
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -66,7 +118,7 @@ const LoginScreen = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Logo size={60} style={styles.logo} />
+          <Logo size={Platform.OS === 'web' ? 400 : 300} style={styles.logo} />
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
         </View>
@@ -83,13 +135,12 @@ const LoginScreen = ({ navigation }) => {
             return (
             <View style={styles.form}>
               <Input
-                label="Email"
-                placeholder="Enter your email"
+                label="Email or Username"
+                placeholder="Enter your email or username"
                 value={values.email}
                 onChangeText={handleChange('email')}
                 onBlur={handleBlur('email')}
                 error={touched.email && errors.email}
-                keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
               />
@@ -138,18 +189,22 @@ const LoginScreen = ({ navigation }) => {
               <Button
                 title="Sign in with Google"
                 variant="outline"
-                onPress={() => {}}
+                onPress={handleGoogleSignIn}
+                loading={googleLoading}
+                disabled={googleLoading || loading || !request}
                 icon="google"
                 style={styles.socialButton}
               />
 
-              <Button
-                title="Sign in with Apple"
-                variant="outline"
-                onPress={() => {}}
-                icon="apple"
-                style={styles.socialButton}
-              />
+              {Platform.OS === 'ios' && (
+                <Button
+                  title="Sign in with Apple"
+                  variant="outline"
+                  onPress={() => Alert.alert('Coming Soon', 'Apple Sign-In will be available soon')}
+                  icon="apple"
+                  style={styles.socialButton}
+                />
+              )}
             </View>
           );
         }}
@@ -172,12 +227,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   scrollContent: {
-    flexGrow: 1,
     padding: SIZES.lg,
-    justifyContent: 'center',
+    paddingTop: SIZES.xxl,
+    paddingBottom: SIZES.xxl * 3,
   },
   header: {
-    marginBottom: SIZES.xxl,
+    marginBottom: SIZES.lg,
     alignItems: 'center',
   },
   logo: {
@@ -203,7 +258,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
   },
   errorContainer: {
@@ -249,7 +304,7 @@ const styles = StyleSheet.create({
   },
   footerLink: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.primary,
+    color: COLORS.accent,
     fontWeight: '600',
   },
 });

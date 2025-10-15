@@ -9,7 +9,7 @@ import {
   Share,
   Alert,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { likePost, unlikePost } from '../store/slices/postsSlice';
 import { COLORS, SIZES, FONT_SIZES } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
@@ -29,13 +29,31 @@ const { width } = Dimensions.get('window');
 const PostCard = ({ post, onPress, onUserPress, onCommentPress }) => {
   const dispatch = useDispatch();
   const { colors } = useTheme();
+  const currentUser = useSelector((state) => state.auth.user);
   const [imageHeight, setImageHeight] = useState(300);
   const styles = getStyles(colors);
+
+  // Check if this is the current user's own post
+  const isOwnPost = !!(
+    currentUser && post.user && (
+      (currentUser.id && post.user.id && String(currentUser.id) === String(post.user.id)) ||
+      (currentUser.id && post.user._id && String(currentUser.id) === String(post.user._id)) ||
+      (currentUser._id && post.user.id && String(currentUser._id) === String(post.user.id)) ||
+      (currentUser._id && post.user._id && String(currentUser._id) === String(post.user._id)) ||
+      (currentUser.id && post.userId && String(currentUser.id) === String(post.userId)) ||
+      (currentUser._id && post.userId && String(currentUser._id) === String(post.userId))
+    )
+  );
 
   /**
    * Handle like/unlike toggle
    */
   const handleLikeToggle = async () => {
+    // Don't allow users to like their own posts
+    if (isOwnPost) {
+      return;
+    }
+
     try {
       const postId = post._id || post.id;
       if (!postId) {
@@ -135,13 +153,18 @@ const PostCard = ({ post, onPress, onUserPress, onCommentPress }) => {
         {/* Action buttons */}
         <View style={styles.actions}>
           <TouchableOpacity
-            style={styles.actionButton}
+            style={[styles.actionButton, isOwnPost && styles.actionButtonDisabled]}
             onPress={handleLikeToggle}
+            disabled={isOwnPost}
           >
-            <Text style={[styles.actionIcon, post.isLiked && styles.liked]}>
+            <Text style={[
+              styles.actionIcon,
+              post.isLiked && styles.liked,
+              isOwnPost && styles.actionIconDisabled
+            ]}>
               {post.isLiked ? '❤️' : '🤍'}
             </Text>
-            <Text style={styles.actionText}>
+            <Text style={[styles.actionText, isOwnPost && styles.actionTextDisabled]}>
               {formatters.formatCompactNumber(post.likeCount || post.likesCount || 0)}
             </Text>
           </TouchableOpacity>
@@ -234,9 +257,15 @@ const getStyles = (colors) => StyleSheet.create({
     alignItems: 'center',
     marginRight: SIZES.lg,
   },
+  actionButtonDisabled: {
+    opacity: 0.5,
+  },
   actionIcon: {
     fontSize: FONT_SIZES.lg,
     marginRight: SIZES.xs,
+  },
+  actionIconDisabled: {
+    opacity: 0.5,
   },
   liked: {
     color: colors.danger,
@@ -245,6 +274,9 @@ const getStyles = (colors) => StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: colors.gray[600],
     fontWeight: '500',
+  },
+  actionTextDisabled: {
+    color: colors.gray[400],
   },
 });
 

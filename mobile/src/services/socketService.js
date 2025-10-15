@@ -24,7 +24,9 @@ class SocketService {
 
       // Don't attempt to connect if there's no token
       if (!token) {
-        console.log('No token available, skipping socket connection');
+        if (__DEV__) {
+          console.log('No token available, skipping socket connection');
+        }
         return;
       }
 
@@ -39,12 +41,16 @@ class SocketService {
       });
 
       this.socket.on('connect', () => {
-        console.log('Socket connected');
+        if (__DEV__) {
+          console.log('Socket connected');
+        }
         this.connected = true;
       });
 
       this.socket.on('disconnect', () => {
-        console.log('Socket disconnected');
+        if (__DEV__) {
+          console.log('Socket disconnected');
+        }
         this.connected = false;
       });
 

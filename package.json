@@ -31,6 +31,7 @@
     "lint:admin": "cd admin-dashboard && npm run lint"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "puppeteer": "^24.24.1"
   }
 }

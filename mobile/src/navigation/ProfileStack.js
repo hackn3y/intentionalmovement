@@ -11,6 +11,14 @@ import FollowingScreen from '../screens/Profile/FollowingScreen';
 import SettingsScreen from '../screens/Other/SettingsScreen';
 import PostDetailScreen from '../screens/Posts/PostDetailScreen';
 
+// Subscription Screens
+import SubscriptionScreen from '../screens/Subscription/SubscriptionScreen';
+import PricingScreen from '../screens/Subscription/PricingScreen';
+
+// Legal Screens
+import TermsOfServiceScreen from '../screens/Legal/TermsOfServiceScreen';
+import PrivacyPolicyScreen from '../screens/Legal/PrivacyPolicyScreen';
+
 const Stack = createStackNavigator();
 
 /**
@@ -63,6 +71,26 @@ const ProfileStack = () => {
         name="PostDetail"
         component={PostDetailScreen}
         options={{ title: 'Post' }}
+      />
+      <Stack.Screen
+        name="Subscription"
+        component={SubscriptionScreen}
+        options={{ title: 'My Subscription' }}
+      />
+      <Stack.Screen
+        name="Pricing"
+        component={PricingScreen}
+        options={{ title: 'Choose Your Plan' }}
+      />
+      <Stack.Screen
+        name="TermsOfService"
+        component={TermsOfServiceScreen}
+        options={{ title: 'Terms of Service' }}
+      />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{ title: 'Privacy Policy' }}
       />
     </Stack.Navigator>
   );
