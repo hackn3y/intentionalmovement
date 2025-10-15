@@ -112,7 +112,7 @@ function Layout() {
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-64 pt-16 lg:pt-0 p-4 sm:p-6 lg:p-8">
+      <main className="lg:ml-64 mt-16 lg:mt-0 p-4 sm:p-6 lg:p-8">
         <Outlet />
       </main>
     </div>

@@ -78,8 +78,8 @@ function Programs() {
   }
 
   return (
-    <div className="pt-4 lg:pt-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8 px-4 lg:px-0">
+    <div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Programs</h1>
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -89,7 +89,7 @@ function Programs() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 px-4 lg:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {programs.map((program) => (
           <Card key={program.id}>
             <div className="mb-4">
