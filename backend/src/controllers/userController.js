@@ -2,6 +2,9 @@ const { Op } = require('sequelize');
 const { User, Follow, Post, Purchase, Program, Achievement, UserAchievement } = require('../models');
 const AchievementService = require('../services/achievementService');
 
+// Safe attributes that exist in production database
+const SAFE_USER_ATTRIBUTES = ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt'];
+
 // Get user profile
 exports.getUserProfile = async (req, res, next) => {
   try {
@@ -9,7 +12,7 @@ exports.getUserProfile = async (req, res, next) => {
     const currentUserId = req.user.id;
 
     const user = await User.findByPk(id, {
-      attributes: { exclude: ['password'] },
+      attributes: SAFE_USER_ATTRIBUTES,
       include: [
         {
           model: User,
@@ -45,7 +48,7 @@ exports.getUserProfile = async (req, res, next) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'username', 'displayName', 'profileImage', 'isVerified']
+          attributes: ['id', 'username', 'displayName', 'profileImage']
         }
       ],
       order: [['createdAt', 'DESC']],
@@ -80,14 +83,16 @@ exports.updateUserProfile = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Ensure user can only update their own profile
-    if (req.user.id !== id && req.user.role !== 'admin') {
+    // Ensure user can only update their own profile (skip role check - column doesn't exist)
+    if (req.user.id !== id) {
       return res.status(403).json({ error: 'Unauthorized to update this profile' });
     }
 
     const { displayName, username, bio, movementGoals, profileImage, coverImage } = req.body;
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, {
+      attributes: SAFE_USER_ATTRIBUTES
+    });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -95,7 +100,10 @@ exports.updateUserProfile = async (req, res, next) => {
 
     // Check if username is being changed and if it's already taken
     if (username && username !== user.username) {
-      const existingUser = await User.findOne({ where: { username } });
+      const existingUser = await User.findOne({
+        where: { username },
+        attributes: ['id', 'username']
+      });
       if (existingUser) {
         return res.status(400).json({ error: 'Username already taken' });
       }
@@ -128,7 +136,7 @@ exports.getFollowers = async (req, res, next) => {
     const { id } = req.params;
     const { limit = 20, offset = 0 } = req.query;
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { attributes: SAFE_USER_ATTRIBUTES });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -163,7 +171,7 @@ exports.getFollowing = async (req, res, next) => {
     const { id } = req.params;
     const { limit = 20, offset = 0 } = req.query;
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { attributes: SAFE_USER_ATTRIBUTES });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -278,8 +286,8 @@ exports.searchUsers = async (req, res, next) => {
           { username: { [Op.like]: `%${searchTerm}%` } },
           { displayName: { [Op.like]: `%${searchTerm}%` } },
           { email: { [Op.like]: `%${searchTerm}%` } }
-        ],
-        isActive: true
+        ]
+        // Skip isActive check - column doesn't exist in production
       },
       attributes: ['id', 'username', 'displayName', 'profileImage', 'bio'],
       limit: parseInt(limit),
@@ -293,8 +301,8 @@ exports.searchUsers = async (req, res, next) => {
           { username: { [Op.like]: `%${searchTerm}%` } },
           { displayName: { [Op.like]: `%${searchTerm}%` } },
           { email: { [Op.like]: `%${searchTerm}%` } }
-        ],
-        isActive: true
+        ]
+        // Skip isActive check - column doesn't exist in production
       }
     });
 
@@ -317,7 +325,7 @@ exports.getUserStats = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { attributes: SAFE_USER_ATTRIBUTES });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -364,8 +372,8 @@ exports.uploadProfileImage = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Ensure user can only update their own profile
-    if (req.user.id !== id && req.user.role !== 'admin') {
+    // Ensure user can only update their own profile (skip role check - column doesn't exist)
+    if (req.user.id !== id) {
       return res.status(403).json({ error: 'Unauthorized to update this profile' });
     }
 
@@ -373,7 +381,7 @@ exports.uploadProfileImage = async (req, res, next) => {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { attributes: SAFE_USER_ATTRIBUTES });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -398,8 +406,8 @@ exports.uploadCoverImage = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Ensure user can only update their own profile
-    if (req.user.id !== id && req.user.role !== 'admin') {
+    // Ensure user can only update their own profile (skip role check - column doesn't exist)
+    if (req.user.id !== id) {
       return res.status(403).json({ error: 'Unauthorized to update this profile' });
     }
 
@@ -407,7 +415,7 @@ exports.uploadCoverImage = async (req, res, next) => {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, { attributes: SAFE_USER_ATTRIBUTES });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
