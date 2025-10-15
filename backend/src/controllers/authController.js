@@ -16,8 +16,11 @@ const generateToken = (userId) => {
 // Register new user
 exports.register = async (req, res, next) => {
   try {
+    console.log('=== REGISTRATION START ===');
     const { email, username, displayName, password } = req.body;
+    console.log('Registration data:', { email, username, displayName, hasPassword: !!password });
 
+    console.log('Checking for existing user...');
     const existingUser = await User.findOne({
       where: {
         [Op.or]: [{ email }, { username }]
@@ -25,13 +28,19 @@ exports.register = async (req, res, next) => {
     });
 
     if (existingUser) {
+      console.log('User already exists');
       return response.conflict(res, 'Email or username already exists');
     }
 
+    console.log('No existing user, proceeding with registration...');
+
     // Hash password manually
+    console.log('Hashing password...');
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Password hashed successfully');
 
     // Use raw SQL to insert user - bypasses Sequelize defaults for non-existent columns
+    console.log('Executing raw SQL INSERT...');
     const [results] = await sequelize.query(
       `INSERT INTO "Users" (id, email, username, "displayName", password, "createdAt", "updatedAt")
        VALUES (gen_random_uuid(), :email, :username, :displayName, :password, NOW(), NOW())
@@ -41,26 +50,44 @@ exports.register = async (req, res, next) => {
         type: sequelize.QueryTypes.INSERT
       }
     );
+    console.log('SQL INSERT successful, results:', results);
 
     const userId = results[0].id;
+    console.log('New user ID:', userId);
 
     // Retrieve the created user using Sequelize model (for proper serialization)
+    console.log('Fetching created user...');
     const user = await User.findByPk(userId);
+    console.log('User fetched:', !!user);
 
+    console.log('Generating token...');
     const token = generateToken(user.id);
 
     // Track signup event
-    mixpanel.trackSignup({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      fullName: user.displayName,
-      signupMethod: 'email',
-      createdAt: user.createdAt,
-    });
+    console.log('Tracking signup in Mixpanel...');
+    try {
+      mixpanel.trackSignup({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.displayName,
+        signupMethod: 'email',
+        createdAt: user.createdAt,
+      });
+    } catch (mixpanelError) {
+      console.error('Mixpanel tracking failed (non-critical):', mixpanelError.message);
+    }
 
+    console.log('Registration successful, sending response');
     return response.created(res, { user, token }, 'User registered successfully');
   } catch (error) {
+    console.error('=== REGISTRATION ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    if (error.original) {
+      console.error('Original error:', error.original);
+    }
     next(error);
   }
 };
