@@ -1,6 +1,7 @@
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 // Enable dismissal of web browser on completion
 WebBrowser.maybeCompleteAuthSession();
@@ -15,6 +16,15 @@ const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_I
  * @returns {Object} Google auth configuration and functions
  */
 export const useGoogleAuth = () => {
+  // Disable Google Auth on web for now due to configuration issues
+  if (Platform.OS === 'web') {
+    return {
+      request: null,
+      response: null,
+      promptAsync: async () => {},
+    };
+  }
+
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
     iosClientId: GOOGLE_IOS_CLIENT_ID,
