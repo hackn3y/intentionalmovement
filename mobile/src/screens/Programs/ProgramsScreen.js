@@ -30,15 +30,6 @@ const ProgramsScreen = ({ navigation }) => {
   const categories = ['all', 'insurance', 'real-estate', 'personal-development'];
   const styles = getStyles(colors);
 
-  // Load programs when search or category changes (debounced for search)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      loadPrograms();
-    }, 500); // Wait 500ms after user stops typing
-
-    return () => clearTimeout(timeoutId);
-  }, [search, selectedCategory]);
-
   const loadPrograms = useCallback(() => {
     dispatch(clearPrograms());
     dispatch(fetchPrograms({
@@ -47,6 +38,27 @@ const ProgramsScreen = ({ navigation }) => {
       page: 1
     }));
   }, [dispatch, selectedCategory, search]);
+
+  // Initial load only (once when component mounts)
+  useEffect(() => {
+    if (programs.length === 0 && !loading) {
+      loadPrograms();
+    }
+  }, []); // Empty dependency array = runs once on mount
+
+  // Load programs when search or category changes (debounced for search)
+  useEffect(() => {
+    // Skip if it's the initial render (handled by the above useEffect)
+    if (programs.length === 0 && !loading && !search && selectedCategory === 'all') {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      loadPrograms();
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timeoutId);
+  }, [search, selectedCategory]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
