@@ -31,6 +31,10 @@ exports.register = async (req, res, next) => {
       username,
       displayName,
       password
+    }, {
+      // Only insert fields that exist in the database
+      // Excludes subscriptionTier and subscriptionStatus which may not exist
+      fields: ['email', 'username', 'displayName', 'password']
     });
 
     const token = generateToken(user.id);
@@ -126,6 +130,9 @@ exports.firebaseAuth = async (req, res, next) => {
         displayName: name || username,
         profileImage: picture,
         isVerified: true
+      }, {
+        // Only insert fields that exist in the database
+        fields: ['firebaseUid', 'email', 'username', 'displayName', 'profileImage', 'isVerified']
       });
     }
 

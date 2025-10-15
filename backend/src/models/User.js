@@ -90,12 +90,12 @@ module.exports = (sequelize) => {
     subscriptionTier: {
       type: DataTypes.ENUM('free', 'basic', 'premium'),
       defaultValue: 'free',
-      allowNull: false
+      allowNull: true // Allow null for backwards compatibility with existing database
     },
     subscriptionStatus: {
       type: DataTypes.ENUM('active', 'trialing', 'canceled', 'expired', 'past_due'),
       defaultValue: 'active',
-      allowNull: false
+      allowNull: true // Allow null for backwards compatibility with existing database
     },
     stripeSubscriptionId: {
       type: DataTypes.STRING,
