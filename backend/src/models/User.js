@@ -143,13 +143,14 @@ module.exports = (sequelize) => {
       { fields: ['email'] },
       { fields: ['username'] },
       { fields: ['firebaseUid'] },
-      { fields: ['role'] },
-      { fields: ['isActive'] },
-      { fields: ['lastActiveAt'] },
+      // Commented out indexes for columns that may not exist in production database
+      // { fields: ['role'] },
+      // { fields: ['isActive'] },
+      // { fields: ['lastActiveAt'] },
       { fields: ['createdAt'] },
-      { fields: ['subscriptionTier'] },
-      { fields: ['subscriptionStatus'] },
-      { fields: ['stripeSubscriptionId'] }
+      // { fields: ['subscriptionTier'] },
+      // { fields: ['subscriptionStatus'] },
+      // { fields: ['stripeSubscriptionId'] }
     ],
     hooks: {
       beforeCreate: async (user) => {
