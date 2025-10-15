@@ -13,7 +13,9 @@ const initializeSocket = (io) => {
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findByPk(decoded.userId);
+      const user = await User.findByPk(decoded.userId, {
+        attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+      });
 
       if (!user) {
         return next(new Error('User not found'));
@@ -32,11 +34,11 @@ const initializeSocket = (io) => {
     console.log(`User connected: ${socket.userId}`);
     connectedUsers.set(socket.userId, socket.id);
 
-    // Update user's last active time
-    User.update(
-      { lastActiveAt: new Date() },
-      { where: { id: socket.userId } }
-    );
+    // Update user's last active time (commented out - lastActiveAt column doesn't exist)
+    // User.update(
+    //   { lastActiveAt: new Date() },
+    //   { where: { id: socket.userId } }
+    // );
 
     // Join user's personal room
     socket.join(`user:${socket.userId}`);
