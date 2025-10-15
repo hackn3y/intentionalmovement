@@ -140,64 +140,95 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 
 // Stripe webhook - must be before express.json() to receive raw body
 console.log('Setting up Stripe webhook...');
-app.post('/api/purchases/webhook', express.raw({ type: 'application/json' }), require('./controllers/purchaseController').handleWebhook);
+try {
+  const purchaseController = require('./controllers/purchaseController');
+  console.log('Purchase controller loaded');
+  app.post('/api/purchases/webhook', express.raw({ type: 'application/json' }), purchaseController.handleWebhook);
+  console.log('Webhook route configured');
+} catch (error) {
+  console.error('Error loading purchase controller:', error);
+  throw error;
+}
 
+console.log('Setting up body parsers...');
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+console.log('Body parsers configured');
 
 // Request ID tracking middleware (must come before requestLogger)
+console.log('Applying request ID middleware...');
 app.use(requestIdMiddleware);
 
 // Request logging middleware
+console.log('Applying request logger...');
 app.use(requestLogger);
 
 // Rate limiting - more permissive in development
+console.log('Configuring rate limiter...');
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: process.env.NODE_ENV === 'production' ? 100 : 1000 // 1000 for dev, 100 for production
 });
 app.use('/api/', limiter);
+console.log('Rate limiter applied');
 
 // Serve static uploaded files
+console.log('Setting up static file serving...');
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Socket.IO initialization
+console.log('Initializing Socket.IO...');
 initializeSocket(io);
 app.set('io', io);
+console.log('Socket.IO initialized');
 
 // Health check
+console.log('Setting up health check route...');
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // API Routes
+console.log('Loading API routes...');
 app.use('/api', routes);
+console.log('API routes loaded');
 
 // Error handling
+console.log('Applying error handler...');
 app.use(errorHandler);
+console.log('Error handler applied');
 
 // Database connection and server start
 const PORT = process.env.PORT || 3001;
 
+console.log('Preparing to start server...');
 const startServer = async () => {
   try {
+    console.log('Testing database connection...');
     // Test database connection
     await sequelize.authenticate();
+    console.log('Database connected!');
     logger.info('Database connection established successfully.');
 
+    console.log('Syncing database...');
     // Sync database
     await sequelize.sync({ force: false });
+    console.log('Database synced!');
     logger.info('Database synchronized.');
 
+    console.log(`Starting server on port ${PORT}...`);
     server.listen(PORT, () => {
+      console.log(`✓ Server successfully started on port ${PORT}`);
       logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
     });
   } catch (error) {
+    console.error('FATAL: Unable to start server:', error);
     logger.error('Unable to start server:', error);
     process.exit(1);
   }
 };
 
+console.log('Calling startServer()...');
 startServer();
 
 // Graceful shutdown
