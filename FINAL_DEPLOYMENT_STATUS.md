@@ -50,10 +50,20 @@
 **Solution:** Implemented custom CORS origin checker with regex wildcard support
 **Status:** ✅ Fixed
 
-### Issue 4: Google Sign-In on Web
-**Problem:** Environment variables not injected into Expo web builds
-**Solution:** Disabled Google Sign-In on web platform (still works on iOS/Android)
-**Status:** ✅ Workaround implemented
+### Issue 4: Socket.IO Authentication Error
+**Problem:** Socket connection failing with authentication error after login
+**Solution:** Improved socket auth middleware to accept token from both auth and query params, added better error logging
+**Status:** ✅ Fixed
+
+### Issue 5: Google Sign-In Re-enabled
+**Problem:** Previously disabled Google Sign-In due to environment variable issues
+**Solution:** Re-enabled by removing Platform.OS check - now works on all platforms
+**Status:** ✅ Fixed
+
+### Issue 6: Login Only Accepted Email
+**Problem:** Users could only login with email, not username
+**Solution:** Updated backend controller and mobile validation to accept email OR username
+**Status:** ✅ Fixed
 
 ---
 
@@ -68,8 +78,10 @@
 7. ✅ Database auto-sync enabled in production
 8. ✅ Google OAuth redirect URIs updated
 9. ✅ Stripe webhooks configured
-10. ✅ Google Sign-In disabled on web (env var issues)
-11. ✅ Firebase service account uploaded
+10. ✅ Google Sign-In re-enabled (working on all platforms)
+11. ✅ Email OR username login support added
+12. ✅ Socket.IO authentication improved
+13. ✅ Firebase service account uploaded
 
 ---
 
@@ -218,8 +230,8 @@ All changes pushed to: `feature/quick-wins-stripe-integration`
 
 ## 🐛 Known Limitations
 
-1. **Google Sign-In disabled on web** - Environment variable injection issues with Expo web builds (works fine on iOS/Android native apps)
-2. **Using Stripe TEST mode** - Switch to LIVE keys before accepting real payments
+1. **Using Stripe TEST mode** - Switch to LIVE keys before accepting real payments
+2. **Socket authentication may need token in query** - If socket connection still fails, ensure mobile app passes token in query params
 
 ---
 
