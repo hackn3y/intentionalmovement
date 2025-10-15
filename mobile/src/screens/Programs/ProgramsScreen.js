@@ -93,7 +93,7 @@ const ProgramsScreen = ({ navigation }) => {
           )}
           <View style={styles.programRating}>
             <Text style={styles.ratingIcon}>⭐</Text>
-            <Text style={styles.ratingText}>{item.rating?.toFixed(1) || 'N/A'}</Text>
+            <Text style={styles.ratingText}>{item.rating ? parseFloat(item.rating).toFixed(1) : 'N/A'}</Text>
           </View>
         </View>
       </View>
