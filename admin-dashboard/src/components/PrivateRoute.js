@@ -21,14 +21,15 @@ function PrivateRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
+  // TEMPORARY: Allow all authenticated users until role column exists in production
   // Logged in but not admin - redirect to unauthorized page
-  if (user.role !== 'admin') {
-    console.log('PrivateRoute: User not admin, redirecting to unauthorized');
-    return <Navigate to="/unauthorized" replace />;
-  }
+  // if (user.role !== 'admin') {
+  //   console.log('PrivateRoute: User not admin, redirecting to unauthorized');
+  //   return <Navigate to="/unauthorized" replace />;
+  // }
 
   // Admin user - allow access
-  console.log('PrivateRoute: Admin access granted');
+  console.log('PrivateRoute: Allowing access (role check temporarily disabled)');
   return children;
 }
 
