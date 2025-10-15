@@ -34,6 +34,9 @@ const io = socketIo(server, {
 
 // Middleware
 
+// Trust proxy - required for Railway/Heroku/any reverse proxy
+app.set('trust proxy', 1);
+
 app.use(compression());
 
 // CORS configuration - must come before helmet to ensure headers are set correctly
