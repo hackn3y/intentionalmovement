@@ -44,7 +44,7 @@ const ProgramDetailScreen = ({ route, navigation }) => {
             <Image
               source={{ uri: currentProgram.coverImage }}
               style={styles.coverImage}
-              resizeMode="cover"
+              resizeMode="contain"
             />
           ) : (
             <View style={styles.imageContainer}>
@@ -102,7 +102,7 @@ const ProgramDetailScreen = ({ route, navigation }) => {
 const getStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: { padding: SIZES.lg, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.card },
-  coverImage: { width: '100%', height: 200, borderRadius: SIZES.md, marginBottom: SIZES.md },
+  coverImage: { width: '90%', height: 220, borderRadius: SIZES.md, marginBottom: SIZES.md, alignSelf: 'center' },
   imageContainer: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.isDark ? colors.gray[800] : colors.gray[100], justifyContent: 'center', alignItems: 'center', marginBottom: SIZES.md },
   imagePlaceholder: { fontSize: 60 },
   title: { fontSize: FONT_SIZES.xxl, fontWeight: 'bold', color: colors.text, textAlign: 'center' },
