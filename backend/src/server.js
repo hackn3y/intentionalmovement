@@ -1,27 +1,42 @@
 require('dotenv').config();
 
-// Validate environment variables before starting the server
-// Temporarily disabled to see actual startup errors
-// const validateEnv = require('./utils/validateEnv');
-// validateEnv();
+// Wrap everything in try-catch to see errors
+try {
+  console.log('Starting server...');
 
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
+  // Validate environment variables before starting the server
+  // Temporarily disabled to see actual startup errors
+  // const validateEnv = require('./utils/validateEnv');
+  // validateEnv();
 
-const logger = require('./utils/logger');
-const { sequelize } = require('./models');
-const routes = require('./routes');
-const { initializeSocket } = require('./socket');
-const errorHandler = require('./middleware/errorHandler');
-const requestLogger = require('./middleware/requestLogger');
-const requestIdMiddleware = require('./middleware/requestId');
+  const express = require('express');
+  const http = require('http');
+  const socketIo = require('socket.io');
+  const cors = require('cors');
+  const helmet = require('helmet');
+  const morgan = require('morgan');
+  const compression = require('compression');
+  const rateLimit = require('express-rate-limit');
+  const path = require('path');
+
+  console.log('Basic dependencies loaded');
+
+  const logger = require('./utils/logger');
+  console.log('Logger loaded');
+
+  const { sequelize } = require('./models');
+  console.log('Models loaded');
+
+  const routes = require('./routes');
+  console.log('Routes loaded');
+
+  const { initializeSocket } = require('./socket');
+  console.log('Socket loaded');
+
+  const errorHandler = require('./middleware/errorHandler');
+  const requestLogger = require('./middleware/requestLogger');
+  const requestIdMiddleware = require('./middleware/requestId');
+  console.log('Middleware loaded');
 
 const app = express();
 const server = http.createServer(app);
@@ -181,4 +196,11 @@ process.on('SIGTERM', () => {
 });
 
 module.exports = { app, server, io };
+
+} catch (error) {
+  console.error('FATAL ERROR during server initialization:');
+  console.error(error);
+  console.error('Stack:', error.stack);
+  process.exit(1);
+}
  
