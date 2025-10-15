@@ -8,6 +8,7 @@ import HomeStack from './HomeStack';
 import ProgramStack from './ProgramStack';
 import MessageStack from './MessageStack';
 import ProfileStack from './ProfileStack';
+import DailyContentStack from './DailyContentStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -56,6 +57,16 @@ const MainNavigator = () => {
           tabBarLabel: 'Programs',
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: size, color }}>📚</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="DailyContentTab"
+        component={DailyContentStack}
+        options={{
+          tabBarLabel: 'Daily',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ fontSize: size, color }}>📅</Text>
           ),
         }}
       />
