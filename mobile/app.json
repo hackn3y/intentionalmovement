@@ -33,18 +33,40 @@
       },
       "navigationBar": {
         "backgroundColor": "#1a1a1a"
-      },
-      "googleServicesFile": "./google-services.json"
+      }
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Intentional Movement",
+      "shortName": "IM",
+      "lang": "en",
+      "scope": "/",
+      "themeColor": "#ec4899",
+      "backgroundColor": "#fdf2f8",
+      "display": "standalone",
+      "orientation": "portrait",
+      "dir": "ltr",
+      "preferRelatedApplications": false,
+      "description": "Planted Mind, Moving Body - Transform your lifestyle through intentional movement and mindful living",
+      "startUrl": "/",
+      "splash": {
+        "backgroundColor": "#fdf2f8",
+        "resizeMode": "contain",
+        "image": "./assets/splash.png"
+      },
+      "config": {
+        "firebase": {
+          "measurementId": ""
+        }
+      }
     },
     "sdkVersion": "54.0.0",
     "extra": {
       "eas": {
         "projectId": "intentional-movement-corp"
-      }
+      },
+      "googleWebClientId": "528044070931-06pbpg4gj40daopug4b7plumibn3g353.apps.googleusercontent.com"
     },
     "plugins": [
       [
