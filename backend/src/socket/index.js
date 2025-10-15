@@ -4,11 +4,19 @@ const { User, Message } = require('../models');
 const connectedUsers = new Map();
 
 const initializeSocket = (io) => {
+  console.log('Socket.IO middleware initialized');
+
   io.use(async (socket, next) => {
     try {
       console.log('=== SOCKET AUTH START ===');
+      console.log('Socket handshake:', JSON.stringify({
+        auth: socket.handshake.auth,
+        query: socket.handshake.query,
+        headers: socket.handshake.headers
+      }));
       const token = socket.handshake.auth.token || socket.handshake.query.token;
       console.log('Token received:', !!token);
+      console.log('Token value:', token ? `${token.substring(0, 20)}...` : 'none');
 
       if (!token) {
         console.error('No token provided');
