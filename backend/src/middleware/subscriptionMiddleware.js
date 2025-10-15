@@ -71,21 +71,28 @@ const canCreatePosts = async (req, res, next) => {
     });
   }
 
-  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null/error), allow access
   // This allows operation while production database doesn't have subscription columns
-  if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
-    console.warn('subscriptionTier column missing - allowing post creation (temporary bypass)');
-    return next();
-  }
+  try {
+    const tier = user.subscriptionTier;
+    if (tier === undefined || tier === null) {
+      console.warn('subscriptionTier column missing - allowing post creation (temporary bypass)');
+      return next();
+    }
 
-  if (!user.canCreatePosts()) {
-    return res.status(403).json({
-      success: false,
-      error: 'Subscription required',
-      requiredTier: 'basic',
-      currentTier: user.subscriptionTier,
-      message: 'Upgrade to Basic or Premium to create posts and share your journey.'
-    });
+    if (!user.canCreatePosts()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Subscription required',
+        requiredTier: 'basic',
+        currentTier: user.subscriptionTier,
+        message: 'Upgrade to Basic or Premium to create posts and share your journey.'
+      });
+    }
+  } catch (error) {
+    // Column doesn't exist in database - bypass check
+    console.warn('subscriptionTier column does not exist - allowing post creation (temporary bypass)');
+    return next();
   }
 
   next();
@@ -105,20 +112,27 @@ const canSendMessages = async (req, res, next) => {
     });
   }
 
-  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
-  if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
-    console.warn('subscriptionTier column missing - allowing messaging (temporary bypass)');
-    return next();
-  }
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null/error), allow access
+  try {
+    const tier = user.subscriptionTier;
+    if (tier === undefined || tier === null) {
+      console.warn('subscriptionTier column missing - allowing messaging (temporary bypass)');
+      return next();
+    }
 
-  if (!user.canSendMessages()) {
-    return res.status(403).json({
-      success: false,
-      error: 'Premium subscription required',
-      requiredTier: 'premium',
-      currentTier: user.subscriptionTier,
-      message: 'Upgrade to Premium to unlock direct messaging with other members.'
-    });
+    if (!user.canSendMessages()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Premium subscription required',
+        requiredTier: 'premium',
+        currentTier: user.subscriptionTier,
+        message: 'Upgrade to Premium to unlock direct messaging with other members.'
+      });
+    }
+  } catch (error) {
+    // Column doesn't exist in database - bypass check
+    console.warn('subscriptionTier column does not exist - allowing messaging (temporary bypass)');
+    return next();
   }
 
   next();
@@ -138,20 +152,27 @@ const canPurchasePrograms = async (req, res, next) => {
     });
   }
 
-  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
-  if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
-    console.warn('subscriptionTier column missing - allowing program purchase (temporary bypass)');
-    return next();
-  }
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null/error), allow access
+  try {
+    const tier = user.subscriptionTier;
+    if (tier === undefined || tier === null) {
+      console.warn('subscriptionTier column missing - allowing program purchase (temporary bypass)');
+      return next();
+    }
 
-  if (!user.canPurchasePrograms()) {
-    return res.status(403).json({
-      success: false,
-      error: 'Subscription required',
-      requiredTier: 'basic',
-      currentTier: user.subscriptionTier,
-      message: 'Upgrade to Basic or Premium to purchase wellness programs.'
-    });
+    if (!user.canPurchasePrograms()) {
+      return res.status(403).json({
+        success: false,
+        error: 'Subscription required',
+        requiredTier: 'basic',
+        currentTier: user.subscriptionTier,
+        message: 'Upgrade to Basic or Premium to purchase wellness programs.'
+      });
+    }
+  } catch (error) {
+    // Column doesn't exist in database - bypass check
+    console.warn('subscriptionTier column does not exist - allowing program purchase (temporary bypass)');
+    return next();
   }
 
   next();
