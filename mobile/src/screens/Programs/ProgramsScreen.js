@@ -30,19 +30,14 @@ const ProgramsScreen = ({ navigation }) => {
   const categories = ['all', 'insurance', 'real-estate', 'personal-development'];
   const styles = getStyles(colors);
 
-  // Debounce search to avoid too many API calls
+  // Load programs when search or category changes (debounced for search)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       loadPrograms();
     }, 500); // Wait 500ms after user stops typing
 
     return () => clearTimeout(timeoutId);
-  }, [search]);
-
-  // Load immediately when category changes
-  useEffect(() => {
-    loadPrograms();
-  }, [selectedCategory]);
+  }, [search, selectedCategory]);
 
   const loadPrograms = useCallback(() => {
     dispatch(clearPrograms());

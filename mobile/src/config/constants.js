@@ -114,4 +114,3 @@ export const FONT_SIZES = {
   xxl: 24,
   xxxl: 32,
 };
-// PWA rebuild triggered at Wed, Oct 15, 2025 11:08:48 AM
