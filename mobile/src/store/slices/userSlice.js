@@ -170,7 +170,13 @@ const userSlice = createSlice({
         const currentProfileId = state.currentProfile?.id || state.currentProfile?._id;
         if (state.currentProfile && currentProfileId === action.payload.userId) {
           state.currentProfile.isFollowing = true;
-          state.currentProfile.followersCount = (state.currentProfile.followersCount || 0) + 1;
+          // Update both follower count locations
+          if (state.currentProfile.stats) {
+            state.currentProfile.stats.followers = (state.currentProfile.stats.followers || 0) + 1;
+          }
+          if (state.currentProfile.followersCount !== undefined) {
+            state.currentProfile.followersCount = (state.currentProfile.followersCount || 0) + 1;
+          }
         }
         state.stats.following += 1;
       })
@@ -187,7 +193,13 @@ const userSlice = createSlice({
         const currentProfileId = state.currentProfile?.id || state.currentProfile?._id;
         if (state.currentProfile && currentProfileId === action.payload.userId) {
           state.currentProfile.isFollowing = false;
-          state.currentProfile.followersCount = Math.max((state.currentProfile.followersCount || 1) - 1, 0);
+          // Update both follower count locations
+          if (state.currentProfile.stats) {
+            state.currentProfile.stats.followers = Math.max((state.currentProfile.stats.followers || 1) - 1, 0);
+          }
+          if (state.currentProfile.followersCount !== undefined) {
+            state.currentProfile.followersCount = Math.max((state.currentProfile.followersCount || 1) - 1, 0);
+          }
         }
         state.stats.following = Math.max(state.stats.following - 1, 0);
       })
