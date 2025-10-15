@@ -79,11 +79,11 @@ function Programs() {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8 px-4 lg:px-0 pt-4 lg:pt-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8 px-4 lg:px-0">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Programs</h1>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="w-full md:w-auto px-6 py-3 bg-primary-600 dark:bg-primary-700 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors font-medium shadow-sm mt-4 md:mt-0"
+          className="w-full md:w-auto px-6 py-3 bg-primary-600 dark:bg-primary-700 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors font-medium shadow-sm mt-6 md:mt-0"
         >
           Add New Program
         </button>
