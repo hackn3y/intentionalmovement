@@ -13,8 +13,9 @@ export const programService = {
    * @param {number} params.limit - Items per page
    */
   getPrograms: ({ category, search, page = 1, limit = 10 } = {}) => {
-    let url = `/programs?page=${page}&limit=${limit}`;
-    if (category) url += `&category=${category}`;
+    const offset = (page - 1) * limit;
+    let url = `/programs?offset=${offset}&limit=${limit}`;
+    if (category && category !== 'all') url += `&category=${category}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     return api.get(url);
   },
@@ -31,7 +32,7 @@ export const programService = {
    * Get user's purchased programs
    */
   getMyPrograms: () => {
-    return api.get('/programs/my-programs');
+    return api.get('/programs/my/purchased');
   },
 
   /**
