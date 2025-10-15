@@ -41,29 +41,21 @@ function Dashboard() {
           title="Total Users"
           value={stats?.totalUsers || 0}
           icon="👥"
-          trend="up"
-          trendValue="+12%"
         />
         <StatCard
           title="Active Programs"
           value={stats?.activePrograms || 0}
           icon="📚"
-          trend="up"
-          trendValue="+3"
         />
         <StatCard
           title="Total Revenue"
           value={`$${(stats?.totalRevenue || 0).toLocaleString()}`}
           icon="💰"
-          trend="up"
-          trendValue="+23%"
         />
         <StatCard
           title="Total Posts"
           value={stats?.totalPosts || 0}
           icon="📝"
-          trend="up"
-          trendValue="+45"
         />
       </div>
 
