@@ -56,16 +56,21 @@ try {
 
   console.log('Configuring middleware...');
   // Trust proxy - required for Railway/Heroku/any reverse proxy
+  console.log('Setting trust proxy...');
   app.set('trust proxy', 1);
 
+console.log('Adding compression...');
 app.use(compression());
 
 // CORS configuration - must come before helmet to ensure headers are set correctly
 // Supports wildcards for Vercel deployments
+console.log('Configuring CORS...');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'];
+console.log(`CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 logger.info(`CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 
 // CORS origin checker with wildcard support
+console.log('Creating CORS origin checker...');
 const corsOriginChecker = (origin, callback) => {
   // Allow requests with no origin (like mobile apps or Postman)
   if (!origin) return callback(null, true);
@@ -91,6 +96,7 @@ const corsOriginChecker = (origin, callback) => {
   }
 };
 
+console.log('Creating CORS options...');
 const corsOptions = {
   origin: corsOriginChecker,
   credentials: true,
@@ -100,9 +106,11 @@ const corsOptions = {
   exposedHeaders: ['Content-Length', 'Content-Type']
 };
 
+console.log('Applying CORS middleware...');
 app.use(cors(corsOptions));
 
 // Enhanced security headers with Helmet
+console.log('Applying Helmet security headers...');
 app.use(helmet({
   crossOriginResourcePolicy: false,
   contentSecurityPolicy: {
@@ -127,9 +135,11 @@ app.use(helmet({
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   xssFilter: true,
 }));
+console.log('Applying Morgan logger...');
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
 // Stripe webhook - must be before express.json() to receive raw body
+console.log('Setting up Stripe webhook...');
 app.post('/api/purchases/webhook', express.raw({ type: 'application/json' }), require('./controllers/purchaseController').handleWebhook);
 
 app.use(express.json({ limit: '10mb' }));

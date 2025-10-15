@@ -5,7 +5,13 @@
  * @module services/stripeService
  */
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// Initialize Stripe only if secret key is available
+let stripe = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+} else {
+  console.warn('WARNING: STRIPE_SECRET_KEY not configured. Stripe functionality will be disabled.');
+}
 
 // Subscription price IDs (these should be created in Stripe Dashboard)
 const SUBSCRIPTION_PRICES = {
@@ -26,6 +32,10 @@ const SUBSCRIPTION_PRICES = {
  * @throws {Error} If customer creation or retrieval fails
  */
 exports.getOrCreateCustomer = async (user) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     // If user already has a Stripe customer ID, return it
     if (user.stripeCustomerId) {
@@ -66,6 +76,10 @@ exports.getOrCreateCustomer = async (user) => {
  * @throws {Error} If payment intent creation fails
  */
 exports.createPaymentIntent = async ({ amount, currency, customerId, metadata }) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount), // Amount in cents
@@ -239,6 +253,10 @@ exports.retrieveSubscription = async (subscriptionId) => {
 
 // Construct webhook event
 exports.constructWebhookEvent = (payload, signature) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
   try {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
