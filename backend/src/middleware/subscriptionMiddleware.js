@@ -6,6 +6,7 @@
  * Require a specific subscription tier to access a route
  * @param {string} requiredTier - 'free', 'basic', or 'premium'
  * @returns {Function} Express middleware function
+ * TEMPORARY: Bypass check if subscriptionTier column doesn't exist in production
  */
 const requireSubscription = (requiredTier) => {
   return async (req, res, next) => {
@@ -17,6 +18,12 @@ const requireSubscription = (requiredTier) => {
           success: false,
           error: 'Authentication required'
         });
+      }
+
+      // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
+      if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
+        console.warn(`subscriptionTier column missing - allowing access to ${requiredTier} tier (temporary bypass)`);
+        return next();
       }
 
       // Check if user has required tier
@@ -52,6 +59,7 @@ const requireSubscription = (requiredTier) => {
 
 /**
  * Check if user can create posts (Basic+ required)
+ * TEMPORARY: Bypass check if subscriptionTier column doesn't exist in production
  */
 const canCreatePosts = async (req, res, next) => {
   const user = req.user;
@@ -61,6 +69,13 @@ const canCreatePosts = async (req, res, next) => {
       success: false,
       error: 'Authentication required'
     });
+  }
+
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
+  // This allows operation while production database doesn't have subscription columns
+  if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
+    console.warn('subscriptionTier column missing - allowing post creation (temporary bypass)');
+    return next();
   }
 
   if (!user.canCreatePosts()) {
@@ -78,6 +93,7 @@ const canCreatePosts = async (req, res, next) => {
 
 /**
  * Check if user can send messages (Premium required)
+ * TEMPORARY: Bypass check if subscriptionTier column doesn't exist in production
  */
 const canSendMessages = async (req, res, next) => {
   const user = req.user;
@@ -87,6 +103,12 @@ const canSendMessages = async (req, res, next) => {
       success: false,
       error: 'Authentication required'
     });
+  }
+
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
+  if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
+    console.warn('subscriptionTier column missing - allowing messaging (temporary bypass)');
+    return next();
   }
 
   if (!user.canSendMessages()) {
@@ -104,6 +126,7 @@ const canSendMessages = async (req, res, next) => {
 
 /**
  * Check if user can purchase programs (Basic+ required)
+ * TEMPORARY: Bypass check if subscriptionTier column doesn't exist in production
  */
 const canPurchasePrograms = async (req, res, next) => {
   const user = req.user;
@@ -113,6 +136,12 @@ const canPurchasePrograms = async (req, res, next) => {
       success: false,
       error: 'Authentication required'
     });
+  }
+
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
+  if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
+    console.warn('subscriptionTier column missing - allowing program purchase (temporary bypass)');
+    return next();
   }
 
   if (!user.canPurchasePrograms()) {
@@ -130,11 +159,13 @@ const canPurchasePrograms = async (req, res, next) => {
 
 /**
  * Check if user has exceeded free tier limits
+ * TEMPORARY: Bypass check if subscriptionTier column doesn't exist in production
  */
 const checkFreeTierLimits = async (req, res, next) => {
   const user = req.user;
 
-  if (!user || user.subscriptionTier !== 'free') {
+  // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), bypass limits
+  if (!user || user.subscriptionTier === undefined || user.subscriptionTier === null || user.subscriptionTier !== 'free') {
     return next(); // Not a free user, no limits
   }
 
