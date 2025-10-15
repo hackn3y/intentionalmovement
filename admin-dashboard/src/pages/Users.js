@@ -99,8 +99,8 @@ function Users() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
         <div className="text-sm text-gray-600 dark:text-gray-400">
           Total: {users.length} users
         </div>
@@ -117,26 +117,26 @@ function Users() {
           />
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full min-w-max">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Subscription
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                   Joined
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -144,29 +144,29 @@ function Users() {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                          <span className="text-primary-700 dark:text-primary-300 font-medium">
+                      <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                          <span className="text-xs sm:text-sm text-primary-700 dark:text-primary-300 font-medium">
                             {user.username?.[0]?.toUpperCase()}
                           </span>
                         </div>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <div className="ml-2 sm:ml-4">
+                        <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
                           {user.username}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {user.fullName}
+                        <div className="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                          {user.email}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                     <div className="text-sm text-gray-900 dark:text-gray-100">{user.email}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => openEditSubscriptionModal(user)}
                       className="flex flex-col items-start hover:opacity-75 transition-opacity"
@@ -188,12 +188,12 @@ function Users() {
                       </span>
                     </button>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                     <div className="text-sm text-gray-900 dark:text-gray-100">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         user.emailVerified
@@ -204,37 +204,39 @@ function Users() {
                       {user.emailVerified ? 'Verified' : 'Pending'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => openViewModal(user.id)}
-                      className="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 mr-4"
-                    >
-                      View
-                    </button>
-                    {user.role !== 'admin' && (
-                      <>
-                        <button
-                          onClick={() => openBanModal(user)}
-                          className={`mr-4 ${user.isBanned
-                            ? "text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
-                            : "text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300"
-                          }`}
-                        >
-                          {user.isBanned ? 'Unban' : 'Ban'}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user.id, user.username)}
-                          className="text-red-600 dark:text-pink-300 hover:text-red-900 dark:hover:text-pink-200"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                    {user.role === 'admin' && (
-                      <span className="text-sm text-gray-500 dark:text-gray-400 italic">
-                        Protected (Admin)
-                      </span>
-                    )}
+                  <td className="px-3 sm:px-6 py-4 text-xs sm:text-sm font-medium">
+                    <div className="flex flex-col sm:flex-row gap-1 sm:gap-0">
+                      <button
+                        onClick={() => openViewModal(user.id)}
+                        className="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 sm:mr-4 text-left"
+                      >
+                        View
+                      </button>
+                      {user.role !== 'admin' && (
+                        <>
+                          <button
+                            onClick={() => openBanModal(user)}
+                            className={`sm:mr-4 text-left ${user.isBanned
+                              ? "text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
+                              : "text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-300"
+                            }`}
+                          >
+                            {user.isBanned ? 'Unban' : 'Ban'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.id, user.username)}
+                            className="text-red-600 dark:text-pink-300 hover:text-red-900 dark:hover:text-pink-200 text-left"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                      {user.role === 'admin' && (
+                        <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 italic">
+                          Protected
+                        </span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
