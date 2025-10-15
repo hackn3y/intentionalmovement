@@ -37,13 +37,38 @@ const io = socketIo(server, {
 app.use(compression());
 
 // CORS configuration - must come before helmet to ensure headers are set correctly
-// Ports 8081, 8091, 8092 are used for Expo web/Metro bundler on this machine
-// Updated to include port 8081 for Expo Metro bundler
-const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'];
+// Supports wildcards for Vercel deployments
+const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'];
 logger.info(`CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 
+// CORS origin checker with wildcard support
+const corsOriginChecker = (origin, callback) => {
+  // Allow requests with no origin (like mobile apps or Postman)
+  if (!origin) return callback(null, true);
+
+  // Check if origin matches any allowed origins (including wildcards)
+  const isAllowed = allowedOrigins.some(allowedOrigin => {
+    if (allowedOrigin.includes('*')) {
+      // Convert wildcard to regex: https://*.vercel.app -> https://.*\.vercel\.app
+      const pattern = allowedOrigin
+        .replace(/\./g, '\\.')
+        .replace(/\*/g, '.*');
+      const regex = new RegExp(`^${pattern}$`);
+      return regex.test(origin);
+    }
+    return allowedOrigin === origin;
+  });
+
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    logger.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  }
+};
+
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: corsOriginChecker,
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -92,10 +117,10 @@ app.use(requestIdMiddleware);
 // Request logging middleware
 app.use(requestLogger);
 
-// Rate limiting
+// Rate limiting - more permissive in development
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000 // 1000 for dev, 100 for production
 });
 app.use('/api/', limiter);
 
@@ -154,3 +179,4 @@ process.on('SIGTERM', () => {
 });
 
 module.exports = { app, server, io };
+ 
