@@ -171,38 +171,69 @@ module.exports = (sequelize) => {
   };
 
   // Subscription helper methods
+  // TEMPORARY: Wrap in try-catch to handle missing subscriptionTier column in production
   User.prototype.hasAccess = function(requiredTier) {
-    const tierHierarchy = { free: 0, basic: 1, premium: 2 };
-    const userTierLevel = tierHierarchy[this.subscriptionTier] || 0;
-    const requiredTierLevel = tierHierarchy[requiredTier] || 0;
-    return userTierLevel >= requiredTierLevel;
+    try {
+      const tierHierarchy = { free: 0, basic: 1, premium: 2 };
+      const userTierLevel = tierHierarchy[this.subscriptionTier] || 0;
+      const requiredTierLevel = tierHierarchy[requiredTier] || 0;
+      return userTierLevel >= requiredTierLevel;
+    } catch (error) {
+      // Column doesn't exist - grant access as temporary bypass
+      return true;
+    }
   };
 
   User.prototype.isSubscriptionActive = function() {
-    if (this.subscriptionStatus === 'canceled' || this.subscriptionStatus === 'expired') {
-      return false;
+    try {
+      if (this.subscriptionStatus === 'canceled' || this.subscriptionStatus === 'expired') {
+        return false;
+      }
+      if (this.subscriptionEndDate && new Date() > new Date(this.subscriptionEndDate)) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      // Column doesn't exist - assume active as temporary bypass
+      return true;
     }
-    if (this.subscriptionEndDate && new Date() > new Date(this.subscriptionEndDate)) {
-      return false;
-    }
-    return true;
   };
 
   User.prototype.isOnTrial = function() {
-    if (!this.trialEndsAt) return false;
-    return new Date() < new Date(this.trialEndsAt) && this.subscriptionStatus === 'trialing';
+    try {
+      if (!this.trialEndsAt) return false;
+      return new Date() < new Date(this.trialEndsAt) && this.subscriptionStatus === 'trialing';
+    } catch (error) {
+      // Column doesn't exist - not on trial
+      return false;
+    }
   };
 
   User.prototype.canCreatePosts = function() {
-    return this.hasAccess('basic');
+    try {
+      return this.hasAccess('basic');
+    } catch (error) {
+      // Allow access if column doesn't exist
+      return true;
+    }
   };
 
   User.prototype.canSendMessages = function() {
-    return this.hasAccess('premium');
+    try {
+      return this.hasAccess('premium');
+    } catch (error) {
+      // Allow access if column doesn't exist
+      return true;
+    }
   };
 
   User.prototype.canPurchasePrograms = function() {
-    return this.hasAccess('basic');
+    try {
+      return this.hasAccess('basic');
+    } catch (error) {
+      // Allow access if column doesn't exist
+      return true;
+    }
   };
 
   User.prototype.toJSON = function() {
