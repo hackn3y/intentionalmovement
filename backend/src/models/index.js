@@ -29,6 +29,9 @@ const Subscription = require('./Subscription')(sequelize);
 const Report = require('./Report')(sequelize);
 const ProgramReview = require('./ProgramReview')(sequelize);
 const AuditLog = require('./AuditLog')(sequelize);
+const DailyContent = require('./DailyContent')(sequelize);
+const UserStreak = require('./UserStreak')(sequelize);
+const DailyCheckIn = require('./DailyCheckIn')(sequelize);
 
 // Define associations
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
@@ -119,6 +122,16 @@ ProgramReview.belongsTo(Program, { foreignKey: 'programId', as: 'program' });
 User.hasMany(AuditLog, { foreignKey: 'userId', as: 'auditLogs' });
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// Daily Content and Streaks
+User.hasOne(UserStreak, { foreignKey: 'userId', as: 'streak' });
+UserStreak.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(DailyCheckIn, { foreignKey: 'userId', as: 'checkIns' });
+DailyCheckIn.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+DailyContent.hasMany(DailyCheckIn, { foreignKey: 'dailyContentId', as: 'checkIns' });
+DailyCheckIn.belongsTo(DailyContent, { foreignKey: 'dailyContentId', as: 'dailyContent' });
+
 module.exports = {
   sequelize,
   User,
@@ -137,5 +150,8 @@ module.exports = {
   Subscription,
   Report,
   ProgramReview,
-  AuditLog
+  AuditLog,
+  DailyContent,
+  UserStreak,
+  DailyCheckIn
 };
