@@ -223,9 +223,9 @@ const PostDetailScreen = ({ route, navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>💬</Text>
-            <Text style={styles.actionText}>
+          <TouchableOpacity style={[styles.actionButton, styles.actionButtonDisabled]} disabled>
+            <Text style={[styles.actionIcon, styles.actionIconDisabled]}>💬</Text>
+            <Text style={[styles.actionText, styles.actionTextDisabled]}>
               {formatters.formatCompactNumber(currentPost.commentCount || currentPost.commentsCount || 0)} Comments
             </Text>
           </TouchableOpacity>
