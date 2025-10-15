@@ -39,18 +39,18 @@ exports.getDashboardStats = async (req, res, next) => {
       }
     });
 
-    // Get recent activity (last 10 users, posts, purchases)
+    // Get recent activity - fetch more items for better chronological mixing
     const [recentUsers, recentPosts, recentPurchases] = await Promise.all([
       User.findAll({
         attributes: ['id', 'username', 'displayName', 'createdAt'],
         order: [['createdAt', 'DESC']],
-        limit: 5
+        limit: 20
       }),
       Post.findAll({
         attributes: ['id', 'content', 'createdAt'],
         include: [{ model: User, as: 'user', attributes: ['username', 'displayName'] }],
         order: [['createdAt', 'DESC']],
-        limit: 5
+        limit: 20
       }),
       Purchase.findAll({
         attributes: ['id', 'amount', 'createdAt'],
@@ -60,28 +60,39 @@ exports.getDashboardStats = async (req, res, next) => {
         ],
         where: { status: 'completed' },
         order: [['createdAt', 'DESC']],
-        limit: 3
+        limit: 20
       })
     ]);
 
-    // Format recent activity
+    // Format recent activity with actual timestamps for proper sorting
     const recentActivity = [
       ...recentUsers.map(u => ({
-        type: 'New User',
+        type: 'user',
+        icon: '👤',
+        label: 'New User',
         description: `${u.displayName || u.username} joined`,
+        timestamp: new Date(u.createdAt).getTime(),
         time: formatTimeAgo(u.createdAt)
       })),
       ...recentPosts.map(p => ({
-        type: 'New Post',
+        type: 'post',
+        icon: '📝',
+        label: 'New Post',
         description: `${p.user?.displayName || p.user?.username} posted`,
+        timestamp: new Date(p.createdAt).getTime(),
         time: formatTimeAgo(p.createdAt)
       })),
       ...recentPurchases.map(p => ({
-        type: 'Purchase',
+        type: 'purchase',
+        icon: '💰',
+        label: 'Purchase',
         description: `${p.user?.displayName || p.user?.username} bought ${p.program?.title}`,
+        timestamp: new Date(p.createdAt).getTime(),
         time: formatTimeAgo(p.createdAt)
       }))
-    ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 10);
+    ]
+      .sort((a, b) => b.timestamp - a.timestamp) // Sort by actual timestamp
+      .slice(0, 15); // Show top 15 most recent activities
 
     // Get popular programs
     const popularPrograms = await sequelize.query(`
