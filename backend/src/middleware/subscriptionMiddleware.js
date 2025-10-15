@@ -20,30 +20,37 @@ const requireSubscription = (requiredTier) => {
         });
       }
 
-      // TEMPORARY: If subscriptionTier doesn't exist (undefined/null), allow access
-      if (user.subscriptionTier === undefined || user.subscriptionTier === null) {
-        console.warn(`subscriptionTier column missing - allowing access to ${requiredTier} tier (temporary bypass)`);
+      // TEMPORARY: If subscriptionTier doesn't exist (undefined/null/error), allow access
+      try {
+        const tier = user.subscriptionTier;
+        if (tier === undefined || tier === null) {
+          console.warn(`subscriptionTier column missing - allowing access to ${requiredTier} tier (temporary bypass)`);
+          return next();
+        }
+
+        // Check if user has required tier
+        if (!user.hasAccess(requiredTier)) {
+          return res.status(403).json({
+            success: false,
+            error: 'Subscription upgrade required',
+            requiredTier,
+            currentTier: user.subscriptionTier,
+            message: getUpgradeMessage(requiredTier, user.subscriptionTier)
+          });
+        }
+
+        // Check if subscription is active
+        if (!user.isSubscriptionActive() && user.subscriptionTier !== 'free') {
+          return res.status(403).json({
+            success: false,
+            error: 'Subscription expired',
+            message: 'Your subscription has expired. Please renew to continue using premium features.'
+          });
+        }
+      } catch (tierError) {
+        // Column doesn't exist in database - bypass check
+        console.warn(`subscriptionTier column does not exist - allowing access to ${requiredTier} tier (temporary bypass)`);
         return next();
-      }
-
-      // Check if user has required tier
-      if (!user.hasAccess(requiredTier)) {
-        return res.status(403).json({
-          success: false,
-          error: 'Subscription upgrade required',
-          requiredTier,
-          currentTier: user.subscriptionTier,
-          message: getUpgradeMessage(requiredTier, user.subscriptionTier)
-        });
-      }
-
-      // Check if subscription is active
-      if (!user.isSubscriptionActive() && user.subscriptionTier !== 'free') {
-        return res.status(403).json({
-          success: false,
-          error: 'Subscription expired',
-          message: 'Your subscription has expired. Please renew to continue using premium features.'
-        });
       }
 
       next();
