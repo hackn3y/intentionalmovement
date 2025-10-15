@@ -79,17 +79,17 @@ function Programs() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 px-4 sm:px-0 pt-4 sm:pt-0">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Programs</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 sm:mb-8 px-4 sm:px-0 pt-4 md:pt-0">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Programs</h1>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="w-full sm:w-auto px-6 py-2.5 bg-primary-600 dark:bg-primary-700 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors font-medium shadow-sm"
+          className="w-full md:w-auto px-6 py-3 bg-primary-600 dark:bg-primary-700 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors font-medium shadow-sm mt-2 md:mt-0"
         >
           Add New Program
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-4 sm:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 px-4 sm:px-0">
         {programs.map((program) => (
           <Card key={program.id}>
             <div className="mb-4">
