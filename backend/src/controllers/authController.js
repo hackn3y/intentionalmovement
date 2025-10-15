@@ -26,16 +26,16 @@ exports.register = async (req, res, next) => {
       return response.conflict(res, 'Email or username already exists');
     }
 
-    const user = await User.create({
+    // Create user - Sequelize will only insert non-null values
+    const user = await User.build({
       email,
       username,
       displayName,
       password
-    }, {
-      // Only insert fields that exist in the database
-      // Excludes subscriptionTier and subscriptionStatus which may not exist
-      fields: ['email', 'username', 'displayName', 'password']
     });
+
+    // Save without default values for missing columns
+    await user.save({ fields: ['email', 'username', 'displayName', 'password'] });
 
     const token = generateToken(user.id);
 
@@ -123,17 +123,16 @@ exports.firebaseAuth = async (req, res, next) => {
       // Create new user from Firebase data
       const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
 
-      user = await User.create({
+      user = await User.build({
         firebaseUid: uid,
         email,
         username,
         displayName: name || username,
         profileImage: picture,
         isVerified: true
-      }, {
-        // Only insert fields that exist in the database
-        fields: ['firebaseUid', 'email', 'username', 'displayName', 'profileImage', 'isVerified']
       });
+
+      await user.save({ fields: ['firebaseUid', 'email', 'username', 'displayName', 'profileImage', 'isVerified'] });
     }
 
     await user.update({ lastActiveAt: new Date() });
