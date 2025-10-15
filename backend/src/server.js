@@ -1,8 +1,9 @@
 require('dotenv').config();
 
 // Validate environment variables before starting the server
-const validateEnv = require('./utils/validateEnv');
-validateEnv();
+// Temporarily disabled to see actual startup errors
+// const validateEnv = require('./utils/validateEnv');
+// validateEnv();
 
 const express = require('express');
 const http = require('http');
