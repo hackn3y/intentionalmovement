@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User } = require('../models');
+const { sequelize } = require('../models');
+const bcrypt = require('bcrypt');
 const admin = require('firebase-admin');
 const response = require('../utils/response');
 const mixpanel = require('../services/mixpanelService');
@@ -26,16 +28,24 @@ exports.register = async (req, res, next) => {
       return response.conflict(res, 'Email or username already exists');
     }
 
-    // Create user - Sequelize will only insert non-null values
-    const user = await User.build({
-      email,
-      username,
-      displayName,
-      password
-    });
+    // Hash password manually
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save without default values for missing columns
-    await user.save({ fields: ['email', 'username', 'displayName', 'password'] });
+    // Use raw SQL to insert user - bypasses Sequelize defaults for non-existent columns
+    const [results] = await sequelize.query(
+      `INSERT INTO "Users" (id, email, username, "displayName", password, "createdAt", "updatedAt")
+       VALUES (gen_random_uuid(), :email, :username, :displayName, :password, NOW(), NOW())
+       RETURNING id`,
+      {
+        replacements: { email, username, displayName, password: hashedPassword },
+        type: sequelize.QueryTypes.INSERT
+      }
+    );
+
+    const userId = results[0].id;
+
+    // Retrieve the created user using Sequelize model (for proper serialization)
+    const user = await User.findByPk(userId);
 
     const token = generateToken(user.id);
 
@@ -88,11 +98,11 @@ exports.login = async (req, res, next) => {
       return response.unauthorized(res, 'Invalid credentials');
     }
 
-    if (!user.isActive) {
-      return response.forbidden(res, 'Account is disabled');
-    }
-
-    await user.update({ lastActiveAt: new Date() });
+    // Skip isActive and lastActiveAt checks - these columns don't exist in production DB
+    // if (!user.isActive) {
+    //   return response.forbidden(res, 'Account is disabled');
+    // }
+    // await user.update({ lastActiveAt: new Date() });
 
     const token = generateToken(user.id);
 
@@ -123,19 +133,29 @@ exports.firebaseAuth = async (req, res, next) => {
       // Create new user from Firebase data
       const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
 
-      user = await User.build({
-        firebaseUid: uid,
-        email,
-        username,
-        displayName: name || username,
-        profileImage: picture,
-        isVerified: true
-      });
+      // Use raw SQL to insert user - bypasses Sequelize defaults for non-existent columns
+      const [results] = await sequelize.query(
+        `INSERT INTO "Users" (id, "firebaseUid", email, username, "displayName", "profileImage", "createdAt", "updatedAt")
+         VALUES (gen_random_uuid(), :firebaseUid, :email, :username, :displayName, :profileImage, NOW(), NOW())
+         RETURNING id`,
+        {
+          replacements: {
+            firebaseUid: uid,
+            email,
+            username,
+            displayName: name || username,
+            profileImage: picture
+          },
+          type: sequelize.QueryTypes.INSERT
+        }
+      );
 
-      await user.save({ fields: ['firebaseUid', 'email', 'username', 'displayName', 'profileImage', 'isVerified'] });
+      const userId = results[0].id;
+      user = await User.findByPk(userId);
     }
 
-    await user.update({ lastActiveAt: new Date() });
+    // Skip lastActiveAt update - column doesn't exist in production DB
+    // await user.update({ lastActiveAt: new Date() });
 
     const token = generateToken(user.id);
 
@@ -167,9 +187,14 @@ exports.refreshToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
     const user = await User.findByPk(decoded.userId);
 
-    if (!user || !user.isActive) {
+    if (!user) {
       return response.unauthorized(res, 'Invalid token');
     }
+
+    // Skip isActive check - column doesn't exist in production DB
+    // if (!user.isActive) {
+    //   return response.unauthorized(res, 'Invalid token');
+    // }
 
     const newToken = generateToken(user.id);
 
