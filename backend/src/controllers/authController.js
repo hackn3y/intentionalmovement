@@ -24,7 +24,8 @@ exports.register = async (req, res, next) => {
     const existingUser = await User.findOne({
       where: {
         [Op.or]: [{ email }, { username }]
-      }
+      },
+      attributes: ['id', 'email', 'username'] // Only select columns that exist in production
     });
 
     if (existingUser) {
@@ -57,7 +58,9 @@ exports.register = async (req, res, next) => {
 
     // Retrieve the created user using Sequelize model (for proper serialization)
     console.log('Fetching created user...');
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+    });
     console.log('User fetched:', !!user);
 
     console.log('Generating token...');
@@ -107,7 +110,8 @@ exports.login = async (req, res, next) => {
           { email: loginIdentifier },
           { username: loginIdentifier }
         ]
-      }
+      },
+      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'password', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
     });
 
     console.log('User found:', !!user, 'Has password:', user ? !!user.password : false);
@@ -154,7 +158,10 @@ exports.firebaseAuth = async (req, res, next) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const { uid, email, name, picture } = decodedToken;
 
-    let user = await User.findOne({ where: { firebaseUid: uid } });
+    let user = await User.findOne({
+      where: { firebaseUid: uid },
+      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+    });
 
     if (!user) {
       // Create new user from Firebase data
@@ -178,7 +185,9 @@ exports.firebaseAuth = async (req, res, next) => {
       );
 
       const userId = results[0].id;
-      user = await User.findByPk(userId);
+      user = await User.findByPk(userId, {
+        attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+      });
     }
 
     // Skip lastActiveAt update - column doesn't exist in production DB
@@ -212,7 +221,9 @@ exports.refreshToken = async (req, res, next) => {
     const { token } = req.body;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
-    const user = await User.findByPk(decoded.userId);
+    const user = await User.findByPk(decoded.userId, {
+      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+    });
 
     if (!user) {
       return response.unauthorized(res, 'Invalid token');
@@ -236,7 +247,10 @@ exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      attributes: ['id', 'email', 'username']
+    });
 
     if (!user) {
       // Don't reveal if email exists
@@ -288,7 +302,10 @@ exports.updateProfile = async (req, res, next) => {
 
     // Check if username is being changed and if it's already taken
     if (username && username !== req.user.username) {
-      const existingUser = await User.findOne({ where: { username } });
+      const existingUser = await User.findOne({
+        where: { username },
+        attributes: ['id', 'username']
+      });
       if (existingUser) {
         return response.badRequest(res, 'Username already taken');
       }
