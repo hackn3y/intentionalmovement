@@ -33,6 +33,17 @@ npm run install:admin        # Install admin dependencies only
 ```
 
 ### Development
+
+**RECOMMENDED: Use the dev-servers script (Windows)**
+```bash
+# Manage all development servers easily
+dev-servers.bat start    # Start all servers (backend, admin, mobile)
+dev-servers.bat stop     # Stop all servers (kills port processes safely)
+dev-servers.bat restart  # Restart all servers
+dev-servers.bat status   # Check which servers are running
+```
+
+**Alternative: Manual startup**
 ```bash
 npm run dev                  # Run backend + admin concurrently
 npm run dev:mobile           # Start Expo development server
@@ -45,6 +56,11 @@ cd mobile && npm run ios     # Run on iOS simulator
 cd mobile && npm run android # Run on Android emulator
 cd mobile && npm run web     # Run in web browser
 ```
+
+**Important Notes**:
+- The `dev-servers.bat` script handles port conflicts automatically
+- Always use `dev-servers.bat stop` before manually starting servers to avoid port conflicts
+- On Windows, use `dev-servers.bat` instead of trying to manually kill ports
 
 ### Testing & Linting
 ```bash
@@ -310,13 +326,24 @@ npm run dev:mobile   # Mobile app
 
 **Port already in use:**
 ```bash
-# Windows: Find and kill process using port 3001
+# RECOMMENDED: Use the dev-servers script
+dev-servers.bat stop        # Stops all development servers safely
+
+# Manual method (Windows):
+# 1. Find process using the port
 netstat -ano | findstr :3001
+# 2. Kill the process (replace PID with actual process ID)
 taskkill /PID <PID> /F
 
 # Or change the port in backend/.env
 PORT=3002
 ```
+
+**IMPORTANT FOR CLAUDE CODE**:
+- When managing development servers, ALWAYS use `dev-servers.bat` instead of manual port management
+- NEVER attempt to kill ports directly without using the script - it can accidentally kill Claude Code itself
+- If you encounter "port already in use" errors, use `dev-servers.bat stop` then `dev-servers.bat start`
+- To check server status, use `dev-servers.bat status` instead of netstat commands
 
 **Database connection issues:**
 - Ensure SQLite file exists: `backend/database.sqlite`
