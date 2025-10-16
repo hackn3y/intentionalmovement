@@ -145,23 +145,23 @@ const ProfileScreen = ({ route, navigation }) => {
             <Text style={styles.username}>@{currentProfile.username}</Text>
           </View>
 
-          {currentProfile.bio && (
+          {currentProfile.bio ? (
             <Text style={styles.bio}>{currentProfile.bio}</Text>
-          )}
+          ) : null}
 
-          {currentProfile.location && (
+          {currentProfile.location ? (
             <View style={styles.locationContainer}>
               <Text style={styles.locationIcon}>📍</Text>
               <Text style={styles.location}>{currentProfile.location}</Text>
             </View>
-          )}
+          ) : null}
 
-          {currentProfile.website && (
+          {currentProfile.website ? (
             <TouchableOpacity style={styles.websiteContainer}>
               <Text style={styles.websiteIcon}>🔗</Text>
               <Text style={styles.website}>{currentProfile.website}</Text>
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
 
         {/* Stats */}

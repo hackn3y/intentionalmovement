@@ -11,7 +11,6 @@ const Stack = createStackNavigator();
  * Auth navigator for authentication flow
  */
 const AuthNavigator = () => {
-  console.log('AuthNavigator: Rendering auth navigation stack');
   return (
     <Stack.Navigator
       screenOptions={{

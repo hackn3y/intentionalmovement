@@ -8,6 +8,9 @@ import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
 import * as NavigationBar from 'expo-navigation-bar';
 
+// Suppress known warnings from third-party libraries
+import './src/utils/suppressWarnings';
+
 import { store } from './src/store';
 import RootNavigator from './src/navigation/RootNavigator';
 import { STRIPE_PUBLISHABLE_KEY } from './src/config/constants';
@@ -68,11 +71,10 @@ export default function App() {
 
     // Listen for notifications
     const notificationListener = Notifications.addNotificationReceivedListener(notification => {
-      console.log('Notification received:', notification);
+      // Notification received - handled silently
     });
 
     const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('Notification response:', response);
       // Handle notification tap
     });
 

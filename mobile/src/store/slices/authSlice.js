@@ -15,18 +15,14 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      console.log('Login response:', response.data);
       // Backend wraps response in data object: response.data.data.token
       const token = response.data.data?.token || response.data.token;
       const user = response.data.data?.user || response.data.user;
-      console.log('Token from response:', token);
       // Set token in cache immediately for instant availability
       setTokenCache(token);
-      console.log('Token set in cache');
       // Then save to persistent storage
       await storage.set('token', token);
       await storage.set('user', JSON.stringify(user));
-      console.log('Token saved to storage');
 
       // Track login event
       // analyticsService.trackLogin(user);
@@ -48,18 +44,14 @@ export const register = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.register(userData);
-      console.log('Register response:', response.data);
       // Backend wraps response in data object: response.data.data.token
       const token = response.data.data?.token || response.data.token;
       const user = response.data.data?.user || response.data.user;
-      console.log('Token from response:', token);
       // Set token in cache immediately for instant availability
       setTokenCache(token);
-      console.log('Token set in cache');
       // Then save to persistent storage
       await storage.set('token', token);
       await storage.set('user', JSON.stringify(user));
-      console.log('Token saved to storage');
 
       // Track signup event
       // analyticsService.trackSignup(user, 'email');
@@ -97,8 +89,6 @@ export const loadUser = createAsyncThunk(
   'auth/loadUser',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('LoadUser: Starting to load user from storage...');
-
       // Add timeout to prevent hanging on web
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Storage timeout')), 3000)
@@ -113,22 +103,16 @@ export const loadUser = createAsyncThunk(
       try {
         [token, userStr] = await Promise.race([storagePromise, timeoutPromise]);
       } catch (err) {
-        console.error('LoadUser: Storage error or timeout:', err);
         return rejectWithValue('Storage access failed');
       }
 
-      console.log('LoadUser: Token exists:', !!token, 'User exists:', !!userStr);
-
       if (!token || !userStr) {
-        console.log('LoadUser: No stored user found');
         return rejectWithValue('No user found');
       }
 
       const user = JSON.parse(userStr);
-      console.log('LoadUser: Successfully loaded user');
       return { token, user };
     } catch (error) {
-      console.error('LoadUser: Failed to load user:', error);
       return rejectWithValue('Failed to load user');
     }
   }

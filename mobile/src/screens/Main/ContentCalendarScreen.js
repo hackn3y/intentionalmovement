@@ -50,6 +50,9 @@ function ContentCalendarScreen({ navigation }) {
   };
 
   const getTypeLabel = (type) => {
+    if (!type || typeof type !== 'string' || type.trim() === '') {
+      return 'Content';
+    }
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
@@ -102,11 +105,11 @@ function ContentCalendarScreen({ navigation }) {
       </View>
 
       {/* Error Message */}
-      {error && (
+      {error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
-      )}
+      ) : null}
 
       <ScrollView
         style={styles.scrollView}
@@ -130,11 +133,11 @@ function ContentCalendarScreen({ navigation }) {
                 style={[styles.calendarCard, isToday(item.date) && styles.todayCard]}
                 onPress={() => navigation.navigate('ContentDetail', { contentId: item.id })}
               >
-                {isToday(item.date) && (
+                {isToday(item.date) ? (
                   <View style={styles.todayBadge}>
                     <Text style={styles.todayBadgeText}>TODAY</Text>
                   </View>
-                )}
+                ) : null}
 
                 <View style={styles.cardHeader}>
                   <View
@@ -162,11 +165,11 @@ function ContentCalendarScreen({ navigation }) {
                   </Text>
                 </View>
 
-                {item.category && (
+                {item.category && typeof item.category === 'string' && item.category.trim() !== '' ? (
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{item.category}</Text>
                   </View>
-                )}
+                ) : null}
 
                 <Text style={styles.title} numberOfLines={2}>
                   {item.title}
@@ -176,11 +179,11 @@ function ContentCalendarScreen({ navigation }) {
                   {item.message}
                 </Text>
 
-                {item.hasCheckedIn && (
+                {item.hasCheckedIn ? (
                   <View style={styles.checkedInIndicator}>
                     <Text style={styles.checkedInText}>✓ Checked In</Text>
                   </View>
-                )}
+                ) : null}
               </TouchableOpacity>
             ))}
           </View>

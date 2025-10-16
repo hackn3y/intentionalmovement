@@ -48,11 +48,6 @@ const ProgramsScreen = ({ navigation }) => {
 
   // Load programs when search or category changes (debounced for search)
   useEffect(() => {
-    // Skip if it's the initial render (handled by the above useEffect)
-    if (programs.length === 0 && !loading && !search && selectedCategory === 'all') {
-      return;
-    }
-
     const timeoutId = setTimeout(() => {
       loadPrograms();
     }, 500); // Wait 500ms after user stops typing

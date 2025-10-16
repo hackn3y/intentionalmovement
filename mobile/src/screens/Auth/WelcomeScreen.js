@@ -46,7 +46,7 @@ const WelcomeScreen = ({ navigation }) => {
           <View style={[styles.heroGradient, { backgroundColor: '#10b981' }]}>
             <View style={styles.heroSection}>
               <Image
-                source={require('../../../assets/favicon.png')}
+                source={require('../../../assets/logo.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
@@ -65,7 +65,7 @@ const WelcomeScreen = ({ navigation }) => {
           >
             <View style={styles.heroSection}>
               <Image
-                source={require('../../../assets/favicon.png')}
+                source={require('../../../assets/logo.png')}
                 style={styles.logoImage}
                 resizeMode="contain"
               />

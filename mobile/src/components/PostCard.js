@@ -129,23 +129,23 @@ const PostCard = ({ post, onPress, onUserPress, onCommentPress }) => {
 
       {/* Content */}
       <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
-        {post.content && <Text style={styles.content}>{post.content}</Text>}
+        {post.content ? <Text style={styles.content}>{post.content}</Text> : null}
 
         {/* Media */}
-        {post.mediaUrl && post.mediaType === 'image' && (
+        {post.mediaUrl && post.mediaType === 'image' ? (
           <Image
             source={{ uri: post.mediaUrl }}
             style={[styles.media, { height: imageHeight }]}
             resizeMode="cover"
             onLoad={handleImageLoad}
           />
-        )}
+        ) : null}
 
-        {post.mediaUrl && post.mediaType === 'video' && (
+        {post.mediaUrl && post.mediaType === 'video' ? (
           <View style={[styles.media, styles.videoPlaceholder]}>
             <Text style={styles.playIcon}>▶</Text>
           </View>
-        )}
+        ) : null}
       </TouchableOpacity>
 
       {/* Footer */}

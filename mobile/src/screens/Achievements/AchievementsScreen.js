@@ -16,9 +16,9 @@ const AchievementBadge = ({ achievement }) => {
       </View>
       <Text style={styles.badgeTitle}>{achievement.title}</Text>
       <Text style={styles.badgeDescription}>{achievement.description}</Text>
-      {achievement.unlockedAt && (
+      {achievement.unlockedAt ? (
         <Text style={styles.unlockedDate}>Unlocked {new Date(achievement.unlockedAt).toLocaleDateString()}</Text>
-      )}
+      ) : null}
     </View>
   );
 };

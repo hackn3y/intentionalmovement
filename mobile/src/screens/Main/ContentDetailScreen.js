@@ -56,6 +56,9 @@ function ContentDetailScreen({ route, navigation }) {
   };
 
   const getTypeLabel = (type) => {
+    if (!type || typeof type !== 'string' || type.trim() === '') {
+      return 'Content';
+    }
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
@@ -112,23 +115,23 @@ function ContentDetailScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {content.category && (
+        {content.category && typeof content.category === 'string' && content.category.trim() !== '' ? (
           <View style={styles.categoryBadge}>
             <Text style={styles.categoryText}>{content.category}</Text>
           </View>
-        )}
+        ) : null}
 
-        <Text style={styles.contentTitle}>{content.title}</Text>
+        <Text style={styles.contentTitle}>{String(content.title || 'Daily Content')}</Text>
 
-        {content.mediaUrl && (
+        {content.mediaUrl && typeof content.mediaUrl === 'string' && content.mediaUrl.trim() !== '' ? (
           <Image
             source={{ uri: content.mediaUrl }}
             style={styles.contentImage}
             resizeMode="cover"
           />
-        )}
+        ) : null}
 
-        <Text style={styles.contentMessage}>{content.message}</Text>
+        <Text style={styles.contentMessage}>{String(content.message || 'No message available.')}</Text>
       </View>
 
       <TouchableOpacity

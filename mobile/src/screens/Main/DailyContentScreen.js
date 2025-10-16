@@ -78,6 +78,9 @@ function DailyContentScreen({ navigation }) {
   };
 
   const getTypeLabel = (type) => {
+    if (!type || typeof type !== 'string' || type.trim() === '') {
+      return 'Content';
+    }
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
@@ -108,106 +111,81 @@ function DailyContentScreen({ navigation }) {
     );
   }
 
-  return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
-      {/* Error Message */}
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
+  // Render the content card separately as a component to avoid && pitfalls
+  const renderContentCard = () => {
+    if (!todayContent || !todayContent.title) {
+      return null;
+    }
 
-      {/* Streak Display */}
-      {streak && (
-        <View style={styles.streakContainer}>
-          <View style={styles.streakCard}>
-            <Text style={styles.streakEmoji}>🔥</Text>
-            <View style={styles.streakInfo}>
-              <Text style={styles.streakNumber}>{streak.currentStreak}</Text>
-              <Text style={styles.streakLabel}>Day Streak</Text>
-            </View>
-          </View>
-          <View style={styles.streakStats}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{streak.longestStreak}</Text>
-              <Text style={styles.statLabel}>Longest</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{streak.totalCheckIns}</Text>
-              <Text style={styles.statLabel}>Total</Text>
-            </View>
-          </View>
-        </View>
-      )}
+    const title = String(todayContent.title || 'Daily Content');
+    const message = String(todayContent.message || 'No message available.');
+    const contentType = todayContent.contentType || 'quote';
+    const hasMedia = todayContent.mediaUrl && typeof todayContent.mediaUrl === 'string' && todayContent.mediaUrl.trim().length > 0;
+    const hasCategory = todayContent.category && typeof todayContent.category === 'string' && todayContent.category.trim().length > 0;
 
-      {/* Content Card */}
+    return (
       <View style={styles.contentCard}>
         <View style={styles.contentHeader}>
           <View
             style={[
               styles.typeBadge,
-              { backgroundColor: getTypeColor(todayContent.contentType) + '20' }
+              { backgroundColor: getTypeColor(contentType) + '20' }
             ]}
           >
             <Text
               style={[
                 styles.typeBadgeText,
-                { color: getTypeColor(todayContent.contentType) }
+                { color: getTypeColor(contentType) }
               ]}
             >
-              {getTypeLabel(todayContent.contentType)}
+              {getTypeLabel(contentType)}
             </Text>
           </View>
           <Text style={styles.contentDate}>
-            {new Date(todayContent.date).toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric'
-            })}
+            {todayContent.date
+              ? new Date(todayContent.date).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric'
+                })
+              : 'Today'}
           </Text>
         </View>
 
-        {todayContent.category && (
+        {hasCategory ? (
           <View style={styles.categoryBadge}>
             <Text style={styles.categoryText}>{todayContent.category}</Text>
           </View>
-        )}
+        ) : null}
 
-        <Text style={styles.contentTitle}>{todayContent.title}</Text>
+        <Text style={styles.contentTitle}>{title}</Text>
 
-        {todayContent.mediaUrl && (
+        {hasMedia ? (
           <Image
             source={{ uri: todayContent.mediaUrl }}
             style={styles.contentImage}
             resizeMode="cover"
           />
-        )}
+        ) : null}
 
-        <Text style={styles.contentMessage}>{todayContent.message}</Text>
+        <Text style={styles.contentMessage}>{message}</Text>
 
-        {/* Check-In Section */}
-        {!hasCheckedIn && !showCheckInForm && (
+        {!hasCheckedIn && !showCheckInForm ? (
           <TouchableOpacity
             style={styles.checkInButton}
             onPress={() => setShowCheckInForm(true)}
           >
             <Text style={styles.checkInButtonText}>✓ Check In</Text>
           </TouchableOpacity>
-        )}
+        ) : null}
 
-        {hasCheckedIn && !showCheckInForm && (
+        {hasCheckedIn && !showCheckInForm ? (
           <View style={styles.checkedInBadge}>
             <Text style={styles.checkedInText}>✓ Checked in today!</Text>
           </View>
-        )}
+        ) : null}
 
-        {showCheckInForm && (
+        {showCheckInForm ? (
           <View style={styles.checkInForm}>
             <Text style={styles.formLabel}>How did it go?</Text>
 
@@ -215,8 +193,8 @@ function DailyContentScreen({ navigation }) {
               style={styles.completedToggle}
               onPress={() => setCompleted(!completed)}
             >
-              <View style={[styles.checkbox, completed && styles.checkboxChecked]}>
-                {completed && <Text style={styles.checkmark}>✓</Text>}
+              <View style={[styles.checkbox, completed ? styles.checkboxChecked : null]}>
+                {completed ? <Text style={styles.checkmark}>✓</Text> : null}
               </View>
               <Text style={styles.completedLabel}>I completed this</Text>
             </TouchableOpacity>
@@ -256,10 +234,49 @@ function DailyContentScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-        )}
+        ) : null}
       </View>
+    );
+  };
 
-      {/* Calendar Link */}
+  return (
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+    >
+      {error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : null}
+
+      {streak ? (
+        <View style={styles.streakContainer}>
+          <View style={styles.streakCard}>
+            <Text style={styles.streakEmoji}>🔥</Text>
+            <View style={styles.streakInfo}>
+              <Text style={styles.streakNumber}>{streak.currentStreak}</Text>
+              <Text style={styles.streakLabel}>Day Streak</Text>
+            </View>
+          </View>
+          <View style={styles.streakStats}>
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{streak.longestStreak}</Text>
+              <Text style={styles.statLabel}>Longest</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statNumber}>{streak.totalCheckIns}</Text>
+              <Text style={styles.statLabel}>Total</Text>
+            </View>
+          </View>
+        </View>
+      ) : null}
+
+      {renderContentCard()}
+
       <TouchableOpacity
         style={styles.calendarLink}
         onPress={() => navigation.navigate('ContentCalendar')}

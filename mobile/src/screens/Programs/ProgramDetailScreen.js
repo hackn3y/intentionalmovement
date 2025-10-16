@@ -53,19 +53,19 @@ const ProgramDetailScreen = ({ route, navigation }) => {
           )}
           <Text style={styles.title}>{currentProgram.title || 'Untitled Program'}</Text>
           <Text style={styles.instructor}>by {currentProgram.instructorName || 'Intentional Movement'}</Text>
-          {currentProgram.price !== undefined && currentProgram.price !== null && (
+          {currentProgram.price !== undefined && currentProgram.price !== null ? (
             <Text style={styles.price}>${parseFloat(currentProgram.price).toFixed(2)}</Text>
-          )}
+          ) : null}
         </View>
 
-        {(currentProgram.description || currentProgram.longDescription) && (
+        {(currentProgram.description || currentProgram.longDescription) ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>About</Text>
             <Text style={styles.description}>
               {currentProgram.longDescription || currentProgram.description || 'No description available'}
             </Text>
           </View>
-        )}
+        ) : null}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Lessons ({currentProgram.lessons?.length || 0})</Text>

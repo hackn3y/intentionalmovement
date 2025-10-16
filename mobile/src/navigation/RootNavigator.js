@@ -56,7 +56,6 @@ const RootNavigator = () => {
         const data = notification.request.content.data;
 
         // Handle navigation based on notification data
-        console.log('Notification tapped:', data);
         // TODO: Navigate to appropriate screen based on data.type
       }
     );
@@ -71,8 +70,6 @@ const RootNavigator = () => {
   /**
    * Show loading spinner while initializing
    */
-  console.log('RootNavigator - initializing:', initializing, 'isAuthenticated:', isAuthenticated);
-
   if (initializing) {
     return <LoadingSpinner text="Loading..." />;
   }

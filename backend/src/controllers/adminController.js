@@ -100,10 +100,10 @@ exports.getDashboardStats = async (req, res, next) => {
         p.id,
         p.title,
         p.price,
-        COUNT(pu.id)::int as purchases
-      FROM "Programs" p
-      LEFT JOIN "Purchases" pu ON pu."programId" = p.id AND pu.status = 'completed'
-      WHERE p."isPublished" = true
+        COUNT(pu.id) as purchases
+      FROM Programs p
+      LEFT JOIN Purchases pu ON pu.programId = p.id AND pu.status = 'completed'
+      WHERE p.isPublished = 1
       GROUP BY p.id
       ORDER BY purchases DESC
       LIMIT 5

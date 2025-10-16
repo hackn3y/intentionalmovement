@@ -2,10 +2,7 @@ import axios from 'axios';
 import { API_URL } from '../config/constants';
 import { storage } from '../utils/storage';
 
-// Debug: Log API URL (development only)
-if (__DEV__) {
-  console.log('API_URL configured as:', API_URL);
-}
+// API URL is configured from constants
 
 // In-memory token cache to avoid async storage delays
 let tokenCache = null;
