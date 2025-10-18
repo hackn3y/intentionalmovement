@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
+import * as ImagePicker from 'expo-image-picker';
 import { createPost } from '../../store/slices/postsSlice';
 import { postSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
@@ -21,6 +22,7 @@ import Button from '../../components/Button';
 import UserAvatar from '../../components/UserAvatar';
 import UpgradePrompt from '../../components/UpgradePrompt';
 import { useEnterToSubmit, useEscapeToClose } from '../../hooks/useKeyboardShortcuts';
+import api from '../../services/api';
 
 /**
  * Create/edit post screen with media picker
@@ -44,11 +46,31 @@ const CreatePostScreen = ({ route, navigation }) => {
    * Handle media picker
    */
   const handleSelectMedia = async (type) => {
-    // TODO: Implement image/video picker with expo-image-picker
-    Alert.alert('Media Picker', `${type} picker will be implemented`);
-    // For now, just set a placeholder
-    setMediaType(type);
-    setSelectedMedia('placeholder');
+    try {
+      // Request permissions
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant permission to access your photos');
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: type === 'video' ? ImagePicker.MediaTypeOptions.Videos : ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: type === 'image' ? [4, 3] : [16, 9],
+        quality: type === 'image' ? 0.8 : 0.7,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedMedia(result.assets[0]);
+        setMediaType(type);
+      }
+    } catch (error) {
+      console.error('Error picking media:', error);
+      Alert.alert('Error', 'Failed to pick media');
+    }
   };
 
   /**
@@ -73,22 +95,47 @@ const CreatePostScreen = ({ route, navigation }) => {
     try {
       const postData = { ...values };
 
-      if (selectedMedia && selectedMedia !== 'placeholder') {
-        // TODO: Upload media and get URL
-        // postData.mediaUrl = uploadedUrl;
-        // postData.mediaType = mediaType;
+      // Upload media if selected
+      if (selectedMedia && selectedMedia.uri) {
+        const formData = new FormData();
+        formData.append('content', values.content);
+
+        // Prepare image file for upload
+        const imageUri = selectedMedia.uri;
+        const filename = imageUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : `image`;
+
+        formData.append('image', {
+          uri: Platform.OS === 'ios' ? imageUri.replace('file://', '') : imageUri,
+          name: filename,
+          type,
+        });
+
+        // Upload post with image using multipart form data
+        const response = await api.post('/posts', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        // Navigate back immediately - post will appear in feed
+        navigation.goBack();
+        return;
       }
 
+      // Create post without media
       await dispatch(createPost(postData)).unwrap();
 
       // Navigate back immediately - post will appear in feed due to Redux state update
       navigation.goBack();
     } catch (error) {
+      console.error('Error creating post:', error);
       // Check if error is subscription-related
-      if (error?.includes?.('Subscription') || error?.includes?.('subscription')) {
+      if (error?.message?.includes?.('Subscription') || error?.message?.includes?.('subscription')) {
         setShowUpgradePrompt(true);
       } else {
-        Alert.alert('Error', error || 'Failed to create post');
+        Alert.alert('Error', error?.message || 'Failed to create post');
       }
     }
   };
@@ -149,13 +196,22 @@ const CreatePostScreen = ({ route, navigation }) => {
               {/* Media Preview */}
               {selectedMedia && (
                 <View style={styles.mediaPreview}>
-                  {mediaType === 'image' ? (
-                    <View style={styles.imagePreview}>
-                      <Text style={styles.mediaPlaceholder}>📷 Image Selected</Text>
+                  {mediaType === 'image' && selectedMedia.uri ? (
+                    <Image
+                      source={{ uri: selectedMedia.uri }}
+                      style={styles.imagePreviewImg}
+                      resizeMode="cover"
+                    />
+                  ) : mediaType === 'video' && selectedMedia.uri ? (
+                    <View style={styles.videoPreview}>
+                      <Text style={styles.mediaPlaceholder}>🎥 Video</Text>
+                      <Text style={styles.videoFilename}>
+                        {selectedMedia.uri.split('/').pop()}
+                      </Text>
                     </View>
                   ) : (
-                    <View style={styles.videoPreview}>
-                      <Text style={styles.mediaPlaceholder}>🎥 Video Selected</Text>
+                    <View style={styles.imagePreview}>
+                      <Text style={styles.mediaPlaceholder}>📷 Image Selected</Text>
                     </View>
                   )}
                   <TouchableOpacity
@@ -267,6 +323,10 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  imagePreviewImg: {
+    width: '100%',
+    height: 200,
+  },
   videoPreview: {
     height: 200,
     justifyContent: 'center',
@@ -275,6 +335,11 @@ const getStyles = (colors, isDarkMode) => StyleSheet.create({
   mediaPlaceholder: {
     fontSize: FONT_SIZES.xl,
     color: isDarkMode ? colors.gray[500] : colors.gray[500],
+  },
+  videoFilename: {
+    fontSize: FONT_SIZES.sm,
+    color: isDarkMode ? colors.gray[600] : colors.gray[600],
+    marginTop: SIZES.sm,
   },
   removeMediaButton: {
     position: 'absolute',

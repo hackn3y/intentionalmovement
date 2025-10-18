@@ -131,7 +131,10 @@ function ContentCalendarScreen({ navigation }) {
               <TouchableOpacity
                 key={item.id}
                 style={[styles.calendarCard, isToday(item.date) && styles.todayCard]}
-                onPress={() => navigation.navigate('ContentDetail', { contentId: item.id })}
+                onPress={() => navigation.navigate('ContentDetail', {
+                  contentId: item.id,
+                  date: item.date
+                })}
               >
                 {isToday(item.date) ? (
                   <View style={styles.todayBadge}>

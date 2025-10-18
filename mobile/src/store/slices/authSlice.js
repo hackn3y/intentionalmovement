@@ -73,10 +73,21 @@ export const loginWithFirebase = createAsyncThunk(
   async (firebaseData, { rejectWithValue }) => {
     try {
       const response = await authService.loginWithFirebase(firebaseData);
-      await storage.set('token', response.data.token);
-      await storage.set('user', JSON.stringify(response.data.user));
-      return response.data;
+      // Backend wraps response in data object: response.data.data.token
+      const token = response.data.data?.token || response.data.token;
+      const user = response.data.data?.user || response.data.user;
+      // Set token in cache immediately for instant availability
+      setTokenCache(token);
+      // Then save to persistent storage
+      await storage.set('token', token);
+      await storage.set('user', JSON.stringify(user));
+
+      // Track login event
+      // analyticsService.trackLogin(user, 'google');
+
+      return { token, user };
     } catch (error) {
+      console.error('Firebase login error:', error);
       return rejectWithValue(error.response?.data?.message || 'Firebase login failed');
     }
   }

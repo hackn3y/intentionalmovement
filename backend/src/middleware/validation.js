@@ -52,16 +52,30 @@ const validateUserRegistration = [
 
 /**
  * Validation rules for user login
+ * Accepts either email OR username
  */
 const validateUserLogin = [
   body('email')
+    .optional()
     .trim()
     .isEmail()
     .withMessage('Must be a valid email address')
     .normalizeEmail(),
+  body('username')
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Username must be between 3 and 30 characters'),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
+  // Custom validation to ensure at least one of email or username is provided
+  body().custom((value, { req }) => {
+    if (!req.body.email && !req.body.username) {
+      throw new Error('Either email or username is required');
+    }
+    return true;
+  }),
   handleValidationErrors
 ];
 

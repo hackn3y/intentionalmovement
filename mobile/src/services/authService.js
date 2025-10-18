@@ -34,7 +34,7 @@ export const authService = {
    * @param {string} firebaseData.provider - Auth provider (google, apple)
    */
   loginWithFirebase: (firebaseData) => {
-    return api.post('/auth/firebase', firebaseData);
+    return api.post('/auth/firebase-auth', firebaseData);
   },
 
   /**

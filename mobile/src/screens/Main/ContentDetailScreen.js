@@ -19,7 +19,7 @@ function ContentDetailScreen({ route, navigation }) {
 
   useEffect(() => {
     loadContent();
-  }, []);
+  }, [contentId, date]);
 
   const loadContent = async () => {
     try {
@@ -28,12 +28,12 @@ function ContentDetailScreen({ route, navigation }) {
 
       let data;
       if (date) {
-        data = await dailyContentService.getContentByDate(date);
-      } else if (contentId) {
-        // For now, we'll use the date-based endpoint
-        // In the future, we could add a specific endpoint for contentId
-        const contentData = await dailyContentService.getTodayContent();
-        data = contentData;
+        // Format the date properly for the API (YYYY-MM-DD)
+        const formattedDate = new Date(date).toISOString().split('T')[0];
+        data = await dailyContentService.getContentByDate(formattedDate);
+      } else {
+        // If no date is provided, fall back to today's content
+        data = await dailyContentService.getTodayContent();
       }
 
       setContent(data.content);

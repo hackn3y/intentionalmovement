@@ -39,10 +39,20 @@ const LoginScreen = ({ navigation }) => {
    */
   const handleLogin = async (values) => {
     try {
-      await dispatch(login(values)).unwrap();
+      // If the email field contains @, it's an email, otherwise it's a username
+      const credentials = values.email.includes('@')
+        ? { email: values.email, password: values.password }
+        : { username: values.email, password: values.password };
+
+      console.log('Attempting login with:', { ...credentials, password: '***' });
+      await dispatch(login(credentials)).unwrap();
       // Navigation is handled by RootNavigator
     } catch (err) {
       console.error('Login failed:', err);
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+      }
     }
   };
 

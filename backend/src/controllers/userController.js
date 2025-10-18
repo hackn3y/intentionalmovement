@@ -387,8 +387,8 @@ exports.uploadProfileImage = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Construct the image URL
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Construct the image URL (includes subfolder path)
+    const imageUrl = `/uploads/profiles/${req.file.filename}`;
 
     await user.update({ profileImage: imageUrl });
 
@@ -421,8 +421,8 @@ exports.uploadCoverImage = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Construct the image URL
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Construct the image URL (includes subfolder path)
+    const imageUrl = `/uploads/profiles/${req.file.filename}`;
 
     await user.update({ coverImage: imageUrl });
 

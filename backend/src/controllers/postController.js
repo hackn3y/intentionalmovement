@@ -108,7 +108,7 @@ exports.createPost = async (req, res, next) => {
     let finalMediaType = mediaType || 'none';
 
     if (req.file) {
-      finalMediaUrl = `/uploads/${req.file.filename}`;
+      finalMediaUrl = `/uploads/posts/${req.file.filename}`;
       finalMediaType = 'image';
     }
 

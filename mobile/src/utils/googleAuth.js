@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 // Enable dismissal of web browser on completion
+// Note: This may show a COOP warning in console on web browsers, but it's harmless
 WebBrowser.maybeCompleteAuthSession();
 
 // Google OAuth Client IDs - these should match your Firebase config

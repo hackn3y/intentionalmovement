@@ -65,6 +65,11 @@ goto end
 echo.
 echo === Starting All Development Servers ===
 echo.
+echo Clearing Metro bundler cache...
+if exist mobile\.expo rmdir /s /q mobile\.expo 2>nul
+if exist mobile\node_modules\.cache rmdir /s /q mobile\node_modules\.cache 2>nul
+echo Cache cleared.
+echo.
 echo Starting Backend (Port %BACKEND_PORT%)...
 start "Backend Server" cmd /c "cd backend && npm run dev"
 timeout /t 3 /nobreak >nul
@@ -74,7 +79,7 @@ start "Admin Dashboard" cmd /c "cd admin-dashboard && npm start"
 timeout /t 3 /nobreak >nul
 echo.
 echo Starting Mobile Metro (Port %MOBILE_PORT%)...
-start "Mobile Metro" cmd /c "cd mobile && npm start"
+start "Mobile Metro" cmd /c "cd mobile && npm start -- --clear"
 echo.
 echo All servers started! Opening status in 3 seconds...
 timeout /t 3 /nobreak >nul

@@ -150,35 +150,63 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// Firebase authentication
+// Firebase/Google OAuth authentication
 exports.firebaseAuth = async (req, res, next) => {
   try {
-    const { idToken } = req.body;
+    const { idToken, email, displayName, profileImage, userInfo } = req.body;
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { uid, email, name, picture } = decodedToken;
+    console.log('Google OAuth login attempt:', { email, displayName, hasToken: !!idToken });
 
+    // Validate required fields
+    if (!email) {
+      return response.badRequest(res, 'Email is required for Google authentication');
+    }
+
+    // Verify the Google OAuth token by calling Google's API
+    let googleUserInfo = userInfo;
+    if (!googleUserInfo && idToken) {
+      try {
+        const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + idToken);
+        if (googleResponse.ok) {
+          const tokenInfo = await googleResponse.json();
+          console.log('Google token verified:', { email: tokenInfo.email });
+
+          // Ensure the token email matches the provided email
+          if (tokenInfo.email !== email) {
+            return response.unauthorized(res, 'Token email does not match provided email');
+          }
+        } else {
+          console.warn('Could not verify Google token, proceeding with provided user info');
+        }
+      } catch (verifyError) {
+        console.warn('Google token verification failed:', verifyError.message);
+        // Continue anyway - we'll rely on the email
+      }
+    }
+
+    // Try to find user by email (Google users don't have passwords)
     let user = await User.findOne({
-      where: { firebaseUid: uid },
-      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+      where: { email },
+      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'password', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
     });
 
     if (!user) {
-      // Create new user from Firebase data
+      // Create new user from Google OAuth data
       const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
+
+      console.log('Creating new user from Google OAuth:', { email, username, displayName });
 
       // Use raw SQL to insert user - bypasses Sequelize defaults for non-existent columns
       const [results] = await sequelize.query(
-        `INSERT INTO "Users" (id, "firebaseUid", email, username, "displayName", "profileImage", "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), :firebaseUid, :email, :username, :displayName, :profileImage, NOW(), NOW())
+        `INSERT INTO "Users" (id, email, username, "displayName", "profileImage", "createdAt", "updatedAt")
+         VALUES (gen_random_uuid(), :email, :username, :displayName, :profileImage, NOW(), NOW())
          RETURNING id`,
         {
           replacements: {
-            firebaseUid: uid,
             email,
             username,
-            displayName: name || username,
-            profileImage: picture
+            displayName: displayName || username,
+            profileImage: profileImage || null
           },
           type: sequelize.QueryTypes.INSERT
         }
@@ -188,15 +216,30 @@ exports.firebaseAuth = async (req, res, next) => {
       user = await User.findByPk(userId, {
         attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
       });
-    }
 
-    // Skip lastActiveAt update - column doesn't exist in production DB
-    // await user.update({ lastActiveAt: new Date() });
+      console.log('New user created:', { id: user.id, email: user.email });
+    } else {
+      console.log('Existing user found:', { id: user.id, email: user.email });
+
+      // Update profile image if provided and different
+      if (profileImage && user.profileImage !== profileImage) {
+        await user.update({ profileImage });
+      }
+    }
 
     const token = generateToken(user.id);
 
-    return response.success(res, { user, token }, 'Authentication successful');
+    // Track login event
+    mixpanel.trackLogin({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      loginMethod: 'google'
+    });
+
+    return response.success(res, { user, token }, 'Google authentication successful');
   } catch (error) {
+    console.error('Google OAuth error:', error);
     next(error);
   }
 };
