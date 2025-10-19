@@ -96,29 +96,71 @@ const ChatScreen = ({ route, navigation }) => {
 };
 
 const getStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  messagesList: { padding: SIZES.md },
-  messageBubble: { marginBottom: SIZES.sm },
-  ownMessage: { alignItems: 'flex-end' },
-  otherMessage: { alignItems: 'flex-start' },
-  messageContent: { maxWidth: '75%', borderRadius: SIZES.md, padding: SIZES.md },
-  ownContent: { backgroundColor: colors.primary },
-  otherContent: { backgroundColor: colors.card },
-  messageText: { fontSize: 16 },
-  ownText: { color: colors.white },
-  otherText: { color: colors.text },
+  container: { flex: 1, backgroundColor: colors.isDark ? '#000000' : '#f2f2f7' },
+  messagesList: { padding: SIZES.md, paddingBottom: SIZES.xl },
+  messageBubble: {
+    marginBottom: SIZES.xs,
+    marginHorizontal: SIZES.xs,
+    flexDirection: 'row',
+  },
+  ownMessage: {
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
+  otherMessage: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  messageContent: {
+    maxWidth: '75%',
+    borderRadius: 18,
+    paddingHorizontal: SIZES.md,
+    paddingVertical: SIZES.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  ownContent: {
+    backgroundColor: colors.isDark ? '#0b93f6' : '#007AFF',
+    borderBottomRightRadius: 4,
+  },
+  otherContent: {
+    backgroundColor: colors.isDark ? '#262626' : '#e5e5ea',
+    borderBottomLeftRadius: 4,
+  },
+  messageText: {
+    fontSize: FONT_SIZES.md,
+    lineHeight: 20,
+  },
+  ownText: {
+    color: '#FFFFFF',
+  },
+  otherText: {
+    color: colors.isDark ? '#FFFFFF' : '#000000',
+  },
   timestamp: {
-    fontSize: FONT_SIZES.sm,
-    marginTop: SIZES.xs,
-    fontWeight: '500',
+    fontSize: FONT_SIZES.xs,
+    marginTop: 2,
+    alignSelf: 'flex-end',
   },
   ownTimestamp: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   otherTimestamp: {
-    color: colors.isDark ? 'rgba(255, 255, 255, 0.6)' : colors.gray[600],
+    color: colors.isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.45)',
   },
-  inputContainer: { flexDirection: 'row', padding: SIZES.md, borderTopWidth: 1, borderTopColor: colors.border, alignItems: 'flex-start', gap: SIZES.sm, backgroundColor: colors.card },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: SIZES.sm,
+    paddingHorizontal: SIZES.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.isDark ? '#1c1c1e' : '#d1d1d6',
+    alignItems: 'flex-end',
+    gap: SIZES.sm,
+    backgroundColor: colors.isDark ? '#000000' : '#ffffff',
+  },
   input: { flex: 1, marginBottom: 0 },
   sendButton: { marginTop: 0, minWidth: 70 },
 });

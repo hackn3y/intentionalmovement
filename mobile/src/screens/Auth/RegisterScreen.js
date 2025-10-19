@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
@@ -147,11 +146,7 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-    >
+    <View style={styles.container}>
       <WebScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -314,7 +309,7 @@ const RegisterScreen = ({ navigation }) => {
           <Text style={styles.termsLink}>Privacy Policy</Text>
         </Text>
       </WebScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

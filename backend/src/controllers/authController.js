@@ -40,28 +40,15 @@ exports.register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Password hashed successfully');
 
-    // Use raw SQL to insert user - bypasses Sequelize defaults for non-existent columns
-    console.log('Executing raw SQL INSERT...');
-    const [results] = await sequelize.query(
-      `INSERT INTO "Users" (id, email, username, "displayName", password, "createdAt", "updatedAt")
-       VALUES (gen_random_uuid(), :email, :username, :displayName, :password, NOW(), NOW())
-       RETURNING id`,
-      {
-        replacements: { email, username, displayName, password: hashedPassword },
-        type: sequelize.QueryTypes.INSERT
-      }
-    );
-    console.log('SQL INSERT successful, results:', results);
-
-    const userId = results[0].id;
-    console.log('New user ID:', userId);
-
-    // Retrieve the created user using Sequelize model (for proper serialization)
-    console.log('Fetching created user...');
-    const user = await User.findByPk(userId, {
-      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+    // Create user using Sequelize model (works with both SQLite and PostgreSQL)
+    console.log('Creating user with Sequelize...');
+    const user = await User.create({
+      email,
+      username,
+      displayName,
+      password: hashedPassword
     });
-    console.log('User fetched:', !!user);
+    console.log('User created successfully, ID:', user.id);
 
     console.log('Generating token...');
     const token = generateToken(user.id);
@@ -196,25 +183,12 @@ exports.firebaseAuth = async (req, res, next) => {
 
       console.log('Creating new user from Google OAuth:', { email, username, displayName });
 
-      // Use raw SQL to insert user - bypasses Sequelize defaults for non-existent columns
-      const [results] = await sequelize.query(
-        `INSERT INTO "Users" (id, email, username, "displayName", "profileImage", "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), :email, :username, :displayName, :profileImage, NOW(), NOW())
-         RETURNING id`,
-        {
-          replacements: {
-            email,
-            username,
-            displayName: displayName || username,
-            profileImage: profileImage || null
-          },
-          type: sequelize.QueryTypes.INSERT
-        }
-      );
-
-      const userId = results[0].id;
-      user = await User.findByPk(userId, {
-        attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+      // Create user using Sequelize model (works with both SQLite and PostgreSQL)
+      user = await User.create({
+        email,
+        username,
+        displayName: displayName || username,
+        profileImage: profileImage || null
       });
 
       console.log('New user created:', { id: user.id, email: user.email });

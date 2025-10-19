@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { COLORS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
+import { fetchConversations } from '../store/slices/messagesSlice';
 import HomeStack from './HomeStack';
 import ProgramStack from './ProgramStack';
 import MessageStack from './MessageStack';
@@ -17,7 +18,21 @@ const Tab = createBottomTabNavigator();
  */
 const MainNavigator = () => {
   const { colors, isDarkMode } = useTheme();
+  const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.messages.unreadCount);
+
+  // Periodically fetch conversations to update unread count
+  useEffect(() => {
+    // Initial fetch
+    dispatch(fetchConversations());
+
+    // Poll every 30 seconds for new messages
+    const interval = setInterval(() => {
+      dispatch(fetchConversations());
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   return (
     <Tab.Navigator

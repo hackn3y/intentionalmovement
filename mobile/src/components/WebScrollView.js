@@ -10,15 +10,23 @@ const WebScrollView = ({ children, style, contentContainerStyle, ...props }) => 
   return (
     <ScrollView
       style={[
+        { flex: 1 },
         Platform.OS === 'web' && {
-          flex: 1,
-          height: '100%',
+          height: '100vh',
+          overflowY: 'scroll',
+          WebkitOverflowScrolling: 'touch',
         },
         style,
       ]}
-      contentContainerStyle={contentContainerStyle}
+      contentContainerStyle={[
+        Platform.OS === 'web' && {
+          minHeight: '100%',
+        },
+        contentContainerStyle,
+      ]}
       showsVerticalScrollIndicator={true}
       bounces={Platform.OS !== 'web'}
+      nestedScrollEnabled={true}
       {...props}
     >
       {children}
