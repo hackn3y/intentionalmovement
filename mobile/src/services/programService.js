@@ -14,7 +14,7 @@ export const programService = {
    */
   getPrograms: ({ category, search, page = 1, limit = 10 } = {}) => {
     const offset = (page - 1) * limit;
-    let url = `/programs?offset=${offset}&limit=${limit}`;
+    let url = `/programs?offset=${offset}&limit=${limit}&_t=${Date.now()}`;
     if (category && category !== 'all') url += `&category=${category}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     return api.get(url);
@@ -25,7 +25,7 @@ export const programService = {
    * @param {string} programId - Program ID
    */
   getProgramById: (programId) => {
-    return api.get(`/programs/${programId}`);
+    return api.get(`/programs/${programId}?_t=${Date.now()}`);
   },
 
   /**

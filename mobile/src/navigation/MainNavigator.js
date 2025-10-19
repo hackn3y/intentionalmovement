@@ -4,7 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector, useDispatch } from 'react-redux';
 import { COLORS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
-import { fetchConversations } from '../store/slices/messagesSlice';
+import { fetchConversations, addMessageFromSocket } from '../store/slices/messagesSlice';
+import socketService from '../services/socketService';
 import HomeStack from './HomeStack';
 import ProgramStack from './ProgramStack';
 import MessageStack from './MessageStack';
@@ -21,17 +22,32 @@ const MainNavigator = () => {
   const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.messages.unreadCount);
 
-  // Periodically fetch conversations to update unread count
+  // Set up real-time message updates and periodic refresh
   useEffect(() => {
     // Initial fetch
     dispatch(fetchConversations());
 
-    // Poll every 30 seconds for new messages
+    // Connect to socket for real-time updates
+    socketService.connect();
+
+    // Listen for new messages to update unread count
+    const handleNewMessage = (message) => {
+      console.log('New message received in MainNavigator:', message);
+      // Refresh conversations to update unread count
+      dispatch(fetchConversations());
+    };
+
+    socketService.onNewMessage(handleNewMessage);
+
+    // Also poll every 60 seconds as fallback
     const interval = setInterval(() => {
       dispatch(fetchConversations());
-    }, 30000);
+    }, 60000);
 
-    return () => clearInterval(interval);
+    return () => {
+      socketService.offNewMessage();
+      clearInterval(interval);
+    };
   }, [dispatch]);
 
   return (

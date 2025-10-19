@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import React, { useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 import { fetchProgramById } from '../../store/slices/programsSlice';
 import { SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
@@ -17,9 +18,30 @@ const ProgramDetailScreen = ({ route, navigation }) => {
   const isPurchased = myPrograms.some(p => (p.id || p._id) === programId);
   const styles = getStyles(colors);
 
+  // Refresh program details when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProgramById(programId));
+    }, [dispatch, programId])
+  );
+
+  // On web, also refresh when browser tab becomes visible
   useEffect(() => {
-    dispatch(fetchProgramById(programId));
-  }, [programId]);
+    if (Platform.OS !== 'web') return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('Browser tab became visible, refreshing program details...');
+        dispatch(fetchProgramById(programId));
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [dispatch, programId]);
 
   const handlePurchase = () => {
     navigation.navigate('Checkout', { programId, price: currentProgram.price });

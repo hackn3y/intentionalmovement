@@ -21,20 +21,30 @@ const ChatScreen = ({ route, navigation }) => {
   const conversationMessages = messages[userId] || [];
   const styles = getStyles(colors);
 
-  const MessageBubble = ({ message, isOwn }) => (
-    <View style={[styles.messageBubble, isOwn ? styles.ownMessage : styles.otherMessage]}>
-      <View style={[styles.messageContent, isOwn ? styles.ownContent : styles.otherContent]}>
-        <Text style={[styles.messageText, isOwn ? styles.ownText : styles.otherText]}>
-          {message.content || message.text}
-        </Text>
-        {(message.createdAt || message.timestamp) && (
-          <Text style={[styles.timestamp, isOwn ? styles.ownTimestamp : styles.otherTimestamp]}>
-            {formatters.formatTime(message.createdAt || message.timestamp)}
+  const MessageBubble = ({ message, isOwn }) => {
+    // Debug log to see message structure
+    console.log('Message:', {
+      sender: message.sender,
+      senderId: message.senderId,
+      currentUserId: currentUser?.id || currentUser?._id,
+      isOwn
+    });
+
+    return (
+      <View style={[styles.messageBubble, isOwn ? styles.ownMessage : styles.otherMessage]}>
+        <View style={[styles.messageContent, isOwn ? styles.ownContent : styles.otherContent]}>
+          <Text style={[styles.messageText, isOwn ? styles.ownText : styles.otherText]}>
+            {message.content || message.text}
           </Text>
-        )}
+          {(message.createdAt || message.timestamp) && (
+            <Text style={[styles.timestamp, isOwn ? styles.ownTimestamp : styles.otherTimestamp]}>
+              {formatters.formatTime(message.createdAt || message.timestamp)}
+            </Text>
+          )}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   useEffect(() => {
     if (conversationId && userId) {
@@ -66,9 +76,14 @@ const ChatScreen = ({ route, navigation }) => {
     }
   };
 
-  const renderMessage = ({ item }) => (
-    <MessageBubble message={item} isOwn={item.sender === currentUser?._id} />
-  );
+  const renderMessage = ({ item }) => {
+    // Check multiple possible sender ID fields
+    const senderId = item.sender || item.senderId || item.from;
+    const currentUserId = currentUser?.id || currentUser?._id;
+    const isOwn = senderId === currentUserId;
+
+    return <MessageBubble message={item} isOwn={isOwn} />;
+  };
 
   if (loading && conversationMessages.length === 0) {
     return <LoadingSpinner text="Loading messages..." />;
