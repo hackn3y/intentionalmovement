@@ -51,6 +51,13 @@ exports.getPrograms = async (req, res, next) => {
         .map(result => result.item)
         .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
 
+      // Set cache-control headers to prevent browser caching
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+
       return res.json({
         programs,
         pagination: {
@@ -76,6 +83,13 @@ exports.getPrograms = async (req, res, next) => {
 
     const totalCount = await Program.count({ where: whereClause });
 
+    // Set cache-control headers to prevent browser caching
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
     res.json({
       programs,
       pagination: {
@@ -86,6 +100,7 @@ exports.getPrograms = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error('Get programs error:', error);
     next(error);
   }
 };
@@ -105,7 +120,7 @@ exports.getProgram = async (req, res, next) => {
       return res.status(404).json({ error: 'Program not found' });
     }
 
-    if (!program.isPublished && req.user.role !== 'admin') {
+    if (!program.isPublished && req.user?.role !== 'admin') {
       return res.status(404).json({ error: 'Program not found' });
     }
 
@@ -122,13 +137,23 @@ exports.getProgram = async (req, res, next) => {
       hasPurchased = !!purchase;
     }
 
-    res.json({
+    const response = {
       program: {
         ...program.toJSON(),
         hasPurchased
       }
+    };
+
+    // Set cache-control headers to prevent browser caching
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     });
+
+    res.json(response);
   } catch (error) {
+    console.error('Get program error:', error);
     next(error);
   }
 };
@@ -218,6 +243,7 @@ exports.updateProgram = async (req, res, next) => {
     }
 
     await program.update(updateData);
+    await program.reload(); // Reload to get fresh data
 
     res.json({
       message: 'Program updated successfully',

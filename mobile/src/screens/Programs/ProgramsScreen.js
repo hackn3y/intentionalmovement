@@ -8,8 +8,10 @@ import {
   RefreshControl,
   TextInput,
   Image,
+  Platform,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 import { fetchPrograms, clearPrograms } from '../../store/slices/programsSlice';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
@@ -30,36 +32,48 @@ const ProgramsScreen = ({ navigation }) => {
   const categories = ['all', 'insurance', 'real-estate', 'personal-development'];
   const styles = getStyles(colors);
 
-  const loadPrograms = useCallback(() => {
+  // Refresh programs when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      // Always refresh programs when tab is focused to get latest data
+      dispatch(clearPrograms());
+      dispatch(fetchPrograms({
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        search: search.trim() || undefined,
+        page: 1
+      }));
+    }, [dispatch, selectedCategory, search])
+  );
+
+  // Load programs when category changes (immediate) or search changes (debounced)
+  useEffect(() => {
+    dispatch(clearPrograms());
+
+    // For category changes, fetch immediately
+    // For search changes, debounce 500ms
+    const debounceTime = search ? 500 : 0;
+
+    const timeoutId = setTimeout(() => {
+      dispatch(fetchPrograms({
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        search: search.trim() || undefined,
+        page: 1
+      }));
+    }, debounceTime);
+
+    return () => clearTimeout(timeoutId);
+  }, [search, selectedCategory, dispatch]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
     dispatch(clearPrograms());
     dispatch(fetchPrograms({
       category: selectedCategory !== 'all' ? selectedCategory : undefined,
       search: search.trim() || undefined,
       page: 1
     }));
-  }, [dispatch, selectedCategory, search]);
-
-  // Initial load only (once when component mounts)
-  useEffect(() => {
-    if (programs.length === 0 && !loading) {
-      loadPrograms();
-    }
-  }, []); // Empty dependency array = runs once on mount
-
-  // Load programs when search or category changes (debounced for search)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      loadPrograms();
-    }, 500); // Wait 500ms after user stops typing
-
-    return () => clearTimeout(timeoutId);
-  }, [search, selectedCategory]);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    loadPrograms();
     setTimeout(() => setRefreshing(false), 1000);
-  }, [loadPrograms]);
+  }, [dispatch, selectedCategory, search]);
 
   const handleLoadMore = useCallback(() => {
     if (!loading && hasMore) {
@@ -154,7 +168,8 @@ const ProgramsScreen = ({ navigation }) => {
       <FlatList
         data={programs}
         renderItem={renderProgram}
-        keyExtractor={(item) => item.id || item._id}
+        keyExtractor={(item) => `${item.id || item._id}-${item.price}-${item.updatedAt || Date.now()}`}
+        extraData={programs}
         ListEmptyComponent={
           loading && page === 1 ? (
             <LoadingSpinner text="Loading programs..." />

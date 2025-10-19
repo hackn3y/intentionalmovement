@@ -16,6 +16,7 @@ export const fetchPrograms = createAsyncThunk(
         hasMore: response.data.pagination?.hasMore || false
       };
     } catch (error) {
+      console.error('Fetch programs error:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch programs');
     }
   }
@@ -192,8 +193,10 @@ const programsSlice = createSlice({
       .addCase(fetchPrograms.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload.page === 1) {
+          // ALWAYS replace when page is 1 (fresh load)
           state.programs = action.payload.programs;
         } else {
+          // Append for pagination
           state.programs = [...state.programs, ...action.payload.programs];
         }
         state.page = action.payload.page;
