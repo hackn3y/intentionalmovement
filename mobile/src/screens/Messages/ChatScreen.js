@@ -22,14 +22,6 @@ const ChatScreen = ({ route, navigation }) => {
   const styles = getStyles(colors);
 
   const MessageBubble = ({ message, isOwn }) => {
-    // Debug log to see message structure
-    console.log('Message:', {
-      sender: message.sender,
-      senderId: message.senderId,
-      currentUserId: currentUser?.id || currentUser?._id,
-      isOwn
-    });
-
     return (
       <View style={[styles.messageBubble, isOwn ? styles.ownMessage : styles.otherMessage]}>
         <View style={[styles.messageContent, isOwn ? styles.ownContent : styles.otherContent]}>
@@ -77,8 +69,8 @@ const ChatScreen = ({ route, navigation }) => {
   };
 
   const renderMessage = ({ item }) => {
-    // Check multiple possible sender ID fields
-    const senderId = item.sender || item.senderId || item.from;
+    // Backend returns senderId as UUID string
+    const senderId = item.senderId;
     const currentUserId = currentUser?.id || currentUser?._id;
     const isOwn = senderId === currentUserId;
 
