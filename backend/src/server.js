@@ -218,12 +218,12 @@ const startServer = async () => {
     console.log('Database connected!');
     logger.info('Database connection established successfully.');
 
-    // Always sync database tables (safe - won't drop data with force:false)
+    // Sync database tables (safe - won't drop data or alter existing tables)
     // This ensures new tables are created when models are added
     console.log('Syncing database...');
     try {
-      // Use alter:true to update schema if tables exist, or create if they don't
-      await sequelize.sync({ alter: true });
+      // Use force:false (safe - only creates missing tables, won't modify existing ones)
+      await sequelize.sync({ force: false });
       console.log('Database synced!');
       logger.info('Database synchronized successfully.');
     } catch (syncError) {
