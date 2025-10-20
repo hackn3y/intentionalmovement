@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
-import { fetchMessages, sendMessage, setCurrentConversation, setUnreadCount } from '../../store/slices/messagesSlice';
+import { fetchMessages, sendMessage, setCurrentConversation, setUnreadCount, fetchConversations } from '../../store/slices/messagesSlice';
 import { messageSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
@@ -84,18 +84,20 @@ const ChatScreen = ({ route, navigation }) => {
     let isActive = true;
 
     const handleNewMessage = (message) => {
-      // Only process if component is still mounted
-      if (!isActive) {
-        console.log('[ChatScreen] Ignoring message - component unmounted');
-        return;
-      }
-
       console.log('[ChatScreen] New message received:', message);
 
       // Check if this message is for the current conversation
       if (message.senderId === userId || message.receiverId === userId) {
-        console.log('[ChatScreen] Message is for current chat, reloading messages');
-        dispatch(fetchMessages({ conversationId: userId }));
+        if (isActive) {
+          // Component is active (screen is visible), reload messages
+          console.log('[ChatScreen] Screen is active, reloading messages');
+          dispatch(fetchMessages({ conversationId: userId }));
+        } else {
+          // Component exists but screen is not visible (user on different tab)
+          // Just trigger a conversation refresh to update the badge
+          console.log('[ChatScreen] Screen is inactive, triggering badge update');
+          dispatch(fetchConversations());
+        }
       }
     };
 
