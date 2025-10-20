@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
       allowNull: false,
       unique: true,
       references: {
-        model: 'users',
+        model: 'Users',  // Capital U to match Sequelize table name
         key: 'id'
       },
       onDelete: 'CASCADE'
