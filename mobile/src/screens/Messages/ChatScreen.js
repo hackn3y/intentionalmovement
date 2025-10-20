@@ -81,8 +81,15 @@ const ChatScreen = ({ route, navigation }) => {
   // Listen for real-time messages in this chat
   useEffect(() => {
     console.log('[ChatScreen] Setting up real-time listener for chat with user:', userId);
+    let isActive = true;
 
     const handleNewMessage = (message) => {
+      // Only process if component is still mounted
+      if (!isActive) {
+        console.log('[ChatScreen] Ignoring message - component unmounted');
+        return;
+      }
+
       console.log('[ChatScreen] New message received:', message);
 
       // Check if this message is for the current conversation
@@ -92,13 +99,13 @@ const ChatScreen = ({ route, navigation }) => {
       }
     };
 
-    // Register the listener and get back the callback reference
+    // Register the listener
     socketService.onNewMessage(handleNewMessage);
 
     return () => {
-      console.log('[ChatScreen] Unmounting, removing only this screen\'s listener');
-      // Remove only this specific listener, not all listeners
-      socketService.offNewMessage(handleNewMessage);
+      console.log('[ChatScreen] Unmounting, disabling message processing');
+      // Don't remove the listener - just stop processing messages
+      isActive = false;
     };
   }, [userId, dispatch]);
 
