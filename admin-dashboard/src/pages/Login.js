@@ -49,24 +49,28 @@ function Login() {
         { idToken }
       );
 
-      if (response.data && response.data.token) {
+      // Backend wraps response in {success, data, message} format
+      const responseData = response.data.data || response.data;
+
+      if (responseData && responseData.token) {
         console.log('=== GOOGLE SIGN-IN RESPONSE ===');
         console.log('Full response:', response.data);
-        console.log('User object:', response.data.user);
-        console.log('User role:', response.data.user?.role);
+        console.log('Response data:', responseData);
+        console.log('User object:', responseData.user);
+        console.log('User role:', responseData.user?.role);
 
         // Store the token
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('token', responseData.token);
+        localStorage.setItem('user', JSON.stringify(responseData.user));
 
         // Check if user is admin
-        if (response.data.user.role === 'admin') {
+        if (responseData.user.role === 'admin') {
           console.log('✓ User is admin, navigating to dashboard');
           toast.success('Signed in with Google!');
           navigate('/dashboard');
         } else {
-          console.log('✗ User is not admin, role:', response.data.user.role);
-          toast.error(`Access denied. Admin privileges required. Your role: ${response.data.user.role || 'none'}`);
+          console.log('✗ User is not admin, role:', responseData.user.role);
+          toast.error(`Access denied. Admin privileges required. Your role: ${responseData.user.role || 'none'}`);
           // Sign out if not admin
           await auth.signOut();
           localStorage.removeItem('token');
