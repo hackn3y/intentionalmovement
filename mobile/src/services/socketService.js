@@ -104,19 +104,28 @@ class SocketService {
   /**
    * Listen for new messages
    * @param {Function} callback - Callback function
+   * @returns {Function} The callback function (to use for removing specific listener)
    */
   onNewMessage(callback) {
     if (this.socket) {
       this.socket.on('new_message', callback);
     }
+    return callback;
   }
 
   /**
    * Remove new message listener
+   * @param {Function} callback - Specific callback to remove (optional - if not provided, removes ALL listeners)
    */
-  offNewMessage() {
+  offNewMessage(callback) {
     if (this.socket) {
-      this.socket.off('new_message');
+      if (callback) {
+        // Remove specific listener
+        this.socket.off('new_message', callback);
+      } else {
+        // Remove all listeners (use with caution)
+        this.socket.off('new_message');
+      }
     }
   }
 

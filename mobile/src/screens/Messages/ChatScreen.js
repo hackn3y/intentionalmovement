@@ -79,29 +79,26 @@ const ChatScreen = ({ route, navigation }) => {
   }, [navigation, conversationId, userId]);
 
   // Listen for real-time messages in this chat
-  // Note: We don't remove the listener on cleanup to avoid breaking MainNavigator's listener
   useEffect(() => {
-    console.log('Setting up real-time listener for chat with user:', userId);
-    let isActive = true;
+    console.log('[ChatScreen] Setting up real-time listener for chat with user:', userId);
 
     const handleNewMessage = (message) => {
-      if (!isActive) return; // Don't process if component unmounted
-
-      console.log('New message received in ChatScreen:', message);
+      console.log('[ChatScreen] New message received:', message);
 
       // Check if this message is for the current conversation
       if (message.senderId === userId || message.receiverId === userId) {
-        console.log('Message is for current chat, reloading messages');
+        console.log('[ChatScreen] Message is for current chat, reloading messages');
         dispatch(fetchMessages({ conversationId: userId }));
       }
     };
 
+    // Register the listener and get back the callback reference
     socketService.onNewMessage(handleNewMessage);
 
     return () => {
-      console.log('ChatScreen unmounting, stopping message processing');
-      isActive = false;
-      // Don't call offNewMessage() - MainNavigator needs to keep its listener
+      console.log('[ChatScreen] Unmounting, removing only this screen\'s listener');
+      // Remove only this specific listener, not all listeners
+      socketService.offNewMessage(handleNewMessage);
     };
   }, [userId, dispatch]);
 
