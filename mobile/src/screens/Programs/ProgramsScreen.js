@@ -29,7 +29,7 @@ const ProgramsScreen = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = ['all', 'insurance', 'real-estate', 'personal-development'];
+  const categories = ['all', 'real-estate', 'personal-development'];
   const styles = getStyles(colors);
 
   // Refresh programs when screen comes into focus
