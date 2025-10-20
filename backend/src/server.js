@@ -55,15 +55,11 @@ app.use(compression());
 
 // CORS configuration - must come before helmet to ensure headers are set correctly
 // Supports wildcards for Vercel deployments
-console.log('Configuring CORS...');
 const allowedOrigins = process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8091', 'http://localhost:8092', 'http://localhost:19006'];
-console.log(`CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 logger.info(`CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 
 // CORS origin checker with wildcard support
-console.log('Creating CORS origin checker...');
 const corsOriginChecker = (origin, callback) => {
-  console.log('CORS check for origin:', origin);
 
   // Allow requests with no origin (like mobile apps or Postman)
   if (!origin) {
@@ -79,17 +75,12 @@ const corsOriginChecker = (origin, callback) => {
         .replace(/\./g, '\\.')
         .replace(/\*/g, '.*');
       const regex = new RegExp(`^${pattern}$`);
-      const matches = regex.test(origin);
-      console.log(`Testing ${origin} against wildcard ${allowedOrigin}: ${matches}`);
-      return matches;
+      return regex.test(origin);
     }
-    const matches = allowedOrigin === origin;
-    console.log(`Testing ${origin} against ${allowedOrigin}: ${matches}`);
-    return matches;
+    return allowedOrigin === origin;
   });
 
   if (isAllowed) {
-    console.log(`CORS allowed for origin: ${origin}`);
     callback(null, true);
   } else {
     console.error(`CORS BLOCKED origin: ${origin}`);
@@ -115,7 +106,6 @@ const corsOriginChecker = (origin, callback) => {
   });
   console.log('Socket.IO created with transports: websocket, polling');
 
-console.log('Creating CORS options...');
 const corsOptions = {
   origin: corsOriginChecker,
   credentials: true,
@@ -125,7 +115,6 @@ const corsOptions = {
   exposedHeaders: ['Content-Length', 'Content-Type']
 };
 
-console.log('Applying CORS middleware...');
 app.use(cors(corsOptions));
 
 // Enhanced security headers with Helmet
