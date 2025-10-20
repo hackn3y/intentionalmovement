@@ -9,7 +9,8 @@
     "test": "jest --coverage",
     "lint": "eslint src/**/*.js",
     "migrate": "node src/database/migrate.js",
-    "seed": "node src/database/seed.js"
+    "seed": "node src/database/seed.js",
+    "sync:production": "node sync-production-db.js"
   },
   "dependencies": {
     "@mux/mux-node": "^12.8.0",
