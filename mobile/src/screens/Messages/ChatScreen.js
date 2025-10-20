@@ -78,23 +78,44 @@ const ChatScreen = ({ route, navigation }) => {
     return unsubscribe;
   }, [navigation, conversationId, userId]);
 
+  // Track whether screen is focused (visible to user)
+  const [isFocused, setIsFocused] = useState(true);
+
+  // Listen for focus/blur events to track screen visibility
+  useEffect(() => {
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      console.log('[ChatScreen] Screen gained focus');
+      setIsFocused(true);
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      console.log('[ChatScreen] Screen lost focus (navigated to different tab)');
+      setIsFocused(false);
+    });
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+    };
+  }, [navigation]);
+
   // Listen for real-time messages in this chat
   useEffect(() => {
     console.log('[ChatScreen] Setting up real-time listener for chat with user:', userId);
-    let isActive = true;
 
     const handleNewMessage = (message) => {
       console.log('[ChatScreen] New message received:', message);
+      console.log('[ChatScreen] isFocused:', isFocused);
 
       // Check if this message is for the current conversation
       if (message.senderId === userId || message.receiverId === userId) {
-        if (isActive) {
+        if (isFocused) {
           // Screen is visible - reload messages to show them and mark as read
-          console.log('[ChatScreen] Screen is active, reloading messages');
+          console.log('[ChatScreen] Screen is focused, reloading messages');
           dispatch(fetchMessages({ conversationId: userId }));
         } else {
-          // Screen is inactive (on different tab) - trigger badge update WITHOUT marking as read
-          console.log('[ChatScreen] Screen is inactive, triggering badge update');
+          // Screen is not visible (on different tab) - trigger badge update WITHOUT marking as read
+          console.log('[ChatScreen] Screen is not focused, triggering badge update');
           dispatch(fetchConversations());
         }
       }
@@ -103,12 +124,11 @@ const ChatScreen = ({ route, navigation }) => {
     // Register the listener
     socketService.onNewMessage(handleNewMessage);
 
+    // No cleanup needed - we keep the listener active
     return () => {
-      console.log('[ChatScreen] Unmounting, disabling message processing');
-      // Don't remove the listener - just stop processing messages
-      isActive = false;
+      console.log('[ChatScreen] Cleaning up listener');
     };
-  }, [userId, dispatch]);
+  }, [userId, isFocused, dispatch]);
 
   const handleSendMessage = async (values, { resetForm }) => {
     try {
