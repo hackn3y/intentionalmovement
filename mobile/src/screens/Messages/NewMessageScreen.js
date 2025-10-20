@@ -83,6 +83,7 @@ const NewMessageScreen = ({ navigation }) => {
             styles.searchInput,
             {
               color: isDarkMode ? '#ffffff' : '#111827',
+              backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
               WebkitTextFillColor: isDarkMode ? '#ffffff' : '#111827',
             }
           ]}
