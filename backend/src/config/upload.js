@@ -1,23 +1,33 @@
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
+const fs = require('fs');
 
 // Configure storage for local development
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Determine upload directory based on file type or request path
-    let uploadDir = 'uploads/';
+    // Use absolute path relative to project root
+    const baseDir = path.join(__dirname, '../../uploads/');
+    let uploadDir = baseDir;
 
     if (req.path.includes('/profile')) {
-      uploadDir += 'profiles/';
+      uploadDir = path.join(baseDir, 'profiles/');
     } else if (req.path.includes('/program')) {
-      uploadDir += 'programs/';
+      uploadDir = path.join(baseDir, 'programs/');
     } else if (req.path.includes('/post')) {
-      uploadDir += 'posts/';
+      uploadDir = path.join(baseDir, 'posts/');
     } else {
-      uploadDir += 'general/';
+      uploadDir = path.join(baseDir, 'general/');
     }
 
+    // Ensure directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+      console.log('[Upload] Created directory:', uploadDir);
+    }
+
+    console.log('[Upload] Saving file to:', uploadDir);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {

@@ -160,8 +160,10 @@ export const updateProfile = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authService.updateProfile(userData);
-      await storage.set('user', JSON.stringify(response.data.user));
-      return response.data.user;
+      // Backend wraps response in data object: response.data.data.user
+      const user = response.data.data?.user || response.data.user;
+      await storage.set('user', JSON.stringify(user));
+      return user;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Update failed');
     }

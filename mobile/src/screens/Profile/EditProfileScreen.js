@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
 import * as ImagePicker from 'expo-image-picker';
 import { updateProfile } from '../../store/slices/authSlice';
+import { userService } from '../../services/userService';
 import { profileSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
@@ -70,18 +71,44 @@ const EditProfileScreen = ({ navigation }) => {
       console.log('handleUpdateProfile called with:', values);
       const updateData = { ...values };
 
+      // Convert image to base64 if one was selected
       if (selectedImage) {
-        // TODO: Upload image and get URL
-        // updateData.profilePicture = imageUrl;
+        try {
+          console.log('Converting image to base64...');
+
+          // Fetch the image and convert to base64
+          const response = await fetch(selectedImage);
+          const blob = await response.blob();
+
+          // Convert blob to base64
+          const reader = new FileReader();
+          const base64Promise = new Promise((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+
+          const base64Image = await base64Promise;
+          console.log('Image converted to base64, length:', base64Image.length);
+
+          // Add the base64 image to update data
+          updateData.profileImage = base64Image;
+        } catch (imageError) {
+          console.error('Image conversion error:', imageError);
+          Alert.alert('Warning', 'Failed to process image, but profile will still be updated');
+        }
       }
 
-      console.log('Dispatching updateProfile with:', updateData);
+      console.log('Dispatching updateProfile with data...');
       const result = await dispatch(updateProfile(updateData)).unwrap();
       console.log('updateProfile result:', result);
 
-      // Navigate back immediately - profile will update on ProfileScreen
+      // Navigate back with refresh parameter to reload profile
       if (navigation && navigation.canGoBack && navigation.canGoBack()) {
-        navigation.goBack();
+        navigation.navigate('Profile', {
+          userId: user.id,
+          _forceRefresh: Date.now(), // Force refresh by changing this value
+        });
       }
     } catch (error) {
       console.error('updateProfile error:', error);

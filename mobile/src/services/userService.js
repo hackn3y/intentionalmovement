@@ -71,10 +71,11 @@ export const userService = {
 
   /**
    * Upload profile picture
+   * @param {string} userId - User ID
    * @param {FormData} formData - Form data with image
    */
-  uploadProfilePicture: (formData) => {
-    return api.post('/users/profile-picture', formData, {
+  uploadProfilePicture: (userId, formData) => {
+    return api.post(`/users/${userId}/upload-profile-image`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
