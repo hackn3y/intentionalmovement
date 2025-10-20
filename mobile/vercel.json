@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build:pwa",
-  "outputDirectory": "dist",
+  "outputDirectory": "mobile/dist",
   "devCommand": "npm run serve:pwa",
   "installCommand": "npm install",
   "framework": null,
