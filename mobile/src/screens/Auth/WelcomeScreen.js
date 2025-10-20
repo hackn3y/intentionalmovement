@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   Platform,
   Image,
+  ImageBackground,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
@@ -19,6 +20,52 @@ const { width, height } = Dimensions.get('window');
  */
 const WelcomeScreen = ({ navigation }) => {
   console.log('WelcomeScreen: Component is rendering');
+
+  // Fix scrolling on web
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // Inject CSS to force scrolling and style scrollbars
+      const style = document.createElement('style');
+      style.innerHTML = `
+        div[data-testid*="scrollview"],
+        div[class*="ScrollView"],
+        div[class*="css-view"] {
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        div[data-testid*="scrollview"]::-webkit-scrollbar,
+        div[class*="ScrollView"]::-webkit-scrollbar,
+        div[class*="css-view"]::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+        }
+
+        /* Hide scrollbar for IE and Edge legacy */
+        div[data-testid*="scrollview"],
+        div[class*="ScrollView"],
+        div[class*="css-view"] {
+          -ms-overflow-style: none !important;
+        }
+
+        /* Hide scrollbar for Firefox */
+        div[data-testid*="scrollview"],
+        div[class*="ScrollView"],
+        div[class*="css-view"] {
+          scrollbar-width: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, []);
 
   /**
    * Navigate to login screen
@@ -38,12 +85,19 @@ const WelcomeScreen = ({ navigation }) => {
     <ScrollView
       style={styles.scrollView}
       contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-      bounces={Platform.OS !== 'web'}
+      showsVerticalScrollIndicator={true}
     >
-        {/* Hero Section with Gradient */}
-        {Platform.OS === 'web' ? (
-          <View style={[styles.heroGradient, { backgroundColor: '#10b981' }]}>
+        {/* Hero Section with Background Image */}
+        <ImageBackground
+          source={require('../../../assets/hero-background.jpg')}
+          style={styles.heroGradient}
+          resizeMode="cover"
+          imageStyle={{
+            top: -350,
+            height: 700,
+          }}
+        >
+          <View style={styles.heroOverlay}>
             <View style={styles.heroSection}>
               <Image
                 source={require('../../../assets/logo.png')}
@@ -58,26 +112,7 @@ const WelcomeScreen = ({ navigation }) => {
               </Text>
             </View>
           </View>
-        ) : (
-          <LinearGradient
-            colors={['#10b981', '#059669', '#047857']}
-            style={styles.heroGradient}
-          >
-            <View style={styles.heroSection}>
-              <Image
-                source={require('../../../assets/logo.png')}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-              <Text style={styles.mainTagline}>
-                Elevate Your LifeStyle
-              </Text>
-              <Text style={styles.subtitle}>
-                Embrace the Power of Intentional Living
-              </Text>
-            </View>
-          </LinearGradient>
-        )}
+        </ImageBackground>
 
         {/* Value Proposition */}
         <View style={styles.valueSection}>
@@ -163,14 +198,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.light,
   },
   scrollContent: {
-    flexGrow: 1,
     paddingBottom: SIZES.xxl * 2,
   },
   heroGradient: {
     width: '100%',
+    height: Platform.OS === 'web' ? 350 : 280,
+    overflow: 'hidden',
+  },
+  heroOverlay: {
+    width: '100%',
+    height: '100%',
     paddingTop: SIZES.xxl,
     paddingBottom: SIZES.xxl,
-    minHeight: Platform.OS === 'web' ? 300 : 250,
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
   },
   heroSection: {
     alignItems: 'center',
@@ -220,19 +260,24 @@ const styles = StyleSheet.create({
   },
   mainTagline: {
     fontSize: FONT_SIZES.xxl,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: COLORS.white,
     textAlign: 'center',
     marginBottom: SIZES.sm,
     letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 10,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
     color: COLORS.white,
     textAlign: 'center',
-    opacity: 0.95,
-    fontWeight: '300',
+    fontWeight: '700',
     letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 8,
   },
   valueSection: {
     paddingHorizontal: SIZES.lg,
@@ -261,14 +306,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.light,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    minHeight: 200,
+    justifyContent: 'space-around',
+    gap: SIZES.sm,
   },
   featureCard: {
-    width: (width - SIZES.md * 3) / 2,
+    width: Platform.OS === 'web' ? 'calc(50% - 12px)' : '48%',
+    minWidth: 150,
+    maxWidth: 250,
     backgroundColor: COLORS.white,
     borderRadius: SIZES.sm,
-    padding: SIZES.sm,
+    padding: SIZES.md,
     marginBottom: SIZES.sm,
     shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 2 },
@@ -276,6 +323,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     alignItems: 'center',
+    flexGrow: 1,
+    flexShrink: 1,
   },
   featureIconContainer: {
     width: 40,

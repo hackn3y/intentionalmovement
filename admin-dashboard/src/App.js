@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Programs from './pages/Programs';
 import Posts from './pages/Posts';
+import CuratedContent from './pages/CuratedContent';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import DailyContent from './pages/DailyContent';
@@ -42,6 +43,7 @@ function App() {
                 <Route path="users" element={<Users />} />
                 <Route path="programs" element={<Programs />} />
                 <Route path="posts" element={<Posts />} />
+                <Route path="curated-content" element={<CuratedContent />} />
                 <Route path="daily-content" element={<DailyContent />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />

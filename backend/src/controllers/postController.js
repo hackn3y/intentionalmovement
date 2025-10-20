@@ -27,6 +27,11 @@ exports.getFeed = async (req, res, next) => {
       whereClause.userId = { [Op.in]: followingIds };
     }
 
+    // Filter by curated content (for Planted Mind Moving Body tab)
+    if (filter === 'curated') {
+      whereClause.isCurated = true;
+    }
+
     const posts = await Post.findAll({
       where: whereClause,
       include: [

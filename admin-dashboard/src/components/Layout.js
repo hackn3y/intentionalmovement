@@ -15,6 +15,7 @@ function Layout() {
     { path: '/users', name: 'Users', icon: '👥' },
     { path: '/programs', name: 'Programs', icon: '📚' },
     { path: '/posts', name: 'Posts', icon: '📝' },
+    { path: '/curated-content', name: 'PMMB Content', icon: '🌱' },
     { path: '/daily-content', name: 'Daily Content', icon: '📅' },
     { path: '/analytics', name: 'Analytics', icon: '📈' },
     { path: '/settings', name: 'Settings', icon: '⚙️' },

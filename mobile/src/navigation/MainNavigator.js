@@ -11,6 +11,7 @@ import ProgramStack from './ProgramStack';
 import MessageStack from './MessageStack';
 import ProfileStack from './ProfileStack';
 import DailyContentStack from './DailyContentStack';
+import PlantedMindStack from './PlantedMindStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -74,10 +75,20 @@ const MainNavigator = () => {
         name="HomeTab"
         component={HomeStack}
         options={{
-          tabBarLabel: 'Intentional Movement Community',
+          tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
             // Replace with actual icon component
             <Text style={{ fontSize: size, color }}>🏠</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="PlantedMindTab"
+        component={PlantedMindStack}
+        options={{
+          tabBarLabel: 'PMMB',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ fontSize: size, color }}>🌱</Text>
           ),
         }}
       />

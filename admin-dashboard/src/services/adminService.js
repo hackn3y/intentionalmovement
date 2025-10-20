@@ -124,6 +124,12 @@ export const adminService = {
     return response.data;
   },
 
+  // Bulk Actions
+  bulkAction: async (data) => {
+    const response = await api.post('/admin/bulk-action', data);
+    return response.data;
+  },
+
   // Content Moderation
   getReports: async (params = {}) => {
     const response = await api.get('/admin/reports', { params });

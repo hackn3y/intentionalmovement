@@ -873,6 +873,18 @@ exports.bulkAction = async (req, res, next) => {
           affectedCount = await Post.destroy({
             where: { id: { [Op.in]: targetIds } }
           });
+        } else if (action === 'curate') {
+          const result = await Post.update(
+            { isCurated: true },
+            { where: { id: { [Op.in]: targetIds } } }
+          );
+          affectedCount = result[0];
+        } else if (action === 'uncurate') {
+          const result = await Post.update(
+            { isCurated: false },
+            { where: { id: { [Op.in]: targetIds } } }
+          );
+          affectedCount = result[0];
         }
         break;
 

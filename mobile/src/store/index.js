@@ -7,6 +7,7 @@ import programsReducer from './slices/programsSlice';
 import achievementsReducer from './slices/achievementsSlice';
 import challengesReducer from './slices/challengesSlice';
 import dailyContentReducer from './slices/dailyContentSlice';
+import plantedMindReducer from './slices/plantedMindSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     achievements: achievementsReducer,
     challenges: challengesReducer,
     dailyContent: dailyContentReducer,
+    plantedMind: plantedMindReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

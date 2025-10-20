@@ -74,6 +74,10 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+    isCurated: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     metadata: {
       type: DataTypes.TEXT,
       defaultValue: null,
@@ -99,9 +103,11 @@ module.exports = (sequelize) => {
       { fields: ['isHidden'] },
       { fields: ['isReported'] },
       { fields: ['isRepost'] },
+      { fields: ['isCurated'] },
       { fields: ['originalPostId'] },
       { fields: ['userId', 'createdAt'] }, // Composite index for user timeline queries
-      { fields: ['visibility', 'isHidden', 'createdAt'] } // Composite index for feed queries
+      { fields: ['visibility', 'isHidden', 'createdAt'] }, // Composite index for feed queries
+      { fields: ['isCurated', 'createdAt'] } // Composite index for curated content queries
     ]
   });
 
