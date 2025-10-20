@@ -63,7 +63,25 @@ function DailyContent() {
       fetchContents();
       fetchStats();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to save content');
+      // Handle 409 conflict (duplicate date)
+      if (error.response?.status === 409 && error.response?.data?.existingContent) {
+        const existing = error.response.data.existingContent;
+        const message = `Content already exists for ${formData.date}:\n"${existing.title}" (${existing.contentType})\n\nWould you like to edit the existing content instead?`;
+
+        if (window.confirm(message)) {
+          // Load the existing content for editing
+          const existingFull = contents.find(c => c.id === existing.id);
+          if (existingFull) {
+            openModal(existingFull);
+          } else {
+            // If not in current list, fetch all and find it
+            toast.error('Please find and edit the existing content from the list');
+            closeModal();
+          }
+        }
+      } else {
+        toast.error(error.response?.data?.error || 'Failed to save content');
+      }
     }
   };
 

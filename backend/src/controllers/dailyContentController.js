@@ -276,7 +276,14 @@ exports.createDailyContent = async (req, res, next) => {
     // Check if content already exists for this date
     const existing = await DailyContent.findOne({ where: { date } });
     if (existing) {
-      return res.status(409).json({ error: 'Content already exists for this date' });
+      return res.status(409).json({
+        error: 'Content already exists for this date. Please choose a different date or edit the existing content.',
+        existingContent: {
+          id: existing.id,
+          title: existing.title,
+          contentType: existing.contentType
+        }
+      });
     }
 
     const content = await DailyContent.create({
@@ -308,6 +315,20 @@ exports.updateDailyContent = async (req, res, next) => {
 
     if (!content) {
       return res.status(404).json({ error: 'Daily content not found' });
+    }
+
+    // If date is being changed, check if new date is available
+    if (updateData.date && updateData.date !== content.date) {
+      const existing = await DailyContent.findOne({
+        where: {
+          date: updateData.date,
+          id: { [Op.ne]: id } // Exclude current record
+        }
+      });
+
+      if (existing) {
+        return res.status(409).json({ error: 'Content already exists for this date. Please choose a different date.' });
+      }
     }
 
     await content.update(updateData);
