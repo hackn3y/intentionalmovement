@@ -41,13 +41,16 @@ const SubscriptionScreen = ({ navigation }) => {
 
   const fetchSubscription = async () => {
     try {
-      const response = await api.get('/subscriptions/my-subscription');
+      const response = await api.get('/subscriptions/my');
       if (response.data.success) {
         setSubscription(response.data.subscription);
       }
     } catch (error) {
       console.error('Failed to fetch subscription:', error);
-      Alert.alert('Error', 'Failed to load subscription details');
+      // Don't show alert if user just doesn't have a subscription yet
+      if (error.response?.status !== 404) {
+        Alert.alert('Error', 'Failed to load subscription details');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
