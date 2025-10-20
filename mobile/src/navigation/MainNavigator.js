@@ -29,8 +29,8 @@ const MainNavigator = () => {
     // Initial fetch
     dispatch(fetchConversations());
 
-    // Connect to socket for real-time updates
-    socketService.connect();
+    // Note: Socket connection is managed by RootNavigator, not here
+    // We just register our listener for new messages
 
     // Listen for new messages to update unread count
     const handleNewMessage = (message) => {

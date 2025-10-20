@@ -15,8 +15,9 @@ class SocketService {
    * Connect to socket server
    */
   async connect() {
-    if (this.socket?.connected) {
-      console.log('Socket already connected, skipping');
+    // If socket already exists (connected or connecting), don't create a new one
+    if (this.socket) {
+      console.log('Socket already exists (connected:', this.socket.connected + '), skipping connection');
       return;
     }
 
