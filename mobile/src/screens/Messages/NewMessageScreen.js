@@ -25,11 +25,6 @@ const NewMessageScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const styles = getStyles(colors, isDarkMode);
 
-  // Debug logging
-  console.log('[NewMessageScreen] isDarkMode:', isDarkMode);
-  console.log('[NewMessageScreen] colors.text:', colors.text);
-  console.log('[NewMessageScreen] colors.background:', colors.background);
-
   useEffect(() => {
     // Debounce search
     const timeoutId = setTimeout(() => {
