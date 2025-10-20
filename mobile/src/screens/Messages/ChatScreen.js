@@ -40,8 +40,10 @@ const ChatScreen = ({ route, navigation }) => {
     );
   };
 
+  // Load messages and mark as read when screen first mounts
   useEffect(() => {
     if (conversationId && userId) {
+      console.log('[ChatScreen] Initial mount - loading messages');
       dispatch(setCurrentConversation({ _id: conversationId }));
       // The backend getMessages endpoint expects userId, not conversationId
       // It also automatically marks messages as read on the backend
@@ -54,7 +56,7 @@ const ChatScreen = ({ route, navigation }) => {
         dispatch(setUnreadCount(newUnreadCount));
       }
     }
-  }, [conversationId, userId, conversations, unreadCount, dispatch]);
+  }, [conversationId, userId, dispatch]); // Removed conversations and unreadCount from dependencies
 
   // Scroll to bottom when messages load or update
   useEffect(() => {
