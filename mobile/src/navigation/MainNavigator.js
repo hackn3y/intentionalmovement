@@ -66,7 +66,7 @@ const MainNavigator = () => {
           height: 60,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '600',
         },
       }}
@@ -77,20 +77,27 @@ const MainNavigator = () => {
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
-            // Replace with actual icon component
             <Text style={{ fontSize: size, color }}>🏠</Text>
           ),
         }}
       />
       <Tab.Screen
-        name="PlantedMindTab"
-        component={PlantedMindStack}
+        name="CommunityTab"
+        component={HomeStack}
         options={{
-          tabBarLabel: 'PMMB',
+          tabBarLabel: 'Community',
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>🌱</Text>
+            <Text style={{ fontSize: size, color }}>👥</Text>
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('HomeTab', {
+              screen: 'Feed',
+            });
+          },
+        })}
       />
       <Tab.Screen
         name="ProgramsTab"
@@ -113,14 +120,17 @@ const MainNavigator = () => {
         }}
       />
       <Tab.Screen
+        name="PlantedMindTab"
+        component={PlantedMindStack}
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
         name="MessagesTab"
         component={MessageStack}
         options={{
-          tabBarLabel: 'Messages',
-          tabBarBadge: unreadCount > 0 ? unreadCount : null,
-          tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>💬</Text>
-          ),
+          tabBarButton: () => null,
         }}
       />
       <Tab.Screen

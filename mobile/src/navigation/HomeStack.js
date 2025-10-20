@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/Main/HomeScreen';
+import DashboardHomeScreen from '../screens/Main/DashboardHomeScreen';
+import FeedScreen from '../screens/Main/FeedScreen';
 import PostDetailScreen from '../screens/Posts/PostDetailScreen';
 import CreatePostScreen from '../screens/Posts/CreatePostScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
@@ -19,13 +20,13 @@ const HomeStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: colors.white,
+          backgroundColor: colors.card,
           elevation: 0,
           shadowOpacity: 0,
           borderBottomWidth: 1,
-          borderBottomColor: colors.gray[200],
+          borderBottomColor: colors.border,
         },
-        headerTintColor: colors.dark,
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -35,7 +36,14 @@ const HomeStack = () => {
     >
       <Stack.Screen
         name="Home"
-        component={HomeScreen}
+        component={DashboardHomeScreen}
+        options={{
+          title: 'Intentional Movement',
+        }}
+      />
+      <Stack.Screen
+        name="Feed"
+        component={FeedScreen}
         options={{
           title: 'Intentional Movement Community',
         }}

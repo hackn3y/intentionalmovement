@@ -12,6 +12,7 @@ import {
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
+import { useTheme } from '../../context/ThemeContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
@@ -28,8 +29,10 @@ const forgotPasswordSchema = Yup.object().shape({
  * Forgot password screen for password reset
  */
 const ForgotPasswordScreen = ({ navigation }) => {
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const styles = getStyles(colors);
 
   /**
    * Handle password reset request
@@ -168,10 +171,10 @@ const ForgotPasswordScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -189,12 +192,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.xxxl,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.sm,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[600],
+    color: colors.gray[600],
     textAlign: 'center',
     paddingHorizontal: SIZES.lg,
   },
@@ -211,7 +214,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[600],
+    color: colors.gray[600],
     fontWeight: '500',
   },
   successContainer: {
@@ -235,12 +238,12 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.sm,
   },
   successText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[600],
+    color: colors.gray[600],
     textAlign: 'center',
     marginBottom: SIZES.xl,
     paddingHorizontal: SIZES.md,
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
   },
   resendText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
   helpSection: {
@@ -264,10 +267,10 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.gray[600],
+    color: colors.gray[600],
   },
   helpLink: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
 });

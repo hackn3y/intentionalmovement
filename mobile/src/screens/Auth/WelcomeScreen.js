@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
+import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/Button';
 
 const { width, height } = Dimensions.get('window');
@@ -20,6 +21,8 @@ const { width, height } = Dimensions.get('window');
  */
 const WelcomeScreen = ({ navigation }) => {
   console.log('WelcomeScreen: Component is rendering');
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
 
   // Fix scrolling on web
   useEffect(() => {
@@ -192,10 +195,10 @@ const WelcomeScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
   },
   scrollContent: {
     paddingBottom: SIZES.xxl * 2,
@@ -230,7 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: SIZES.lg,
   },
   logoBox: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.card,
     paddingVertical: SIZES.md,
     paddingHorizontal: SIZES.lg,
     borderRadius: SIZES.xs,
@@ -240,20 +243,20 @@ const styles = StyleSheet.create({
   logoBoxText: {
     fontSize: FONT_SIZES.lg,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     textAlign: 'center',
     letterSpacing: 0.5,
   },
   logoSubtext: {
     fontSize: FONT_SIZES.sm,
-    color: '#666',
+    color: colors.gray[600],
     textAlign: 'center',
     marginTop: 2,
   },
   logoText: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: 'bold',
-    color: COLORS.white,
+    color: '#ffffff',
     textAlign: 'center',
     letterSpacing: 1,
     marginBottom: SIZES.sm,
@@ -261,7 +264,7 @@ const styles = StyleSheet.create({
   mainTagline: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '900',
-    color: COLORS.white,
+    color: '#ffffff',
     textAlign: 'center',
     marginBottom: SIZES.sm,
     letterSpacing: 0.5,
@@ -271,7 +274,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.white,
+    color: '#ffffff',
     textAlign: 'center',
     fontWeight: '700',
     letterSpacing: 0.3,
@@ -282,20 +285,20 @@ const styles = StyleSheet.create({
   valueSection: {
     paddingHorizontal: SIZES.lg,
     paddingVertical: SIZES.xl,
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
     minHeight: 150,
   },
   valueTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '600',
-    color: '#ec4899',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: SIZES.md,
     lineHeight: FONT_SIZES.lg * 1.4,
   },
   valueDescription: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.gray[700],
+    color: colors.gray[700],
     textAlign: 'center',
     lineHeight: FONT_SIZES.sm * 1.6,
     fontWeight: '400',
@@ -303,7 +306,7 @@ const styles = StyleSheet.create({
   featuresSection: {
     paddingHorizontal: SIZES.md,
     paddingVertical: SIZES.lg,
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
@@ -313,11 +316,11 @@ const styles = StyleSheet.create({
     width: Platform.OS === 'web' ? 'calc(50% - 12px)' : '48%',
     minWidth: 150,
     maxWidth: 250,
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.card,
     borderRadius: SIZES.sm,
     padding: SIZES.md,
     marginBottom: SIZES.sm,
-    shadowColor: COLORS.black,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -330,7 +333,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#fce7f3',
+    backgroundColor: colors.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SIZES.xs,
@@ -341,33 +344,33 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
-    color: '#ec4899',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: SIZES.xs,
   },
   featureDescription: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.gray[600],
+    color: colors.gray[600],
     textAlign: 'center',
     lineHeight: FONT_SIZES.xs * 1.4,
   },
   actionsSection: {
     paddingHorizontal: SIZES.lg,
     paddingVertical: SIZES.xl,
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
     minHeight: 150,
   },
   primaryButton: {
     marginBottom: SIZES.md,
-    backgroundColor: '#ec4899',
+    backgroundColor: colors.primary,
   },
   secondaryButton: {
     marginBottom: SIZES.lg,
-    borderColor: '#ec4899',
+    borderColor: colors.primary,
   },
   disclaimer: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.gray[500],
+    color: colors.gray[500],
     textAlign: 'center',
     lineHeight: FONT_SIZES.xs * 1.5,
   },

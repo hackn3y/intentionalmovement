@@ -8,6 +8,9 @@ const { uploadImage } = require('../config/upload');
 router.use(verifyToken);
 
 router.get('/search', userController.searchUsers);
+// Privacy settings routes (before /:id routes to avoid conflicts)
+router.get('/privacy-settings', userController.getPrivacySettings);
+router.put('/privacy-settings', userController.updatePrivacySettings);
 router.get('/:id', userController.getUserProfile);
 router.put('/:id', userController.updateUserProfile);
 // Upload routes
@@ -20,3 +23,4 @@ router.delete('/:id/follow', userController.unfollowUser);
 router.get('/:id/stats', userController.getUserStats);
 
 module.exports = router;
+

@@ -17,6 +17,7 @@ import { Formik } from 'formik';
 import { register, clearError, loginWithFirebase } from '../../store/slices/authSlice';
 import { registerSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
+import { useTheme } from '../../context/ThemeContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Logo from '../../components/Logo';
@@ -30,12 +31,14 @@ import WebScrollView from '../../components/WebScrollView';
  */
 const RegisterScreen = ({ navigation }) => {
   const dispatch = useDispatch();
+  const { colors } = useTheme();
   const { loading, error } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
   const [appleAvailable, setAppleAvailable] = useState(false);
+  const styles = getStyles(colors);
 
   // Initialize Google Auth
   const { request, response, promptAsync } = useGoogleAuth();
@@ -336,10 +339,10 @@ const RegisterScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -374,7 +377,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '900',
-    color: COLORS.white,
+    color: '#ffffff',
     marginBottom: SIZES.xs,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 2, height: 2 },
@@ -382,7 +385,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.white,
+    color: '#ffffff',
     fontWeight: '700',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 1, height: 1 },
@@ -422,12 +425,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: COLORS.gray[300],
+    backgroundColor: colors.border,
   },
   dividerText: {
     marginHorizontal: SIZES.md,
     fontSize: FONT_SIZES.sm,
-    color: COLORS.gray[500],
+    color: colors.gray[500],
   },
   socialButton: {
     marginBottom: SIZES.md,
@@ -440,21 +443,21 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[600],
+    color: colors.gray[600],
   },
   footerLink: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.accent,
+    color: colors.primary,
     fontWeight: '600',
   },
   terms: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.gray[500],
+    color: colors.gray[500],
     textAlign: 'center',
     marginTop: SIZES.md,
   },
   termsLink: {
-    color: COLORS.accent,
+    color: colors.primary,
     fontWeight: '600',
   },
 });

@@ -434,3 +434,85 @@ exports.uploadCoverImage = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get privacy settings
+exports.getPrivacySettings = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'metadata']
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const metadata = user.metadata || {};
+    const privacySettings = metadata.privacySettings || {};
+
+    // Return default privacy settings if none exist
+    const settings = {
+      profileVisibility: privacySettings.profileVisibility || 'public',
+      showEmail: privacySettings.showEmail || false,
+      showPhoneNumber: privacySettings.showPhoneNumber || false,
+      allowFollowRequests: privacySettings.allowFollowRequests !== false,
+      allowMessages: privacySettings.allowMessages || 'everyone',
+      showActivity: privacySettings.showActivity !== false,
+      showPurchases: privacySettings.showPurchases || false,
+      allowTagging: privacySettings.allowTagging !== false
+    };
+
+    res.json({ settings });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update privacy settings
+exports.updatePrivacySettings = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const {
+      profileVisibility,
+      showEmail,
+      showPhoneNumber,
+      allowFollowRequests,
+      allowMessages,
+      showActivity,
+      showPurchases,
+      allowTagging
+    } = req.body;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get existing metadata
+    const metadata = user.metadata || {};
+
+    // Update privacy settings in metadata
+    metadata.privacySettings = {
+      profileVisibility: profileVisibility !== undefined ? profileVisibility : (metadata.privacySettings?.profileVisibility || 'public'),
+      showEmail: showEmail !== undefined ? showEmail : (metadata.privacySettings?.showEmail || false),
+      showPhoneNumber: showPhoneNumber !== undefined ? showPhoneNumber : (metadata.privacySettings?.showPhoneNumber || false),
+      allowFollowRequests: allowFollowRequests !== undefined ? allowFollowRequests : (metadata.privacySettings?.allowFollowRequests !== false),
+      allowMessages: allowMessages !== undefined ? allowMessages : (metadata.privacySettings?.allowMessages || 'everyone'),
+      showActivity: showActivity !== undefined ? showActivity : (metadata.privacySettings?.showActivity !== false),
+      showPurchases: showPurchases !== undefined ? showPurchases : (metadata.privacySettings?.showPurchases || false),
+      allowTagging: allowTagging !== undefined ? allowTagging : (metadata.privacySettings?.allowTagging !== false)
+    };
+
+    // Update user metadata
+    await user.update({ metadata });
+
+    res.json({
+      message: 'Privacy settings updated successfully',
+      settings: metadata.privacySettings
+    });
+  } catch (error) {
+    next(error);
+  }
+};

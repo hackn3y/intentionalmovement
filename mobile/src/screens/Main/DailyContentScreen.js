@@ -17,14 +17,16 @@ import {
   checkInToday,
   clearError
 } from '../../store/slices/dailyContentSlice';
-import { COLORS } from '../../config/constants';
+import { useTheme } from '../../context/ThemeContext';
 import { formatters } from '../../utils/formatters';
 
 function DailyContentScreen({ navigation }) {
   const dispatch = useDispatch();
+  const { colors } = useTheme();
   const { todayContent, hasCheckedIn, streak, loading, error, checkInLoading } = useSelector(
     (state) => state.dailyContent
   );
+  const styles = getStyles(colors);
 
   const [showCheckInForm, setShowCheckInForm] = useState(false);
   const [notes, setNotes] = useState('');
@@ -68,14 +70,14 @@ function DailyContentScreen({ navigation }) {
   };
 
   const getTypeColor = (type) => {
-    const colors = {
+    const typeColors = {
       quote: '#3b82f6',
       tip: '#10b981',
       challenge: '#8b5cf6',
-      affirmation: COLORS.primary,
+      affirmation: colors.primary,
       reflection: '#f59e0b'
     };
-    return colors[type] || colors.quote;
+    return typeColors[type] || typeColors.quote;
   };
 
   const getTypeLabel = (type) => {
@@ -88,7 +90,7 @@ function DailyContentScreen({ navigation }) {
   if (loading && !todayContent) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -284,16 +286,16 @@ function DailyContentScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdf2f8'
+    backgroundColor: colors.background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fdf2f8'
+    backgroundColor: colors.background
   },
   emptyContainer: {
     flex: 1,
@@ -309,12 +311,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     marginBottom: 10
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.gray[600],
     textAlign: 'center'
   },
   errorContainer: {
@@ -333,7 +335,7 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   streakCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 20,
     flexDirection: 'row',
@@ -356,16 +358,16 @@ const styles = StyleSheet.create({
   streakNumber: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: COLORS.primary
+    color: colors.primary
   },
   streakLabel: {
     fontSize: 14,
-    color: '#666',
+    color: colors.gray[600],
     marginTop: 4
   },
   streakStats: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -383,20 +385,20 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333'
+    color: colors.text
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: colors.gray[600],
     marginTop: 4
   },
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: '#e5e7eb'
+    backgroundColor: colors.border
   },
   contentCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 20,
     margin: 16,
@@ -424,11 +426,11 @@ const styles = StyleSheet.create({
   },
   contentDate: {
     fontSize: 12,
-    color: '#666'
+    color: colors.gray[600]
   },
   categoryBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.gray[100],
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -436,13 +438,13 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 11,
-    color: '#666',
+    color: colors.gray[600],
     textTransform: 'uppercase'
   },
   contentTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     marginBottom: 16
   },
   contentImage: {
@@ -454,11 +456,11 @@ const styles = StyleSheet.create({
   contentMessage: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#555',
+    color: colors.gray[700],
     marginBottom: 20
   },
   checkInButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -485,12 +487,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb'
+    borderTopColor: colors.border
   },
   formLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
     marginBottom: 12
   },
   completedToggle: {
@@ -503,14 +505,14 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#d1d5db',
+    borderColor: colors.gray[300],
     marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center'
   },
   checkboxChecked: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
   },
   checkmark: {
     color: '#fff',
@@ -519,14 +521,14 @@ const styles = StyleSheet.create({
   },
   completedLabel: {
     fontSize: 15,
-    color: '#333'
+    color: colors.text
   },
   notesInput: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.gray[50],
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    color: '#333',
+    color: colors.text,
     minHeight: 100,
     marginBottom: 16
   },
@@ -539,11 +541,11 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: colors.border,
     alignItems: 'center'
   },
   cancelButtonText: {
-    color: '#666',
+    color: colors.gray[600],
     fontSize: 15,
     fontWeight: '600'
   },
@@ -551,7 +553,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 8,
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center'
   },
   submitButtonText: {
@@ -563,7 +565,7 @@ const styles = StyleSheet.create({
     margin: 16,
     marginTop: 0,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
@@ -574,7 +576,7 @@ const styles = StyleSheet.create({
   },
   calendarLinkText: {
     fontSize: 16,
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: '600'
   }
 });

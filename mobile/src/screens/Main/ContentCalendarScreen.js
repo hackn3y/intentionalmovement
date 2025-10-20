@@ -10,14 +10,16 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchContentCalendar, clearError } from '../../store/slices/dailyContentSlice';
-import { COLORS } from '../../config/constants';
+import { useTheme } from '../../context/ThemeContext';
 import { formatters } from '../../utils/formatters';
 
 function ContentCalendarScreen({ navigation }) {
   const dispatch = useDispatch();
+  const { colors } = useTheme();
   const { calendar, loading, error } = useSelector((state) => state.dailyContent);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDays, setSelectedDays] = useState(30);
+  const styles = getStyles(colors);
 
   useEffect(() => {
     loadCalendar();
@@ -40,14 +42,14 @@ function ContentCalendarScreen({ navigation }) {
   };
 
   const getTypeColor = (type) => {
-    const colors = {
+    const typeColors = {
       quote: '#3b82f6',
       tip: '#10b981',
       challenge: '#8b5cf6',
-      affirmation: COLORS.primary,
+      affirmation: colors.primary,
       reflection: '#f59e0b'
     };
-    return colors[type] || colors.quote;
+    return typeColors[type] || typeColors.quote;
   };
 
   const getTypeLabel = (type) => {
@@ -70,7 +72,7 @@ function ContentCalendarScreen({ navigation }) {
   if (loading && calendar.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -193,22 +195,22 @@ function ContentCalendarScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdf2f8'
+    backgroundColor: colors.background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fdf2f8'
+    backgroundColor: colors.background
   },
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
     gap: 8,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -220,16 +222,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.gray[100],
     alignItems: 'center'
   },
   filterButtonActive: {
-    backgroundColor: COLORS.primary
+    backgroundColor: colors.primary
   },
   filterText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666'
+    color: colors.gray[600]
   },
   filterTextActive: {
     color: '#fff'
@@ -263,12 +265,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     marginBottom: 10
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: colors.gray[600],
     textAlign: 'center'
   },
   contentList: {
@@ -276,7 +278,7 @@ const styles = StyleSheet.create({
     paddingTop: 8
   },
   calendarCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -288,13 +290,13 @@ const styles = StyleSheet.create({
   },
   todayCard: {
     borderWidth: 2,
-    borderColor: COLORS.primary
+    borderColor: colors.primary
   },
   todayBadge: {
     position: 'absolute',
     top: -8,
     right: 16,
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12
@@ -321,11 +323,11 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    color: '#666'
+    color: colors.gray[600]
   },
   categoryBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.gray[100],
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
@@ -333,25 +335,25 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 10,
-    color: '#666',
+    color: colors.gray[600],
     textTransform: 'uppercase'
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
     marginBottom: 8
   },
   message: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#666'
+    color: colors.gray[600]
   },
   checkedInIndicator: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb'
+    borderTopColor: colors.border
   },
   checkedInText: {
     fontSize: 13,
