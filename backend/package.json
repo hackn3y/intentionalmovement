@@ -10,7 +10,8 @@
     "lint": "eslint src/**/*.js",
     "migrate": "node src/database/migrate.js",
     "seed": "node src/database/seed.js",
-    "sync:production": "node sync-production-db.js"
+    "sync:production": "node sync-production-db.js",
+    "force:sync": "node force-sync-db.js"
   },
   "dependencies": {
     "@mux/mux-node": "^12.8.0",
