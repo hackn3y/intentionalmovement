@@ -50,21 +50,31 @@ function Login() {
       );
 
       if (response.data && response.data.token) {
+        console.log('=== GOOGLE SIGN-IN RESPONSE ===');
+        console.log('Full response:', response.data);
+        console.log('User object:', response.data.user);
+        console.log('User role:', response.data.user?.role);
+
         // Store the token
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
         // Check if user is admin
         if (response.data.user.role === 'admin') {
+          console.log('✓ User is admin, navigating to dashboard');
           toast.success('Signed in with Google!');
           navigate('/dashboard');
         } else {
-          toast.error('Access denied. Admin privileges required.');
+          console.log('✗ User is not admin, role:', response.data.user.role);
+          toast.error(`Access denied. Admin privileges required. Your role: ${response.data.user.role || 'none'}`);
           // Sign out if not admin
           await auth.signOut();
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
+      } else {
+        console.log('✗ No token in response:', response.data);
+        toast.error('Authentication failed - no token received');
       }
     } catch (error) {
       console.error('Google sign-in error:', error);
