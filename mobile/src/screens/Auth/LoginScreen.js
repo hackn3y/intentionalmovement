@@ -9,7 +9,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
+  ImageBackground,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
 import { login, clearError, loginWithFirebase } from '../../store/slices/authSlice';
@@ -126,12 +131,30 @@ const LoginScreen = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
       >
-        <View style={styles.header}>
-          <Logo size={Platform.OS === 'web' ? 400 : 300} style={styles.logo} />
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
-        </View>
+        {/* Hero Section with Background Image */}
+        <ImageBackground
+          source={require('../../../assets/hero-background.jpg')}
+          style={styles.heroBackground}
+          resizeMode="cover"
+          imageStyle={{
+            top: -350,
+            height: 700,
+          }}
+        >
+          <View style={styles.heroOverlay}>
+            <View style={styles.header}>
+              <Image
+                source={require('../../../assets/logo.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.title}>Welcome Back</Text>
+              <Text style={styles.subtitle}>Sign in to continue</Text>
+            </View>
+          </View>
+        </ImageBackground>
 
         <Formik
           initialValues={{ email: '', password: '' }}
@@ -237,29 +260,53 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   scrollContent: {
-    padding: SIZES.lg,
-    paddingTop: SIZES.xxl,
     paddingBottom: SIZES.xxl * 3,
   },
+  heroBackground: {
+    width: '100%',
+    height: Platform.OS === 'web' ? 350 : 280,
+    overflow: 'hidden',
+  },
+  heroOverlay: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    paddingTop: SIZES.xl,
+    paddingBottom: SIZES.lg,
+  },
   header: {
-    marginBottom: SIZES.lg,
     alignItems: 'center',
+    paddingHorizontal: SIZES.lg,
+  },
+  logoImage: {
+    width: Platform.OS === 'web' ? 400 : width * 0.8,
+    height: Platform.OS === 'web' ? 150 : 100,
+    marginBottom: SIZES.lg,
   },
   logo: {
     marginBottom: SIZES.md,
   },
   title: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: 'bold',
-    color: COLORS.dark,
+    fontSize: FONT_SIZES.xxl,
+    fontWeight: '900',
+    color: COLORS.white,
     marginBottom: SIZES.xs,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 10,
   },
   subtitle: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.gray[500],
+    color: COLORS.white,
+    fontWeight: '700',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 8,
   },
   form: {
     marginBottom: SIZES.xl,
+    paddingHorizontal: SIZES.lg,
+    paddingTop: SIZES.lg,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
