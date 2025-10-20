@@ -88,14 +88,14 @@ const ChatScreen = ({ route, navigation }) => {
 
       // Check if this message is for the current conversation
       if (message.senderId === userId || message.receiverId === userId) {
-        if (isActive) {
-          // Component is active (screen is visible), reload messages
-          console.log('[ChatScreen] Screen is active, reloading messages');
-          dispatch(fetchMessages({ conversationId: userId }));
-        } else {
+        // Always reload messages to mark them as read in the backend
+        console.log('[ChatScreen] Reloading messages to mark as read');
+        dispatch(fetchMessages({ conversationId: userId }));
+
+        if (!isActive) {
           // Component exists but screen is not visible (user on different tab)
-          // Just trigger a conversation refresh to update the badge
-          console.log('[ChatScreen] Screen is inactive, triggering badge update');
+          // Also trigger a conversation refresh to update the badge
+          console.log('[ChatScreen] Screen is inactive, also triggering badge update');
           dispatch(fetchConversations());
         }
       }
