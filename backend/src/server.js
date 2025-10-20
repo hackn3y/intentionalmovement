@@ -104,9 +104,16 @@ const corsOriginChecker = (origin, callback) => {
       origin: corsOriginChecker,
       methods: ['GET', 'POST'],
       credentials: true
-    }
+    },
+    // Support both WebSocket and polling for browser compatibility
+    transports: ['websocket', 'polling'],
+    // Allow upgrade from polling to websocket
+    allowUpgrades: true,
+    // Ping configuration
+    pingTimeout: 60000,
+    pingInterval: 25000
   });
-  console.log('Socket.IO created');
+  console.log('Socket.IO created with transports: websocket, polling');
 
 console.log('Creating CORS options...');
 const corsOptions = {

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
@@ -7,6 +7,7 @@ import { messageSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
 import { formatters } from '../../utils/formatters';
+import socketService from '../../services/socketService';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -20,6 +21,7 @@ const ChatScreen = ({ route, navigation }) => {
   // Use userId as the key since that's what we use for fetchMessages
   const conversationMessages = messages[userId] || [];
   const styles = getStyles(colors);
+  const flatListRef = useRef(null);
 
   const MessageBubble = ({ message, isOwn }) => {
     return (
@@ -47,6 +49,16 @@ const ChatScreen = ({ route, navigation }) => {
     }
   }, [conversationId, userId]);
 
+  // Scroll to bottom when messages load or update
+  useEffect(() => {
+    if (conversationMessages.length > 0 && flatListRef.current) {
+      // Use setTimeout to ensure the FlatList has rendered
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [conversationMessages]);
+
   // Reload messages when screen gains focus or when new message sent
   useEffect(() => {
     const loadMessages = () => {
@@ -58,6 +70,28 @@ const ChatScreen = ({ route, navigation }) => {
     const unsubscribe = navigation.addListener('focus', loadMessages);
     return unsubscribe;
   }, [navigation, conversationId, userId]);
+
+  // Listen for real-time messages in this chat
+  useEffect(() => {
+    console.log('Setting up real-time listener for chat with user:', userId);
+
+    const handleNewMessage = (message) => {
+      console.log('New message received in ChatScreen:', message);
+
+      // Check if this message is for the current conversation
+      if (message.senderId === userId || message.receiverId === userId) {
+        console.log('Message is for current chat, reloading messages');
+        dispatch(fetchMessages({ conversationId: userId }));
+      }
+    };
+
+    socketService.onNewMessage(handleNewMessage);
+
+    return () => {
+      console.log('Cleaning up real-time listener for chat');
+      socketService.offNewMessage();
+    };
+  }, [userId, dispatch]);
 
   const handleSendMessage = async (values, { resetForm }) => {
     try {
@@ -84,10 +118,12 @@ const ChatScreen = ({ route, navigation }) => {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={90}>
       <FlatList
+        ref={flatListRef}
         data={conversationMessages}
         renderItem={renderMessage}
         keyExtractor={(item, index) => item._id || item.id || `message-${index}`}
         contentContainerStyle={styles.messagesList}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
 
       <Formik initialValues={{ text: '' }} validationSchema={messageSchema} onSubmit={handleSendMessage}>

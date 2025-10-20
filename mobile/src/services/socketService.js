@@ -34,17 +34,29 @@ class SocketService {
         auth: {
           token,
         },
-        transports: ['websocket'],
+        // Try WebSocket first, fallback to polling for browser compatibility
+        transports: ['websocket', 'polling'],
+        upgrade: true,
         reconnection: true,
         reconnectionDelay: 1000,
-        reconnectionAttempts: 5,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 10,
+        timeout: 20000,
       });
 
       this.socket.on('connect', () => {
         if (__DEV__) {
           console.log('Socket connected');
+          console.log('Transport:', this.socket.io.engine.transport.name);
         }
         this.connected = true;
+      });
+
+      // Log transport upgrade
+      this.socket.io.engine.on('upgrade', (transport) => {
+        if (__DEV__) {
+          console.log('Transport upgraded to:', transport.name);
+        }
       });
 
       this.socket.on('disconnect', () => {
