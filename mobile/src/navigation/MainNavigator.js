@@ -74,7 +74,7 @@ const MainNavigator = () => {
         name="HomeTab"
         component={HomeStack}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: 'Intentional Movement Community',
           tabBarIcon: ({ color, size }) => (
             // Replace with actual icon component
             <Text style={{ fontSize: size, color }}>🏠</Text>
