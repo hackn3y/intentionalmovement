@@ -46,6 +46,8 @@ const ChatScreen = ({ route, navigation }) => {
       // The backend getMessages endpoint expects userId, not conversationId
       // It also automatically marks messages as read
       dispatch(fetchMessages({ conversationId: userId }));
+      // Also mark as read in the Redux store to clear the badge immediately
+      dispatch(markAsRead(conversationId));
     }
   }, [conversationId, userId]);
 

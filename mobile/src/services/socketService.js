@@ -16,20 +16,21 @@ class SocketService {
    */
   async connect() {
     if (this.socket?.connected) {
+      console.log('Socket already connected, skipping');
       return;
     }
 
     try {
+      console.log('Attempting to connect to Socket.IO at:', SOCKET_URL);
       const token = await storage.get('token');
 
       // Don't attempt to connect if there's no token
       if (!token) {
-        if (__DEV__) {
-          console.log('No token available, skipping socket connection');
-        }
+        console.log('No token available, skipping socket connection');
         return;
       }
 
+      console.log('Token found, initializing socket connection...');
       this.socket = io(SOCKET_URL, {
         auth: {
           token,
@@ -68,10 +69,21 @@ class SocketService {
 
       this.socket.on('connect_error', (error) => {
         console.error('Socket connection error:', error);
+        console.error('Error message:', error.message);
+        console.error('Error type:', error.type);
+        console.error('Error description:', error.description);
       });
 
       this.socket.on('error', (error) => {
         console.error('Socket error:', error);
+      });
+
+      this.socket.on('reconnect_attempt', (attemptNumber) => {
+        console.log('Reconnection attempt:', attemptNumber);
+      });
+
+      this.socket.on('reconnect_failed', () => {
+        console.error('Socket reconnection failed after all attempts');
       });
     } catch (error) {
       console.error('Failed to connect socket:', error);
