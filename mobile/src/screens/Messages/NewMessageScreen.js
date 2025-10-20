@@ -84,7 +84,13 @@ const NewMessageScreen = ({ navigation }) => {
       {/* Search Input */}
       <View style={styles.searchContainer}>
         <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
+          style={[
+            styles.searchInput,
+            {
+              color: isDarkMode ? '#ffffff' : '#111827',
+              WebkitTextFillColor: isDarkMode ? '#ffffff' : '#111827',
+            }
+          ]}
           placeholder="Search users..."
           placeholderTextColor={colors.gray[400]}
           value={searchQuery}
