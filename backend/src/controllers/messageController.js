@@ -195,6 +195,18 @@ exports.sendMessage = async (req, res, next) => {
       ]
     });
 
+    // Send real-time notification via Socket.IO
+    const io = req.app.get('io');
+    const { connectedUsers } = require('../socket');
+
+    if (io && connectedUsers) {
+      const receiverSocketId = connectedUsers.get(receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit('new_message', createdMessage);
+        console.log('Sent real-time message notification to receiver:', receiverId);
+      }
+    }
+
     // TODO: Send push notification to receiver
 
     res.status(201).json({
