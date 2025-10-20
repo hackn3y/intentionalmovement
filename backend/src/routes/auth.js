@@ -14,6 +14,7 @@ const { authRateLimit } = require('../middleware/userRateLimit');
 router.post('/register', authRateLimit, validateUserRegistration, authController.register);
 router.post('/login', authRateLimit, validateUserLogin, authController.login);
 router.post('/firebase-auth', authRateLimit, authController.firebaseAuth);
+router.post('/firebase', authRateLimit, authController.firebaseAuth); // Alias for admin dashboard
 router.post('/logout', verifyToken, authController.logout);
 router.post('/refresh-token', authRateLimit, authController.refreshToken);
 router.post('/forgot-password', authRateLimit, validateEmail, authController.forgotPassword);

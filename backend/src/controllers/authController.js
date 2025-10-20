@@ -142,62 +142,86 @@ exports.firebaseAuth = async (req, res, next) => {
   try {
     const { idToken, email, displayName, profileImage, userInfo } = req.body;
 
-    console.log('Google OAuth login attempt:', { email, displayName, hasToken: !!idToken });
+    console.log('Firebase OAuth login attempt:', { email, displayName, hasToken: !!idToken });
 
-    // Validate required fields
-    if (!email) {
-      return response.badRequest(res, 'Email is required for Google authentication');
-    }
+    let verifiedEmail = email;
+    let verifiedDisplayName = displayName;
+    let verifiedProfileImage = profileImage;
 
-    // Verify the Google OAuth token by calling Google's API
-    let googleUserInfo = userInfo;
-    if (!googleUserInfo && idToken) {
+    // If idToken is provided, verify it using Firebase Admin SDK
+    if (idToken) {
       try {
-        const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + idToken);
-        if (googleResponse.ok) {
-          const tokenInfo = await googleResponse.json();
-          console.log('Google token verified:', { email: tokenInfo.email });
+        console.log('Verifying Firebase ID token...');
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        console.log('Firebase token verified:', { uid: decodedToken.uid, email: decodedToken.email });
 
-          // Ensure the token email matches the provided email
-          if (tokenInfo.email !== email) {
-            return response.unauthorized(res, 'Token email does not match provided email');
-          }
-        } else {
-          console.warn('Could not verify Google token, proceeding with provided user info');
-        }
+        // Use verified data from Firebase token
+        verifiedEmail = decodedToken.email;
+        verifiedDisplayName = decodedToken.name || displayName;
+        verifiedProfileImage = decodedToken.picture || profileImage;
       } catch (verifyError) {
-        console.warn('Google token verification failed:', verifyError.message);
-        // Continue anyway - we'll rely on the email
+        console.error('Firebase token verification failed:', verifyError.message);
+        return response.unauthorized(res, 'Invalid Firebase token');
+      }
+    } else {
+      // Fallback to Google OAuth token verification
+      console.log('No Firebase ID token, using Google OAuth verification...');
+
+      // Validate required fields
+      if (!email) {
+        return response.badRequest(res, 'Email is required for Google authentication');
+      }
+
+      // Verify the Google OAuth token by calling Google's API
+      let googleUserInfo = userInfo;
+      if (!googleUserInfo && idToken) {
+        try {
+          const googleResponse = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + idToken);
+          if (googleResponse.ok) {
+            const tokenInfo = await googleResponse.json();
+            console.log('Google token verified:', { email: tokenInfo.email });
+
+            // Ensure the token email matches the provided email
+            if (tokenInfo.email !== email) {
+              return response.unauthorized(res, 'Token email does not match provided email');
+            }
+          } else {
+            console.warn('Could not verify Google token, proceeding with provided user info');
+          }
+        } catch (verifyError) {
+          console.warn('Google token verification failed:', verifyError.message);
+          // Continue anyway - we'll rely on the email
+        }
       }
     }
 
     // Try to find user by email (Google users don't have passwords)
     let user = await User.findOne({
-      where: { email },
-      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'password', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
+      where: { email: verifiedEmail },
+      attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'password', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'role', 'createdAt', 'updatedAt']
     });
 
     if (!user) {
       // Create new user from Google OAuth data
-      const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
+      const username = verifiedEmail.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
 
-      console.log('Creating new user from Google OAuth:', { email, username, displayName });
+      console.log('Creating new user from Firebase OAuth:', { email: verifiedEmail, username, displayName: verifiedDisplayName });
 
       // Create user using Sequelize model (works with both SQLite and PostgreSQL)
       user = await User.create({
-        email,
+        email: verifiedEmail,
         username,
-        displayName: displayName || username,
-        profileImage: profileImage || null
+        displayName: verifiedDisplayName || username,
+        profileImage: verifiedProfileImage || null
       });
 
       console.log('New user created:', { id: user.id, email: user.email });
     } else {
-      console.log('Existing user found:', { id: user.id, email: user.email });
+      console.log('Existing user found:', { id: user.id, email: user.email, role: user.role });
 
       // Update profile image if provided and different
-      if (profileImage && user.profileImage !== profileImage) {
-        await user.update({ profileImage });
+      if (verifiedProfileImage && user.profileImage !== verifiedProfileImage) {
+        await user.update({ profileImage: verifiedProfileImage });
       }
     }
 
@@ -208,12 +232,13 @@ exports.firebaseAuth = async (req, res, next) => {
       id: user.id,
       username: user.username,
       email: user.email,
-      loginMethod: 'google'
+      loginMethod: 'firebase'
     });
 
-    return response.success(res, { user, token }, 'Google authentication successful');
+    // Return user data with role included
+    return response.success(res, { user, token }, 'Firebase authentication successful');
   } catch (error) {
-    console.error('Google OAuth error:', error);
+    console.error('Firebase OAuth error:', error);
     next(error);
   }
 };
