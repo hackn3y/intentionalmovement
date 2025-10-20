@@ -5,10 +5,23 @@ const { User } = require('../models');
 // Initialize Firebase Admin (only if credentials are provided)
 if (process.env.FIREBASE_PROJECT_ID) {
   try {
-    admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
-      projectId: process.env.FIREBASE_PROJECT_ID
-    });
+    // Try to initialize with service account credentials
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      // Use service account from environment variable (for production)
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: process.env.FIREBASE_PROJECT_ID
+      });
+      console.log('Firebase Admin initialized with service account from env');
+    } else {
+      // Use application default credentials (for local development)
+      admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+        projectId: process.env.FIREBASE_PROJECT_ID
+      });
+      console.log('Firebase Admin initialized with application default credentials');
+    }
   } catch (error) {
     console.warn('Firebase Admin not initialized:', error.message);
   }
