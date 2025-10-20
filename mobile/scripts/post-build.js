@@ -76,8 +76,61 @@ if (fs.existsSync(iconsDir)) {
   console.log('   ⚠️  icons directory not found');
 }
 
-// Fix 4: Verify PWA meta tags are present
-console.log('\n4. Verifying PWA meta tags...');
+// Fix 4: Inject PWA meta tags into index.html
+console.log('\n4. Injecting PWA meta tags...');
+if (fs.existsSync(indexPath)) {
+  let html = fs.readFileSync(indexPath, 'utf8');
+
+  // PWA meta tags to inject
+  const pwaTags = `
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ec4899">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Intentional Movement">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="description" content="Planted Mind, Moving Body - Intentional Movement Community">
+    <meta name="mobile-web-app-capable" content="yes">`;
+
+  // Service worker registration script
+  const serviceWorkerScript = `
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('SW registered:', registration);
+            })
+            .catch(error => {
+              console.log('SW registration failed:', error);
+            });
+        });
+      }
+    </script>`;
+
+  // Only inject if not already present
+  if (!html.includes('rel="manifest"')) {
+    // Inject meta tags before </head>
+    html = html.replace('</head>', `${pwaTags}\n  </head>`);
+    console.log('   ✅ Injected PWA meta tags');
+  } else {
+    console.log('   ℹ️  PWA meta tags already present');
+  }
+
+  if (!html.includes('serviceWorker.register')) {
+    // Inject service worker script before </body>
+    html = html.replace('</body>', `${serviceWorkerScript}\n  </body>`);
+    console.log('   ✅ Injected service worker registration');
+  } else {
+    console.log('   ℹ️  Service worker registration already present');
+  }
+
+  fs.writeFileSync(indexPath, html);
+}
+
+// Fix 5: Verify PWA meta tags are present
+console.log('\n5. Verifying PWA configuration...');
 if (fs.existsSync(indexPath)) {
   const html = fs.readFileSync(indexPath, 'utf8');
 
