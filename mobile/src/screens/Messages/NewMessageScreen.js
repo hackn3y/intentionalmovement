@@ -79,12 +79,11 @@ const NewMessageScreen = ({ navigation }) => {
       {/* Search Input */}
       <View style={styles.searchContainer}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.text }]}
           placeholder="Search users..."
           placeholderTextColor={colors.gray[400]}
           value={searchQuery}
           onChangeText={setSearchQuery}
-          color={colors.text}
           autoFocus
           autoCapitalize="none"
           autoCorrect={false}
@@ -136,7 +135,6 @@ const getStyles = (colors, isDarkMode) =>
       borderRadius: SIZES.sm,
       paddingHorizontal: SIZES.md,
       fontSize: FONT_SIZES.md,
-      color: colors.text,
     },
     listContainer: {
       paddingTop: SIZES.sm,
