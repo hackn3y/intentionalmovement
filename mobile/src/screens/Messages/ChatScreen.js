@@ -78,19 +78,19 @@ const ChatScreen = ({ route, navigation }) => {
     return unsubscribe;
   }, [navigation, conversationId, userId]);
 
-  // Track whether screen is focused (visible to user)
-  const [isFocused, setIsFocused] = useState(true);
+  // Track whether screen is focused (visible to user) using a ref
+  const isFocusedRef = useRef(true);
 
   // Listen for focus/blur events to track screen visibility
   useEffect(() => {
     const unsubscribeFocus = navigation.addListener('focus', () => {
       console.log('[ChatScreen] Screen gained focus');
-      setIsFocused(true);
+      isFocusedRef.current = true;
     });
 
     const unsubscribeBlur = navigation.addListener('blur', () => {
       console.log('[ChatScreen] Screen lost focus (navigated to different tab)');
-      setIsFocused(false);
+      isFocusedRef.current = false;
     });
 
     return () => {
@@ -105,11 +105,11 @@ const ChatScreen = ({ route, navigation }) => {
 
     const handleNewMessage = (message) => {
       console.log('[ChatScreen] New message received:', message);
-      console.log('[ChatScreen] isFocused:', isFocused);
+      console.log('[ChatScreen] isFocused:', isFocusedRef.current);
 
       // Check if this message is for the current conversation
       if (message.senderId === userId || message.receiverId === userId) {
-        if (isFocused) {
+        if (isFocusedRef.current) {
           // Screen is visible - reload messages to show them and mark as read
           console.log('[ChatScreen] Screen is focused, reloading messages');
           dispatch(fetchMessages({ conversationId: userId }));
@@ -128,7 +128,7 @@ const ChatScreen = ({ route, navigation }) => {
     return () => {
       console.log('[ChatScreen] Cleaning up listener');
     };
-  }, [userId, isFocused, dispatch]);
+  }, [userId, dispatch]);
 
   const handleSendMessage = async (values, { resetForm }) => {
     try {
