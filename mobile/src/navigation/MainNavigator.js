@@ -22,6 +22,11 @@ const MainNavigator = () => {
   const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.messages.unreadCount);
 
+  // Log unreadCount changes to debug badge updates
+  useEffect(() => {
+    console.log('[MainNavigator] unreadCount changed to:', unreadCount);
+  }, [unreadCount]);
+
   // Set up real-time message updates and periodic refresh
   useEffect(() => {
     console.log('[MainNavigator] Mounting - setting up real-time updates');
