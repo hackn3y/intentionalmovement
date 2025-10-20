@@ -46,9 +46,15 @@ const forceSyncDatabase = async () => {
     // Force sync - sync models in dependency order to avoid foreign key errors
     console.log('[3/3] Force syncing database (dropping and recreating all tables)...');
 
-    // First, drop all tables to start fresh
-    await sequelize.drop();
-    console.log('✓ Dropped all tables');
+    // First, drop all tables to start fresh using raw SQL (Sequelize.drop() has bugs)
+    try {
+      await sequelize.query('DROP SCHEMA public CASCADE');
+      await sequelize.query('CREATE SCHEMA public');
+      await sequelize.query('GRANT ALL ON SCHEMA public TO public');
+      console.log('✓ Dropped all tables');
+    } catch (dropError) {
+      console.log('⚠ Could not drop schema (may not exist yet)');
+    }
 
     // Then sync models in the correct order (parent tables first)
     const modelOrder = [
