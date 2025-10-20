@@ -37,7 +37,7 @@ const HomeStack = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          title: 'Feed',
+          title: 'Intentional Movement Community',
         }}
       />
       <Stack.Screen
