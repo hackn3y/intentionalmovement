@@ -186,13 +186,6 @@ const ProfileScreen = ({ route, navigation }) => {
             </Text>
             <Text style={styles.statLabel}>Following</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.stat}>
-            <Text style={styles.statValue}>
-              {formatters.formatCompactNumber(currentProfile.stats?.workouts || 0)}
-            </Text>
-            <Text style={styles.statLabel}>Workouts</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Action Buttons */}

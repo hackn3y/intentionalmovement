@@ -99,7 +99,7 @@ const WelcomeScreen = ({ navigation }) => {
             </View>
             <Text style={styles.featureTitle}>Wellness Programs</Text>
             <Text style={styles.featureDescription}>
-              Expert-led fitness and wellness programs tailored to your goals
+              Expert-led wellness programs tailored to your goals
             </Text>
           </View>
 

@@ -147,7 +147,6 @@ const EditProfileScreen = ({ navigation }) => {
             displayName: user.displayName || '',
             username: user.username || '',
             bio: user.bio || '',
-            movementGoals: user.movementGoals || '',
           }}
           validationSchema={profileSchema}
           onSubmit={handleUpdateProfile}
@@ -183,17 +182,6 @@ const EditProfileScreen = ({ navigation }) => {
                 error={touched.bio && errors.bio}
                 multiline
                 numberOfLines={4}
-              />
-
-              <Input
-                label="Movement Goals"
-                placeholder="What are your fitness goals?"
-                value={values.movementGoals}
-                onChangeText={handleChange('movementGoals')}
-                onBlur={handleBlur('movementGoals')}
-                error={touched.movementGoals && errors.movementGoals}
-                multiline
-                numberOfLines={3}
               />
 
               <View style={styles.buttonContainer}>

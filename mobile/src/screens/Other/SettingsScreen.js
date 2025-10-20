@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, Platform, Share } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
@@ -23,6 +23,36 @@ const SettingsScreen = ({ navigation }) => {
   const { user } = useSelector((state) => state.auth);
   const { isDarkMode, toggleTheme, colors } = useTheme();
   const [notifications, setNotifications] = useState(true);
+
+  const handleInviteFriends = async () => {
+    try {
+      const message = 'Join me on Intentional Movement Corp - Elevate Your LifeStyle through intentional living and personal development!';
+      const url = 'https://intentionalmovementcorp.com'; // Update with actual app URL/store links
+
+      if (Platform.OS === 'web') {
+        // For web, use native share if available, otherwise copy to clipboard
+        if (navigator.share) {
+          await navigator.share({
+            title: 'Join Intentional Movement Corp',
+            text: message,
+            url: url,
+          });
+        } else {
+          // Fallback for web browsers without Share API
+          await navigator.clipboard.writeText(`${message}\n\n${url}`);
+          Alert.alert('Copied!', 'Invite link copied to clipboard');
+        }
+      } else {
+        // For mobile, use React Native Share
+        const result = await Share.share({
+          message: `${message}\n\n${url}`,
+          title: 'Join Intentional Movement Corp',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
 
   const handleLogout = () => {
     if (Platform.OS === 'web') {
@@ -157,6 +187,13 @@ const SettingsScreen = ({ navigation }) => {
         <SettingItem title="Version" subtitle="1.0.0" showBorder={false} colors={colors} />
       </View>
 
+      {/* Invite Friends Button */}
+      <View style={styles.inviteSection}>
+        <TouchableOpacity style={styles.inviteButton} onPress={handleInviteFriends}>
+          <Text style={styles.inviteButtonText}>Invite Friends</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Logout Button */}
       <View style={styles.logoutSection}>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -181,7 +218,10 @@ const getStyles = (colors) => StyleSheet.create({
   settingTitle: { fontSize: FONT_SIZES.md, fontWeight: '500', color: colors.dark },
   settingSubtitle: { fontSize: FONT_SIZES.sm, color: colors.gray[600], marginTop: 2 },
   arrow: { fontSize: FONT_SIZES.xxl, color: colors.gray[400], fontWeight: '300' },
-  logoutSection: { paddingVertical: SIZES.xxl, paddingHorizontal: SIZES.lg },
+  inviteSection: { paddingVertical: SIZES.md, paddingHorizontal: SIZES.lg },
+  inviteButton: { paddingVertical: SIZES.md, backgroundColor: colors.success, borderRadius: SIZES.sm, alignItems: 'center' },
+  inviteButtonText: { fontSize: FONT_SIZES.md, fontWeight: '600', color: colors.white },
+  logoutSection: { paddingVertical: SIZES.md, paddingHorizontal: SIZES.lg },
   logoutButton: { paddingVertical: SIZES.lg, backgroundColor: colors.primary, borderRadius: SIZES.sm, alignItems: 'center' },
   logoutText: { fontSize: FONT_SIZES.lg, fontWeight: '700', color: colors.white },
   footer: { paddingHorizontal: SIZES.xl, paddingBottom: SIZES.xxl, paddingTop: SIZES.md, alignItems: 'center' },
