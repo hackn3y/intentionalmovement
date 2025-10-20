@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (userData) => {
     setUser(userData);
+    setIsAuthenticated(!!userData);
   };
 
   const value = {

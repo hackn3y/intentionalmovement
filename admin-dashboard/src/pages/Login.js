@@ -10,7 +10,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, updateUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,14 +59,19 @@ function Login() {
         console.log('User object:', responseData.user);
         console.log('User role:', responseData.user?.role);
 
-        // Store the token
-        localStorage.setItem('token', responseData.token);
-        localStorage.setItem('user', JSON.stringify(responseData.user));
-
         // Check if user is admin
         if (responseData.user.role === 'admin') {
-          console.log('✓ User is admin, navigating to dashboard');
+          console.log('✓ User is admin, updating auth context');
+
+          // Store the token
+          localStorage.setItem('token', responseData.token);
+          localStorage.setItem('user', JSON.stringify(responseData.user));
+
+          // Update AuthContext with the user data
+          updateUser(responseData.user);
+
           toast.success('Signed in with Google!');
+          console.log('Navigating to dashboard...');
           navigate('/dashboard');
         } else {
           console.log('✗ User is not admin, role:', responseData.user.role);
