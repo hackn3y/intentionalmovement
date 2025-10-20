@@ -84,6 +84,7 @@ const NewMessageScreen = ({ navigation }) => {
           placeholderTextColor={colors.gray[400]}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          color={colors.text}
           autoFocus
           autoCapitalize="none"
           autoCorrect={false}
