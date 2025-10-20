@@ -142,7 +142,9 @@ exports.firebaseAuth = async (req, res, next) => {
   try {
     const { idToken, email, displayName, profileImage, userInfo } = req.body;
 
-    console.log('Firebase OAuth login attempt:', { email, displayName, hasToken: !!idToken });
+    console.log('=== FIREBASE AUTH START ===');
+    console.log('Request body:', { email, displayName, hasToken: !!idToken, tokenLength: idToken?.length });
+    console.log('Firebase Admin apps:', admin.apps.length);
 
     let verifiedEmail = email;
     let verifiedDisplayName = displayName;

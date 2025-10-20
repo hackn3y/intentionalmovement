@@ -3,28 +3,40 @@ const admin = require('firebase-admin');
 const { User } = require('../models');
 
 // Initialize Firebase Admin (only if credentials are provided)
+console.log('=== FIREBASE ADMIN INITIALIZATION ===');
+console.log('FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'SET' : 'NOT SET');
+console.log('FIREBASE_SERVICE_ACCOUNT:', process.env.FIREBASE_SERVICE_ACCOUNT ? `SET (${process.env.FIREBASE_SERVICE_ACCOUNT.length} chars)` : 'NOT SET');
+
 if (process.env.FIREBASE_PROJECT_ID) {
   try {
     // Try to initialize with service account credentials
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       // Use service account from environment variable (for production)
+      console.log('Attempting to parse FIREBASE_SERVICE_ACCOUNT...');
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      console.log('Parsed service account, project_id:', serviceAccount.project_id);
+
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
         projectId: process.env.FIREBASE_PROJECT_ID
       });
-      console.log('Firebase Admin initialized with service account from env');
+      console.log('✓ Firebase Admin initialized with service account from env');
     } else {
       // Use application default credentials (for local development)
+      console.log('Using application default credentials...');
       admin.initializeApp({
         credential: admin.credential.applicationDefault(),
         projectId: process.env.FIREBASE_PROJECT_ID
       });
-      console.log('Firebase Admin initialized with application default credentials');
+      console.log('✓ Firebase Admin initialized with application default credentials');
     }
+    console.log('✓ Firebase Admin apps:', admin.apps.length);
   } catch (error) {
-    console.warn('Firebase Admin not initialized:', error.message);
+    console.error('✗ Firebase Admin initialization failed:', error.message);
+    console.error('Stack:', error.stack);
   }
+} else {
+  console.log('✗ FIREBASE_PROJECT_ID not set, skipping Firebase Admin initialization');
 }
 
 // Verify JWT token
