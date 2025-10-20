@@ -24,6 +24,7 @@ const DailyContentStack = () => {
           fontWeight: 'bold',
         },
         headerShadowVisible: false,
+        headerBackTitleVisible: false,
       }}
     >
       <Stack.Screen

@@ -37,6 +37,8 @@ const ProfileStack = () => {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        headerBackTitleVisible: false,
+        headerShown: true,
       }}
     >
       <Stack.Screen
