@@ -19,7 +19,6 @@ class SocketService {
   async connect() {
     // If already connected or in the process of connecting, skip
     if (this.socket || this.connecting) {
-      console.log('Socket already exists or connecting (socket:', !!this.socket, 'connecting:', this.connecting, '), skipping connection');
       return;
     }
 
@@ -27,17 +26,14 @@ class SocketService {
     this.connecting = true;
 
     try {
-      console.log('Attempting to connect to Socket.IO at:', SOCKET_URL);
       const token = await storage.get('token');
 
       // Don't attempt to connect if there's no token
       if (!token) {
-        console.log('No token available, skipping socket connection');
         this.connecting = false;
         return;
       }
 
-      console.log('Token found, initializing socket connection...');
       this.socket = io(SOCKET_URL, {
         auth: {
           token,
@@ -53,55 +49,32 @@ class SocketService {
       });
 
       this.socket.on('connect', () => {
-        if (__DEV__) {
-          console.log('Socket connected');
-          console.log('Transport:', this.socket.io.engine.transport.name);
-        }
         this.connected = true;
         this.connecting = false; // Clear connecting flag when connected
 
         // Register all pending listeners
         if (this.pendingListeners.length > 0) {
-          console.log(`[SocketService] Registering ${this.pendingListeners.length} pending listeners`);
           this.pendingListeners.forEach(({ event, callback }) => {
-            console.log(`[SocketService] Registering queued listener for event: ${event}`);
             this.socket.on(event, callback);
           });
           this.pendingListeners = []; // Clear the queue
         }
       });
 
-      // Log transport upgrade
-      this.socket.io.engine.on('upgrade', (transport) => {
-        if (__DEV__) {
-          console.log('Transport upgraded to:', transport.name);
-        }
-      });
-
       this.socket.on('disconnect', () => {
-        if (__DEV__) {
-          console.log('Socket disconnected');
-        }
         this.connected = false;
       });
 
       this.socket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
-        console.error('Error message:', error.message);
-        console.error('Error type:', error.type);
-        console.error('Error description:', error.description);
+        if (__DEV__) {
+          console.error('Socket connection error:', error);
+        }
       });
 
       this.socket.on('error', (error) => {
-        console.error('Socket error:', error);
-      });
-
-      this.socket.on('reconnect_attempt', (attemptNumber) => {
-        console.log('Reconnection attempt:', attemptNumber);
-      });
-
-      this.socket.on('reconnect_failed', () => {
-        console.error('Socket reconnection failed after all attempts');
+        if (__DEV__) {
+          console.error('Socket error:', error);
+        }
       });
     } catch (error) {
       console.error('Failed to connect socket:', error);
@@ -130,11 +103,9 @@ class SocketService {
   onNewMessage(callback) {
     if (this.socket && typeof this.socket !== 'string') {
       // Socket exists and is connected, register immediately
-      console.log('[SocketService] Registering new_message listener immediately');
       this.socket.on('new_message', callback);
     } else {
       // Socket doesn't exist yet, queue the listener
-      console.log('[SocketService] Queueing new_message listener (socket not ready)');
       this.pendingListeners.push({ event: 'new_message', callback });
     }
     return callback;

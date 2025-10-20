@@ -22,15 +22,8 @@ const MainNavigator = () => {
   const dispatch = useDispatch();
   const unreadCount = useSelector((state) => state.messages.unreadCount);
 
-  // Log unreadCount changes to debug badge updates
-  useEffect(() => {
-    console.log('[MainNavigator] unreadCount changed to:', unreadCount);
-  }, [unreadCount]);
-
   // Set up real-time message updates and periodic refresh
   useEffect(() => {
-    console.log('[MainNavigator] Mounting - setting up real-time updates');
-
     // Initial fetch
     dispatch(fetchConversations());
 
@@ -39,24 +32,18 @@ const MainNavigator = () => {
 
     // Listen for new messages to update unread count
     const handleNewMessage = (message) => {
-      console.log('[MainNavigator] *** NEW MESSAGE RECEIVED ***');
-      console.log('[MainNavigator] Message data:', JSON.stringify(message));
-      console.log('[MainNavigator] Fetching conversations to update badge...');
       // Refresh conversations to update unread count
       dispatch(fetchConversations());
     };
 
-    console.log('[MainNavigator] Registering message listener');
     socketService.onNewMessage(handleNewMessage);
 
     // Also poll every 60 seconds as fallback
     const interval = setInterval(() => {
-      console.log('[MainNavigator] Polling conversations (60s interval)');
       dispatch(fetchConversations());
     }, 60000);
 
     return () => {
-      console.log('[MainNavigator] Unmounting - cleaning up');
       // Remove only this specific listener
       socketService.offNewMessage(handleNewMessage);
       clearInterval(interval);

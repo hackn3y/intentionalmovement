@@ -31,7 +31,6 @@ const UserAvatar = ({
 
     // If it's a base64 image (starts with data:), use it directly
     if (uri.startsWith('data:')) {
-      console.log('[UserAvatar] Using base64 image');
       return uri;
     }
 
@@ -43,12 +42,10 @@ const UserAvatar = ({
         ? window.location.origin.replace(':8081', ':3001') // Web: use current origin but port 3001
         : API_URL.replace('/api', ''); // Mobile: use API_URL
       const fullUrl = `${baseUrl}${uri}`;
-      console.log('[UserAvatar] Converting relative path to full URL:', { uri, baseUrl, fullUrl, isWeb: typeof window !== 'undefined' });
       return fullUrl;
     }
 
     // Otherwise use the URI as-is (for Google images, etc.)
-    console.log('[UserAvatar] Using URI as-is:', uri);
     return uri;
   }, [uri]);
 
@@ -81,7 +78,6 @@ const UserAvatar = ({
           source={{ uri: imageUri }}
           style={[styles.image, avatarStyle]}
           onError={(error) => {
-            console.log('[UserAvatar] Image failed to load:', { imageUri, error });
             setImageError(true);
           }}
         />

@@ -68,14 +68,11 @@ const EditProfileScreen = ({ navigation }) => {
    */
   const handleUpdateProfile = async (values) => {
     try {
-      console.log('handleUpdateProfile called with:', values);
       const updateData = { ...values };
 
       // Convert image to base64 if one was selected
       if (selectedImage) {
         try {
-          console.log('Converting image to base64...');
-
           // Fetch the image and convert to base64
           const response = await fetch(selectedImage);
           const blob = await response.blob();
@@ -89,19 +86,18 @@ const EditProfileScreen = ({ navigation }) => {
           });
 
           const base64Image = await base64Promise;
-          console.log('Image converted to base64, length:', base64Image.length);
 
           // Add the base64 image to update data
           updateData.profileImage = base64Image;
         } catch (imageError) {
-          console.error('Image conversion error:', imageError);
+          if (__DEV__) {
+            console.error('Image conversion error:', imageError);
+          }
           Alert.alert('Warning', 'Failed to process image, but profile will still be updated');
         }
       }
 
-      console.log('Dispatching updateProfile with data...');
       const result = await dispatch(updateProfile(updateData)).unwrap();
-      console.log('updateProfile result:', result);
 
       // Navigate back with refresh parameter to reload profile
       if (navigation && navigation.canGoBack && navigation.canGoBack()) {
@@ -111,7 +107,9 @@ const EditProfileScreen = ({ navigation }) => {
         });
       }
     } catch (error) {
-      console.error('updateProfile error:', error);
+      if (__DEV__) {
+        console.error('updateProfile error:', error);
+      }
       Alert.alert('Error', error || 'Failed to update profile');
     }
   };
