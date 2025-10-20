@@ -32,11 +32,13 @@ const MainNavigator = () => {
 
     // Listen for new messages to update unread count
     const handleNewMessage = (message) => {
-      console.log('New message received in MainNavigator:', message);
+      console.log('[MainNavigator] New message received:', message);
+      console.log('[MainNavigator] Fetching conversations to update badge...');
       // Refresh conversations to update unread count
       dispatch(fetchConversations());
     };
 
+    console.log('[MainNavigator] Setting up new message listener');
     socketService.onNewMessage(handleNewMessage);
 
     // Also poll every 60 seconds as fallback
