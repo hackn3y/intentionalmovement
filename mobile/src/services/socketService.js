@@ -21,6 +21,9 @@ class SocketService {
       return;
     }
 
+    // Set placeholder immediately to prevent duplicate connections during async operations
+    this.socket = 'connecting';
+
     try {
       console.log('Attempting to connect to Socket.IO at:', SOCKET_URL);
       const token = await storage.get('token');
@@ -28,6 +31,7 @@ class SocketService {
       // Don't attempt to connect if there's no token
       if (!token) {
         console.log('No token available, skipping socket connection');
+        this.socket = null; // Reset placeholder
         return;
       }
 
@@ -88,6 +92,7 @@ class SocketService {
       });
     } catch (error) {
       console.error('Failed to connect socket:', error);
+      this.socket = null; // Reset placeholder on error
     }
   }
 
