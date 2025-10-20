@@ -13,6 +13,7 @@ const challengeRoutes = require('./challenges');
 const subscriptionRoutes = require('./subscriptions');
 const adminRoutes = require('./admin');
 const dailyContentRoutes = require('./dailyContent');
+const adminSetupRoutes = require('./admin-setup');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -26,5 +27,6 @@ router.use('/challenges', challengeRoutes);
 router.use('/subscriptions', subscriptionRoutes);
 router.use('/admin', adminRoutes);
 router.use('/daily-content', dailyContentRoutes);
+router.use('/admin-setup', adminSetupRoutes);
 
 module.exports = router;
