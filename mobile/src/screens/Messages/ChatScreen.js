@@ -166,12 +166,32 @@ const ChatScreen = ({ route, navigation }) => {
       />
 
       <Formik initialValues={{ text: '' }} validationSchema={messageSchema} onSubmit={handleSendMessage}>
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-          <View style={styles.inputContainer}>
-            <Input placeholder="Type a message..." value={values.text} onChangeText={handleChange('text')} onBlur={handleBlur('text')} error={touched.text && errors.text} style={styles.input} />
-            <Button title="Send" onPress={handleSubmit} disabled={!values.text.trim()} size="small" style={styles.sendButton} />
-          </View>
-        )}
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => {
+          // Handle Ctrl+Enter to send message
+          const handleKeyPress = (e) => {
+            if (Platform.OS === 'web' && e.nativeEvent.key === 'Enter' && (e.nativeEvent.ctrlKey || e.nativeEvent.metaKey)) {
+              e.preventDefault();
+              if (values.text.trim()) {
+                handleSubmit();
+              }
+            }
+          };
+
+          return (
+            <View style={styles.inputContainer}>
+              <Input
+                placeholder="Type a message..."
+                value={values.text}
+                onChangeText={handleChange('text')}
+                onBlur={handleBlur('text')}
+                onKeyPress={handleKeyPress}
+                error={touched.text && errors.text}
+                style={styles.input}
+              />
+              <Button title="Send" onPress={handleSubmit} disabled={!values.text.trim()} size="small" style={styles.sendButton} />
+            </View>
+          );
+        }}
       </Formik>
     </KeyboardAvoidingView>
   );
