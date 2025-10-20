@@ -9,20 +9,21 @@ class SocketService {
   constructor() {
     this.socket = null;
     this.connected = false;
+    this.connecting = false; // Track connection state separately
   }
 
   /**
    * Connect to socket server
    */
   async connect() {
-    // If socket already exists (connected or connecting), don't create a new one
-    if (this.socket) {
-      console.log('Socket already exists (connected:', this.socket.connected + '), skipping connection');
+    // If already connected or in the process of connecting, skip
+    if (this.socket || this.connecting) {
+      console.log('Socket already exists or connecting (socket:', !!this.socket, 'connecting:', this.connecting, '), skipping connection');
       return;
     }
 
-    // Set placeholder immediately to prevent duplicate connections during async operations
-    this.socket = 'connecting';
+    // Set connecting flag immediately to prevent duplicate calls
+    this.connecting = true;
 
     try {
       console.log('Attempting to connect to Socket.IO at:', SOCKET_URL);
@@ -31,7 +32,7 @@ class SocketService {
       // Don't attempt to connect if there's no token
       if (!token) {
         console.log('No token available, skipping socket connection');
-        this.socket = null; // Reset placeholder
+        this.connecting = false;
         return;
       }
 
@@ -56,6 +57,7 @@ class SocketService {
           console.log('Transport:', this.socket.io.engine.transport.name);
         }
         this.connected = true;
+        this.connecting = false; // Clear connecting flag when connected
       });
 
       // Log transport upgrade
@@ -92,7 +94,8 @@ class SocketService {
       });
     } catch (error) {
       console.error('Failed to connect socket:', error);
-      this.socket = null; // Reset placeholder on error
+      this.socket = null;
+      this.connecting = false; // Reset connecting flag on error
     }
   }
 
@@ -104,6 +107,7 @@ class SocketService {
       this.socket.disconnect();
       this.socket = null;
       this.connected = false;
+      this.connecting = false;
     }
   }
 
