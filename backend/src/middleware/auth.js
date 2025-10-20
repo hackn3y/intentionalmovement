@@ -97,29 +97,75 @@ const verifyToken = async (req, res, next) => {
 };
 
 // Check if user is admin
-const isAdmin = (req, res, next) => {
-  // TODO: role column doesn't exist in production DB yet
-  // For now, allow all authenticated users (will need migration to add role column)
-  console.warn('isAdmin check skipped - role column does not exist in production');
-  next();
+const isAdmin = async (req, res, next) => {
+  try {
+    // Fetch fresh user data with role column
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'email', 'username', 'role']
+    });
 
-  // if (req.user.role !== 'admin') {
-  //   return res.status(403).json({ error: 'Admin access required' });
-  // }
-  // next();
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    // Check if role column exists (handles migration transition period)
+    if (user.role === undefined || user.role === null) {
+      console.warn('isAdmin check skipped - role column does not exist in production');
+      return next();
+    }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    // Attach role to request for downstream use
+    req.user.role = user.role;
+    next();
+  } catch (error) {
+    // If column doesn't exist, it will throw an error - allow access during migration
+    if (error.message && error.message.includes('column')) {
+      console.warn('isAdmin check skipped - role column does not exist in production');
+      return next();
+    }
+    console.error('isAdmin middleware error:', error);
+    return res.status(500).json({ error: 'Admin check failed' });
+  }
 };
 
 // Check if user is moderator or admin
-const isModerator = (req, res, next) => {
-  // TODO: role column doesn't exist in production DB yet
-  // For now, allow all authenticated users (will need migration to add role column)
-  console.warn('isModerator check skipped - role column does not exist in production');
-  next();
+const isModerator = async (req, res, next) => {
+  try {
+    // Fetch fresh user data with role column
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'email', 'username', 'role']
+    });
 
-  // if (!['admin', 'moderator'].includes(req.user.role)) {
-  //   return res.status(403).json({ error: 'Moderator access required' });
-  // }
-  // next();
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    // Check if role column exists (handles migration transition period)
+    if (user.role === undefined || user.role === null) {
+      console.warn('isModerator check skipped - role column does not exist in production');
+      return next();
+    }
+
+    if (!['admin', 'moderator'].includes(user.role)) {
+      return res.status(403).json({ error: 'Moderator access required' });
+    }
+
+    // Attach role to request for downstream use
+    req.user.role = user.role;
+    next();
+  } catch (error) {
+    // If column doesn't exist, it will throw an error - allow access during migration
+    if (error.message && error.message.includes('column')) {
+      console.warn('isModerator check skipped - role column does not exist in production');
+      return next();
+    }
+    console.error('isModerator middleware error:', error);
+    return res.status(500).json({ error: 'Moderator check failed' });
+  }
 };
 
 module.exports = {

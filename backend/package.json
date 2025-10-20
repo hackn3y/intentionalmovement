@@ -12,7 +12,8 @@
     "seed": "node src/database/seed.js",
     "sync:production": "node sync-production-db.js",
     "force:sync": "node force-sync-db.js",
-    "force:sync:auto": "node force-sync-db-auto.js"
+    "force:sync:auto": "node force-sync-db-auto.js",
+    "migrate:add-role": "node add-role-column.js"
   },
   "dependencies": {
     "@mux/mux-node": "^12.8.0",
