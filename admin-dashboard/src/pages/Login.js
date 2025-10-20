@@ -63,9 +63,9 @@ function Login() {
         if (responseData.user.role === 'admin') {
           console.log('✓ User is admin, updating auth context');
 
-          // Store the token
-          localStorage.setItem('token', responseData.token);
-          localStorage.setItem('user', JSON.stringify(responseData.user));
+          // Store the token (use adminToken/adminUser keys to match authService)
+          localStorage.setItem('adminToken', responseData.token);
+          localStorage.setItem('adminUser', JSON.stringify(responseData.user));
 
           // Update AuthContext with the user data
           updateUser(responseData.user);
