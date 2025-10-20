@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect } from '@react-navigation/native';
-import { fetchPrograms, clearPrograms } from '../../store/slices/programsSlice';
+import { fetchPrograms, clearPrograms, fetchMyPrograms } from '../../store/slices/programsSlice';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -24,7 +24,7 @@ import EmptyState from '../../components/EmptyState';
 const ProgramsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { colors } = useTheme();
-  const { programs, loading, page, hasMore } = useSelector((state) => state.programs);
+  const { programs, loading, page, hasMore, myPrograms } = useSelector((state) => state.programs);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -42,6 +42,8 @@ const ProgramsScreen = ({ navigation }) => {
         search: search.trim() || undefined,
         page: 1
       }));
+      // Also fetch user's purchased programs
+      dispatch(fetchMyPrograms());
     }, [dispatch, selectedCategory, search])
   );
 
@@ -89,37 +91,56 @@ const ProgramsScreen = ({ navigation }) => {
     navigation.navigate('ProgramDetail', { programId: program.id || program._id });
   };
 
-  const renderProgram = ({ item }) => (
-    <TouchableOpacity style={styles.programCard} onPress={() => handleProgramPress(item)}>
-      {item.coverImage ? (
-        <Image
-          source={{ uri: item.coverImage }}
-          style={styles.programImage}
-          resizeMode="cover"
-        />
-      ) : (
-        <View style={styles.programImage}>
-          <Text style={styles.programImagePlaceholder}>📚</Text>
-        </View>
-      )}
-      <View style={styles.programInfo}>
-        <Text style={styles.programTitle}>{item.title}</Text>
-        <Text style={styles.programInstructor}>by {item.instructorName || 'Intentional Movement'}</Text>
-        <Text style={styles.programDescription} numberOfLines={2}>
-          {item.description || 'No description available'}
-        </Text>
-        <View style={styles.programMeta}>
-          {item.price !== undefined && item.price !== null && (
-            <Text style={styles.programPrice}>${parseFloat(item.price).toFixed(2)}</Text>
-          )}
-          <View style={styles.programRating}>
-            <Text style={styles.ratingIcon}>⭐</Text>
-            <Text style={styles.ratingText}>{item.rating ? parseFloat(item.rating).toFixed(1) : 'N/A'}</Text>
+  const renderProgram = ({ item }) => {
+    // Check if program is purchased
+    const isPurchased = myPrograms.some(p => (p.id || p._id) === (item.id || item._id));
+
+    return (
+      <TouchableOpacity style={styles.programCard} onPress={() => handleProgramPress(item)}>
+        {item.coverImage ? (
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: item.coverImage }}
+              style={styles.programImage}
+              resizeMode="cover"
+            />
+            {isPurchased && (
+              <View style={styles.paidBadge}>
+                <Text style={styles.paidBadgeText}>PAID</Text>
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={styles.imageContainer}>
+            <View style={styles.programImage}>
+              <Text style={styles.programImagePlaceholder}>📚</Text>
+            </View>
+            {isPurchased && (
+              <View style={styles.paidBadge}>
+                <Text style={styles.paidBadgeText}>PAID</Text>
+              </View>
+            )}
+          </View>
+        )}
+        <View style={styles.programInfo}>
+          <Text style={styles.programTitle}>{item.title}</Text>
+          <Text style={styles.programInstructor}>by {item.instructorName || 'Intentional Movement'}</Text>
+          <Text style={styles.programDescription} numberOfLines={2}>
+            {item.description || 'No description available'}
+          </Text>
+          <View style={styles.programMeta}>
+            {item.price !== undefined && item.price !== null && (
+              <Text style={styles.programPrice}>${parseFloat(item.price).toFixed(2)}</Text>
+            )}
+            <View style={styles.programRating}>
+              <Text style={styles.ratingIcon}>⭐</Text>
+              <Text style={styles.ratingText}>{item.rating ? parseFloat(item.rating).toFixed(1) : 'N/A'}</Text>
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const renderFooter = () => {
     if (!loading || page === 1) return null;
@@ -244,6 +265,10 @@ const getStyles = (colors) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[200],
   },
+  imageContainer: {
+    position: 'relative',
+    marginRight: SIZES.md,
+  },
   programImage: {
     width: 100,
     height: 100,
@@ -251,10 +276,23 @@ const getStyles = (colors) => StyleSheet.create({
     backgroundColor: colors.gray[100],
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SIZES.md,
   },
   programImagePlaceholder: {
     fontSize: 40,
+  },
+  paidBadge: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: colors.success,
+    paddingHorizontal: SIZES.xs,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  paidBadgeText: {
+    color: colors.white,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: 'bold',
   },
   programInfo: {
     flex: 1,
