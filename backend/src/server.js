@@ -174,11 +174,14 @@ app.use(requestIdMiddleware);
 console.log('Applying request logger...');
 app.use(requestLogger);
 
-// Rate limiting - more permissive in development
+// Rate limiting - more permissive for authenticated users
 console.log('Configuring rate limiter...');
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 100 : 1000 // 1000 for dev, 100 for production
+  max: process.env.NODE_ENV === 'production' ? 500 : 1000, // 500 for production, 1000 for dev
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use('/api/', limiter);
 console.log('Rate limiter applied');
