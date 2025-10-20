@@ -22,6 +22,7 @@ const UserAvatar = ({
   isOnline = false,
   style,
 }) => {
+  const [imageError, setImageError] = React.useState(false);
   const initials = formatters.getInitials(firstName, lastName);
 
   const avatarStyle = {
@@ -41,10 +42,19 @@ const UserAvatar = ({
     borderWidth: size * 0.05,
   };
 
+  // Reset error state when URI changes
+  React.useEffect(() => {
+    setImageError(false);
+  }, [uri]);
+
   return (
     <View style={[styles.container, avatarStyle, style]}>
-      {uri ? (
-        <Image source={{ uri }} style={[styles.image, avatarStyle]} />
+      {uri && !imageError ? (
+        <Image
+          source={{ uri }}
+          style={[styles.image, avatarStyle]}
+          onError={() => setImageError(true)}
+        />
       ) : (
         <View style={[styles.placeholder, avatarStyle]}>
           <Text style={[styles.initials, initialsStyle]}>{initials}</Text>
