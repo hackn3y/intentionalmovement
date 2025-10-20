@@ -11,9 +11,20 @@ import FollowingScreen from '../screens/Profile/FollowingScreen';
 import SettingsScreen from '../screens/Other/SettingsScreen';
 import PostDetailScreen from '../screens/Posts/PostDetailScreen';
 
+// Settings Screens
+import ChangePasswordScreen from '../screens/Other/ChangePasswordScreen';
+import PrivacySettingsScreen from '../screens/Other/PrivacySettingsScreen';
+import HelpCenterScreen from '../screens/Other/HelpCenterScreen';
+
 // Subscription Screens
 import SubscriptionScreen from '../screens/Subscription/SubscriptionScreen';
 import PricingScreen from '../screens/Subscription/PricingScreen';
+
+// Program Screens
+import MyProgramsScreen from '../screens/Programs/MyProgramsScreen';
+
+// Achievement Screens
+import AchievementsScreen from '../screens/Achievements/AchievementsScreen';
 
 // Legal Screens
 import TermsOfServiceScreen from '../screens/Legal/TermsOfServiceScreen';
@@ -93,6 +104,31 @@ const ProfileStack = () => {
         name="PrivacyPolicy"
         component={PrivacyPolicyScreen}
         options={{ title: 'Privacy Policy' }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{ title: 'Change Password' }}
+      />
+      <Stack.Screen
+        name="PrivacySettings"
+        component={PrivacySettingsScreen}
+        options={{ title: 'Privacy Settings' }}
+      />
+      <Stack.Screen
+        name="HelpCenter"
+        component={HelpCenterScreen}
+        options={{ title: 'Help Center' }}
+      />
+      <Stack.Screen
+        name="MyPrograms"
+        component={MyProgramsScreen}
+        options={{ title: 'My Programs' }}
+      />
+      <Stack.Screen
+        name="Achievements"
+        component={AchievementsScreen}
+        options={{ title: 'My Achievements' }}
       />
     </Stack.Navigator>
   );

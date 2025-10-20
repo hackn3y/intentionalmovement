@@ -102,14 +102,14 @@ const SettingsScreen = ({ navigation }) => {
         <SettingItem
           title="Change Password"
           subtitle="Update your password"
-          onPress={() => Alert.alert('Change Password', 'Password change screen will be implemented')}
+          onPress={() => navigation.navigate('ChangePassword')}
           rightElement={<Text style={styles.arrow}>›</Text>}
           colors={colors}
         />
         <SettingItem
           title="Privacy Settings"
           subtitle="Manage your privacy preferences"
-          onPress={() => Alert.alert('Privacy Settings', 'Privacy settings will be implemented')}
+          onPress={() => navigation.navigate('PrivacySettings')}
           rightElement={<Text style={styles.arrow}>›</Text>}
           showBorder={false}
           colors={colors}
@@ -160,7 +160,7 @@ const SettingsScreen = ({ navigation }) => {
         <SettingItem
           title="Help Center"
           subtitle="Get help and support"
-          onPress={() => Alert.alert('Help Center', 'Help center will open')}
+          onPress={() => navigation.navigate('HelpCenter')}
           rightElement={<Text style={styles.arrow}>›</Text>}
           colors={colors}
         />
