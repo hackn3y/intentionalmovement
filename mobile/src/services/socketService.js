@@ -10,6 +10,7 @@ class SocketService {
     this.socket = null;
     this.connected = false;
     this.connecting = false; // Track connection state separately
+    this.pendingListeners = []; // Queue listeners until socket is ready
   }
 
   /**
@@ -58,6 +59,16 @@ class SocketService {
         }
         this.connected = true;
         this.connecting = false; // Clear connecting flag when connected
+
+        // Register all pending listeners
+        if (this.pendingListeners.length > 0) {
+          console.log(`[SocketService] Registering ${this.pendingListeners.length} pending listeners`);
+          this.pendingListeners.forEach(({ event, callback }) => {
+            console.log(`[SocketService] Registering queued listener for event: ${event}`);
+            this.socket.on(event, callback);
+          });
+          this.pendingListeners = []; // Clear the queue
+        }
       });
 
       // Log transport upgrade
@@ -117,8 +128,14 @@ class SocketService {
    * @returns {Function} The callback function (to use for removing specific listener)
    */
   onNewMessage(callback) {
-    if (this.socket) {
+    if (this.socket && typeof this.socket !== 'string') {
+      // Socket exists and is connected, register immediately
+      console.log('[SocketService] Registering new_message listener immediately');
       this.socket.on('new_message', callback);
+    } else {
+      // Socket doesn't exist yet, queue the listener
+      console.log('[SocketService] Queueing new_message listener (socket not ready)');
+      this.pendingListeners.push({ event: 'new_message', callback });
     }
     return callback;
   }
