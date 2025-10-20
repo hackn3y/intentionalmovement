@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
-import { fetchMessages, sendMessage, markAsRead, setCurrentConversation } from '../../store/slices/messagesSlice';
+import { fetchMessages, sendMessage, setCurrentConversation, setUnreadCount } from '../../store/slices/messagesSlice';
 import { messageSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,7 +16,7 @@ const ChatScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const { colors } = useTheme();
   const { conversationId, userId } = route.params;
-  const { messages, loading, currentConversation } = useSelector((state) => state.messages);
+  const { messages, loading, currentConversation, conversations, unreadCount } = useSelector((state) => state.messages);
   const currentUser = useSelector((state) => state.auth.user);
   // Use userId as the key since that's what we use for fetchMessages
   const conversationMessages = messages[userId] || [];
@@ -44,12 +44,17 @@ const ChatScreen = ({ route, navigation }) => {
     if (conversationId && userId) {
       dispatch(setCurrentConversation({ _id: conversationId }));
       // The backend getMessages endpoint expects userId, not conversationId
-      // It also automatically marks messages as read
+      // It also automatically marks messages as read on the backend
       dispatch(fetchMessages({ conversationId: userId }));
-      // Also mark as read in the Redux store to clear the badge immediately
-      dispatch(markAsRead(conversationId));
+
+      // Manually update unread count in Redux to clear the badge immediately
+      const conversation = conversations.find(c => c._id === conversationId);
+      if (conversation && conversation.unreadCount > 0) {
+        const newUnreadCount = Math.max(0, unreadCount - conversation.unreadCount);
+        dispatch(setUnreadCount(newUnreadCount));
+      }
     }
-  }, [conversationId, userId]);
+  }, [conversationId, userId, conversations, unreadCount, dispatch]);
 
   // Scroll to bottom when messages load or update
   useEffect(() => {
