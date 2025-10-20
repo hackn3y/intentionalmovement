@@ -8,6 +8,26 @@ const SAFE_USER_ATTRIBUTES = ['id', 'firebaseUid', 'email', 'username', 'display
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res, next) => {
   try {
+    // Helper function to safely count with fallback
+    const safeCount = async (model, options = {}) => {
+      try {
+        return await model.count(options);
+      } catch (error) {
+        console.warn(`Count failed for ${model.name}:`, error.message);
+        return 0;
+      }
+    };
+
+    // Helper function to safely sum with fallback
+    const safeSum = async (model, field, options = {}) => {
+      try {
+        return await model.sum(field, options);
+      } catch (error) {
+        console.warn(`Sum failed for ${model.name}.${field}:`, error.message);
+        return 0;
+      }
+    };
+
     const [
       totalUsers,
       totalPosts,
@@ -17,15 +37,13 @@ exports.getDashboardStats = async (req, res, next) => {
       pendingReports,
       totalRevenue
     ] = await Promise.all([
-      User.count(),
-      // TEMPORARY: Skip isActive check since column doesn't exist in production
-      // User.count({ where: { isActive: true } }),
-      Post.count(),
-      Purchase.count({ where: { status: 'completed' } }),
-      Program.count({ where: { isPublished: true } }),
-      Subscription.count({ where: { status: 'active' } }),
-      Report.count({ where: { status: 'pending' } }),
-      Purchase.sum('amount', { where: { status: 'completed' } })
+      safeCount(User),
+      safeCount(Post),
+      safeCount(Purchase, { where: { status: 'completed' } }),
+      safeCount(Program, { where: { isPublished: true } }),
+      safeCount(Subscription, { where: { status: 'active' } }),
+      safeCount(Report, { where: { status: 'pending' } }),
+      safeSum(Purchase, 'amount', { where: { status: 'completed' } })
     ]);
 
     // Get new users this month
@@ -39,20 +57,29 @@ exports.getDashboardStats = async (req, res, next) => {
       }
     });
 
-    // Get recent activity - fetch more items for better chronological mixing
+    // Get recent activity - fetch more items for better chronological mixing (with safe fallbacks)
+    const safeFindAll = async (model, options) => {
+      try {
+        return await model.findAll(options);
+      } catch (error) {
+        console.warn(`FindAll failed for ${model.name}:`, error.message);
+        return [];
+      }
+    };
+
     const [recentUsers, recentPosts, recentPurchases] = await Promise.all([
-      User.findAll({
+      safeFindAll(User, {
         attributes: ['id', 'username', 'displayName', 'createdAt'],
         order: [['createdAt', 'DESC']],
         limit: 20
       }),
-      Post.findAll({
+      safeFindAll(Post, {
         attributes: ['id', 'content', 'createdAt'],
         include: [{ model: User, as: 'user', attributes: ['username', 'displayName'] }],
         order: [['createdAt', 'DESC']],
         limit: 20
       }),
-      Purchase.findAll({
+      safeFindAll(Purchase, {
         attributes: ['id', 'amount', 'createdAt'],
         include: [
           { model: User, as: 'user', attributes: ['username', 'displayName'] },
@@ -94,20 +121,26 @@ exports.getDashboardStats = async (req, res, next) => {
       .sort((a, b) => b.timestamp - a.timestamp) // Sort by actual timestamp
       .slice(0, 15); // Show top 15 most recent activities
 
-    // Get popular programs
-    const popularPrograms = await sequelize.query(`
-      SELECT
-        p.id,
-        p.title,
-        p.price,
-        COUNT(pu.id) as purchases
-      FROM Programs p
-      LEFT JOIN Purchases pu ON pu.programId = p.id AND pu.status = 'completed'
-      WHERE p.isPublished = 1
-      GROUP BY p.id
-      ORDER BY purchases DESC
-      LIMIT 5
-    `, { type: sequelize.QueryTypes.SELECT });
+    // Get popular programs (with safe fallback)
+    let popularPrograms = [];
+    try {
+      popularPrograms = await sequelize.query(`
+        SELECT
+          p.id,
+          p.title,
+          p.price,
+          COUNT(pu.id) as purchases
+        FROM "Programs" p
+        LEFT JOIN "Purchases" pu ON pu."programId" = p.id AND pu.status = 'completed'
+        WHERE p."isPublished" = true
+        GROUP BY p.id
+        ORDER BY purchases DESC
+        LIMIT 5
+      `, { type: sequelize.QueryTypes.SELECT });
+    } catch (error) {
+      console.warn('Failed to fetch popular programs:', error.message);
+      popularPrograms = [];
+    }
 
     res.json({
       totalUsers,
