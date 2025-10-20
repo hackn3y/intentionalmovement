@@ -37,9 +37,44 @@ const forceSyncDatabase = async () => {
     console.log(`This will affect ${models.length} models: ${models.join(', ')}`);
     console.log('\n⚠️  ALL DATA WILL BE PERMANENTLY DELETED ⚠️\n');
 
-    // Force sync
+    // Force sync - sync models in dependency order to avoid foreign key errors
     console.log('[3/3] Force syncing database (dropping and recreating all tables)...');
-    await sequelize.sync({ force: true });
+
+    // First, drop all tables to start fresh
+    await sequelize.drop();
+    console.log('✓ Dropped all tables');
+
+    // Then sync models in the correct order (parent tables first)
+    const modelOrder = [
+      'User',           // Must be first (parent of many tables)
+      'Post',           // Parent of Comment, Like
+      'Comment',
+      'Like',
+      'Follow',
+      'Message',
+      'Program',        // Parent of Purchase, Progress, ProgramReview
+      'Purchase',
+      'Progress',
+      'Achievement',    // Parent of UserAchievement
+      'UserAchievement',
+      'Challenge',      // Parent of ChallengeParticipant
+      'ChallengeParticipant',
+      'Subscription',
+      'Report',
+      'ProgramReview',
+      'AuditLog',
+      'DailyContent',   // Parent of DailyCheckIn
+      'UserStreak',     // References User
+      'DailyCheckIn'    // References User and DailyContent
+    ];
+
+    for (const modelName of modelOrder) {
+      if (sequelize.models[modelName]) {
+        await sequelize.models[modelName].sync();
+        console.log(`  ✓ Created ${modelName} table`);
+      }
+    }
+
     console.log('✓ Database force synced successfully!');
 
     // Verify
