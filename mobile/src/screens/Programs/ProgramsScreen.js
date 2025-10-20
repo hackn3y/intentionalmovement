@@ -140,6 +140,7 @@ const ProgramsScreen = ({ navigation }) => {
           value={search}
           onChangeText={setSearch}
           placeholderTextColor={colors.gray[400]}
+          color={colors.text}
         />
       </View>
 

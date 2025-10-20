@@ -20,10 +20,10 @@ import EmptyState from '../../components/EmptyState';
  */
 const NewMessageScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const { searchResults, loading } = useSelector((state) => state.user);
   const [searchQuery, setSearchQuery] = useState('');
-  const styles = getStyles(colors);
+  const styles = getStyles(colors, isDarkMode);
 
   useEffect(() => {
     // Debounce search
@@ -117,7 +117,7 @@ const NewMessageScreen = ({ navigation }) => {
   );
 };
 
-const getStyles = (colors) =>
+const getStyles = (colors, isDarkMode) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -131,7 +131,7 @@ const getStyles = (colors) =>
     },
     searchInput: {
       height: 44,
-      backgroundColor: colors.isDark ? colors.gray[800] : colors.gray[100],
+      backgroundColor: isDarkMode ? colors.gray[800] : colors.gray[100],
       borderRadius: SIZES.sm,
       paddingHorizontal: SIZES.md,
       fontSize: FONT_SIZES.md,
