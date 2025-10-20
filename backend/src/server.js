@@ -222,12 +222,17 @@ const startServer = async () => {
     // This ensures new tables are created when models are added
     console.log('Syncing database...');
     try {
-      await sequelize.sync({ force: false });
+      // Use alter:true to update schema if tables exist, or create if they don't
+      await sequelize.sync({ alter: true });
       console.log('Database synced!');
       logger.info('Database synchronized successfully.');
     } catch (syncError) {
-      console.warn('Database sync failed (this is normal if database already exists):', syncError.message);
-      logger.warn('Database sync failed, continuing with existing schema:', syncError.message);
+      console.error('Database sync failed:', syncError.message);
+      logger.error('Database sync failed:', syncError);
+
+      // If sync fails, the database might be in a bad state
+      // Log the error but don't crash - let the app try to start
+      console.error('WARNING: Database may not be properly initialized. Some features may not work.');
     }
 
     console.log(`Starting server on port ${PORT}...`);
