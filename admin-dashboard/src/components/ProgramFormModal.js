@@ -210,7 +210,6 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
             >
               <option value="">Select a category</option>
-              <option value="insurance">Insurance</option>
               <option value="real-estate">Real Estate</option>
               <option value="personal-development">Personal Development</option>
               <option value="all-levels">All Levels</option>
