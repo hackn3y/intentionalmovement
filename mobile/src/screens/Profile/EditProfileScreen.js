@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
+import * as ImagePicker from 'expo-image-picker';
 import { updateProfile } from '../../store/slices/authSlice';
 import { profileSchema } from '../../utils/validation';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
@@ -33,8 +34,31 @@ const EditProfileScreen = ({ navigation }) => {
    * Handle image picker
    */
   const handleSelectImage = async () => {
-    // TODO: Implement image picker
-    Alert.alert('Image Picker', 'Image picker will be implemented with expo-image-picker');
+    try {
+      // Request permission (required for mobile, not for web)
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Required', 'Please allow access to your photo library to change your profile picture.');
+          return;
+        }
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error);
+      Alert.alert('Error', 'Failed to select image. Please try again.');
+    }
   };
 
   /**
