@@ -143,6 +143,23 @@ function DailyContent() {
     return colors[type] || colors.quote;
   };
 
+  // Helper function to parse date string as local date (not UTC)
+  const parseLocalDate = (dateString) => {
+    // dateString is in format "YYYY-MM-DD"
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed
+  };
+
+  const formatDate = (dateString) => {
+    const date = parseLocalDate(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -230,12 +247,7 @@ function DailyContent() {
                     {content.contentType}
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(content.date).toLocaleDateString('en-US', {
-                      weekday: 'short',
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
+                    {formatDate(content.date)}
                   </span>
                   {content.category && (
                     <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded">

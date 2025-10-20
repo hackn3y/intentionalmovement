@@ -18,6 +18,7 @@ import {
   clearError
 } from '../../store/slices/dailyContentSlice';
 import { COLORS } from '../../config/constants';
+import { formatters } from '../../utils/formatters';
 
 function DailyContentScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -143,11 +144,7 @@ function DailyContentScreen({ navigation }) {
           </View>
           <Text style={styles.contentDate}>
             {todayContent.date
-              ? new Date(todayContent.date).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric'
-                })
+              ? formatters.formatDateString(todayContent.date, 'EEEE, MMMM d')
               : 'Today'}
           </Text>
         </View>

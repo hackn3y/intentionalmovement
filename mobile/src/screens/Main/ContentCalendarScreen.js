@@ -11,6 +11,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchContentCalendar, clearError } from '../../store/slices/dailyContentSlice';
 import { COLORS } from '../../config/constants';
+import { formatters } from '../../utils/formatters';
 
 function ContentCalendarScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -160,11 +161,7 @@ function ContentCalendarScreen({ navigation }) {
                   </View>
 
                   <Text style={styles.date}>
-                    {new Date(item.date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
+                    {formatters.formatDateString(item.date, 'MMM d, yyyy')}
                   </Text>
                 </View>
 

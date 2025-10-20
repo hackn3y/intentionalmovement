@@ -239,4 +239,33 @@ export const formatters = {
     const last = lastName?.charAt(0) || '';
     return (first + last).toUpperCase();
   },
+
+  /**
+   * Parse a date-only string (YYYY-MM-DD) as a local date, not UTC
+   * This prevents timezone issues where "2025-10-31" shows as Oct 30 in some timezones
+   * @param {string} dateString - Date string in YYYY-MM-DD format
+   * @returns {Date} Date object representing local date
+   */
+  parseLocalDateString: (dateString) => {
+    if (!dateString) return null;
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed
+  },
+
+  /**
+   * Format a date-only string (YYYY-MM-DD) to a readable format
+   * @param {string} dateString - Date string in YYYY-MM-DD format
+   * @param {string} formatStr - Date-fns format string (default: 'PPPP')
+   * @returns {string} Formatted date
+   */
+  formatDateString: (dateString, formatStr = 'PPPP') => {
+    try {
+      const date = formatters.parseLocalDateString(dateString);
+      if (!date) return '';
+      return format(date, formatStr);
+    } catch (error) {
+      console.error('Error formatting date string:', error);
+      return '';
+    }
+  },
 };

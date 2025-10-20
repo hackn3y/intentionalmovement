@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import dailyContentService from '../../services/dailyContentService';
 import { COLORS } from '../../config/constants';
+import { formatters } from '../../utils/formatters';
 
 function ContentDetailScreen({ route, navigation }) {
   const { contentId, date } = route.params;
@@ -106,12 +107,7 @@ function ContentDetailScreen({ route, navigation }) {
             </Text>
           </View>
           <Text style={styles.contentDate}>
-            {new Date(content.date).toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric'
-            })}
+            {formatters.formatDateString(content.date, 'EEEE, MMMM d, yyyy')}
           </Text>
         </View>
 
