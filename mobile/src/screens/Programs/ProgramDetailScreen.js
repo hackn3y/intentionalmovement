@@ -63,14 +63,26 @@ const ProgramDetailScreen = ({ route, navigation }) => {
       <ScrollView>
         <View style={styles.header}>
           {currentProgram.coverImage ? (
-            <Image
-              source={{ uri: currentProgram.coverImage }}
-              style={styles.coverImage}
-              resizeMode="contain"
-            />
+            <View style={styles.coverImageWrapper}>
+              <Image
+                source={{ uri: currentProgram.coverImage }}
+                style={styles.coverImage}
+                resizeMode="contain"
+              />
+              {isPurchased && (
+                <View style={styles.paidBadge}>
+                  <Text style={styles.paidBadgeText}>PAID</Text>
+                </View>
+              )}
+            </View>
           ) : (
             <View style={styles.imageContainer}>
               <Text style={styles.imagePlaceholder}>📚</Text>
+              {isPurchased && (
+                <View style={styles.paidBadge}>
+                  <Text style={styles.paidBadgeText}>PAID</Text>
+                </View>
+              )}
             </View>
           )}
           <Text style={styles.title}>{currentProgram.title || 'Untitled Program'}</Text>
@@ -124,9 +136,12 @@ const ProgramDetailScreen = ({ route, navigation }) => {
 const getStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: { padding: SIZES.lg, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.card },
-  coverImage: { width: '90%', height: 220, borderRadius: SIZES.md, marginBottom: SIZES.md, alignSelf: 'center' },
-  imageContainer: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.isDark ? colors.gray[800] : colors.gray[100], justifyContent: 'center', alignItems: 'center', marginBottom: SIZES.md },
+  coverImageWrapper: { position: 'relative', width: '90%', height: 220, marginBottom: SIZES.md, alignSelf: 'center' },
+  coverImage: { width: '100%', height: '100%', borderRadius: SIZES.md },
+  imageContainer: { position: 'relative', width: 120, height: 120, borderRadius: 60, backgroundColor: colors.isDark ? colors.gray[800] : colors.gray[100], justifyContent: 'center', alignItems: 'center', marginBottom: SIZES.md },
   imagePlaceholder: { fontSize: 60 },
+  paidBadge: { position: 'absolute', top: 10, right: 10, backgroundColor: colors.success, paddingHorizontal: SIZES.sm, paddingVertical: SIZES.xs, borderRadius: 6 },
+  paidBadgeText: { color: colors.white, fontSize: FONT_SIZES.sm, fontWeight: 'bold' },
   title: { fontSize: FONT_SIZES.xxl, fontWeight: 'bold', color: colors.text, textAlign: 'center' },
   instructor: { fontSize: FONT_SIZES.md, color: colors.gray[600], marginTop: SIZES.xs },
   price: { fontSize: FONT_SIZES.xl, fontWeight: 'bold', color: colors.primary, marginTop: SIZES.sm },
