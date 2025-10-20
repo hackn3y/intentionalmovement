@@ -24,6 +24,9 @@ try {
   const logger = require('./utils/logger');
   console.log('Logger loaded');
 
+  // Initialize Firebase Admin early (must be before controllers/routes)
+  require('./middleware/auth');
+
   const { sequelize } = require('./models');
   console.log('Models loaded');
 
