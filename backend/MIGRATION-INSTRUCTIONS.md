@@ -1,80 +1,91 @@
-# Database Migration Instructions
+# Railway Database Migration Instructions
 
-## Problem
-The Vercel deployment is getting a 500 error because the production PostgreSQL database on Railway is missing the `isCurated` column that was recently added to the Post model.
+## ⚠️ CRITICAL: Run Force Sync on Railway PostgreSQL
 
-## Solution
-Run the PostgreSQL migration script to add the missing column.
+### Problem
+Your Railway PostgreSQL database needs to be force-synced to create all tables. When you ran `railway run node force-sync-db-auto.js` locally, it synchronized your **local SQLite database**, not Railway's PostgreSQL database.
 
-## Option 1: Run via Railway CLI (Recommended)
+### You Need To:
+Run the force-sync script **inside Railway's production environment** so it connects to the actual PostgreSQL database.
 
-### Prerequisites
-- Install Railway CLI: `npm install -g @railway/cli`
-- Login: `railway login`
+## Method 1: Railway Dashboard - One-Off Command (Easiest)
 
-### Steps
-1. Link to your Railway project:
+1. Go to https://railway.app/dashboard
+2. Select project: **disciplined-beauty**
+3. Click on your **backend service** (Node.js app, not Postgres)
+4. Look for **"Run Command"** or **"One-Off Command"** (location varies by Railway version):
+   - May be in **Settings** tab
+   - Or in **Deployments** → Latest deployment → Shell/Command interface
+5. Run:
    ```bash
-   cd backend
-   railway link
+   npm run force:sync:auto
    ```
+6. Wait for success message showing 20 tables created
+7. **Restart the backend service**
 
-2. Run the migration:
+## Method 2: Temporarily Change Start Command
+
+1. Railway dashboard → Backend service → **Settings**
+2. Find **"Start Command"**
+3. Change from `npm start` to:
    ```bash
-   railway run node add-iscurated-postgres.js
+   npm run force:sync:auto && npm start
    ```
+4. Save and let Railway redeploy
+5. Check logs for "SUCCESS: Database has been reset"
+6. **IMPORTANT**: Change start command back to `npm start` after successful sync
 
-## Option 2: Run via Railway Dashboard
+## Method 3: Railway CLI (if you have it configured)
 
-1. Go to your Railway project dashboard
-2. Click on your backend service
-3. Go to the "Deployments" tab
-4. Click on the latest deployment
-5. Open the "Deploy Logs"
-6. In the deployment settings, add a temporary "Migration" service:
-   - Create a new service
-   - Set the start command to: `node add-iscurated-postgres.js`
-   - Share the same DATABASE_URL environment variable
-   - Deploy and monitor logs
-   - Once complete, you can remove this service
-
-## Option 3: SSH into Railway
-
-1. From Railway dashboard, click "Shell" on your backend service
-2. Run:
-   ```bash
-   node add-iscurated-postgres.js
-   ```
-
-## Option 4: Automated Migration on Startup (Not Recommended for Production)
-
-Add a migration check to your server startup in `src/server.js`:
-
-```javascript
-// Run migrations before starting server (only in production)
-if (process.env.NODE_ENV === 'production') {
-  require('./migrations/add-iscurated')
-    .then(() => server.listen(PORT))
-    .catch(err => {
-      logger.error('Migration failed:', err);
-      process.exit(1);
-    });
-}
+```bash
+cd backend
+railway link  # Link to your Railway project
+railway run npm run force:sync:auto
 ```
+
+## What the Script Does
+
+When run on Railway's PostgreSQL database:
+1. Connects to Railway PostgreSQL (via DATABASE_URL environment variable)
+2. Drops all existing tables (clears broken schema)
+3. Creates fresh tables for all 20 models:
+   - Users, Posts, Comments, Likes, Follows, Messages
+   - Programs, Purchases, Progresses
+   - Achievements, UserAchievements
+   - Challenges, ChallengeParticipants
+   - Subscriptions, Reports, ProgramReviews, AuditLog
+   - **daily_contents, user_streaks, daily_check_ins** ← The ones you need!
+4. Verifies tables were created
+
+## After Successful Sync
+
+1. **Restart Railway backend service**
+2. Check Railway logs - should see:
+   ```
+   Database connected!
+   Database synced!
+   ✓ Server successfully started on port 3001
+   ```
+3. **Test creating daily content** in admin dashboard
+4. **Create new admin user** (database is empty)
 
 ## Verification
 
-After running the migration, verify it worked:
+To verify tables exist on Railway PostgreSQL:
 
-1. Check the Vercel deployment - the 500 errors should be gone
-2. Or manually verify in Railway:
-   ```bash
-   railway run psql $DATABASE_URL -c "SELECT column_name FROM information_schema.columns WHERE table_name='Posts' AND column_name='isCurated';"
+1. Railway dashboard → **Postgres** service → **Connect** → **Query**
+2. Run:
+   ```sql
+   SELECT table_name
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
+   ORDER BY table_name;
    ```
+3. Should see 20 tables
 
-## What the Migration Does
+## Troubleshooting
 
-- Adds `isCurated` BOOLEAN column to Posts table (defaults to false)
-- Creates index on `isCurated` for performance
-- Creates composite index on `(isCurated, createdAt)` for curated feed queries
-- Safe to run multiple times (checks if column exists first)
+- **"Database: SQLite"** in output = You ran locally, not on Railway
+- **"Database: PostgreSQL"** in output = Correct! Running on Railway
+- **Script succeeds but app still crashes** = Restart backend service
+- **Railway CLI not working** = Use Method 1 or 2 instead
