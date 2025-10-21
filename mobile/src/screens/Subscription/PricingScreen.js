@@ -8,6 +8,7 @@ import {
   Alert,
   Switch,
   Platform,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -352,7 +353,24 @@ const PricingScreen = ({ navigation }) => {
       </View>
 
       {/* Contact Support */}
-      <TouchableOpacity style={styles.supportButton}>
+      <TouchableOpacity
+        style={styles.supportButton}
+        onPress={() => {
+          const email = 'support@intentionalmovementcorporation.com';
+          const subject = 'Membership Support Request';
+          const body = 'Hi, I need help with my membership.';
+          const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+          Linking.openURL(mailtoUrl).catch((err) => {
+            console.error('Failed to open email client:', err);
+            if (Platform.OS === 'web') {
+              window.alert('Please contact us at: support@intentionalmovementcorporation.com');
+            } else {
+              Alert.alert('Contact Support', 'Please email us at: support@intentionalmovementcorporation.com');
+            }
+          });
+        }}
+      >
         <Ionicons name="help-circle-outline" size={20} color={COLORS.primary} />
         <Text style={styles.supportText}>Need help? Contact support</Text>
       </TouchableOpacity>
