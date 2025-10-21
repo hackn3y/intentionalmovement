@@ -7,8 +7,8 @@
   # Directory where the built files will be located (relative to base)
   publish = "build"
 
-  # Build command - use npm script that sets CI=false
-  command = "npm run build:netlify"
+  # Build command - npm run build now includes CI=false by default
+  command = "npm run build"
 
 # Redirect all requests to index.html for client-side routing
 [[redirects]]
