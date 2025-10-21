@@ -9,7 +9,7 @@ exports.getPlans = async (req, res, next) => {
       {
         id: 'basic_monthly',
         tier: 'basic',
-        name: 'Basic Monthly',
+        name: 'Basic',
         price: 9.99,
         currency: 'USD',
         interval: 'month',
@@ -25,21 +25,25 @@ exports.getPlans = async (req, res, next) => {
       {
         id: 'basic_yearly',
         tier: 'basic',
-        name: 'Basic Yearly',
+        name: 'Basic',
         price: 99,
         currency: 'USD',
         interval: 'year',
         priceId: process.env.STRIPE_BASIC_YEARLY_PRICE_ID,
         savings: 20,
         features: [
-          'All Basic Monthly features',
+          'Create unlimited posts',
+          'Purchase up to 3 programs',
+          'Basic achievements',
+          'Ad-free experience',
+          'Community access',
           'Save $20 per year'
         ]
       },
       {
         id: 'premium_monthly',
         tier: 'premium',
-        name: 'Premium Monthly',
+        name: 'Premium',
         price: 29.99,
         currency: 'USD',
         interval: 'month',
@@ -57,14 +61,20 @@ exports.getPlans = async (req, res, next) => {
       {
         id: 'premium_yearly',
         tier: 'premium',
-        name: 'Premium Yearly',
+        name: 'Premium',
         price: 299,
         currency: 'USD',
         interval: 'year',
         priceId: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID,
         savings: 60,
         features: [
-          'All Premium Monthly features',
+          'Unlimited program purchases',
+          'Unlimited messaging',
+          'All achievements & challenges',
+          'Exclusive content',
+          'Priority support',
+          'Early access to features',
+          'Creator tools',
           'Save $60 per year'
         ]
       }
@@ -76,6 +86,44 @@ exports.getPlans = async (req, res, next) => {
       trialDays: 14
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// Create checkout session for subscription (mobile payment sheet)
+exports.createCheckout = async (req, res, next) => {
+  try {
+    const { priceId, tier } = req.body;
+    const userId = req.user.id;
+
+    if (!priceId || !tier) {
+      return res.status(400).json({ error: 'Price ID and tier are required' });
+    }
+
+    if (!['basic', 'premium'].includes(tier)) {
+      return res.status(400).json({ error: 'Invalid subscription tier' });
+    }
+
+    // Get or create Stripe customer
+    const user = await User.findByPk(userId);
+    const customerId = await stripeService.getOrCreateCustomer(user);
+
+    // Create subscription checkout
+    const checkout = await stripeService.createSubscriptionCheckout({
+      customerId,
+      priceId,
+      userId,
+      tier
+    });
+
+    res.json({
+      success: true,
+      clientSecret: checkout.clientSecret,
+      subscriptionId: checkout.subscriptionId,
+      customerId: checkout.customerId
+    });
+  } catch (error) {
+    console.error('Create checkout error:', error);
     next(error);
   }
 };

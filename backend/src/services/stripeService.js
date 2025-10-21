@@ -323,4 +323,46 @@ exports.detachPaymentMethod = async (paymentMethodId) => {
   }
 };
 
+// Create subscription with payment intent (for mobile payment sheet)
+exports.createSubscriptionCheckout = async ({ customerId, priceId, userId, tier }) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
+  try {
+    // Create subscription with payment_behavior='default_incomplete'
+    // This creates a subscription with the first invoice in incomplete state
+    const subscription = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      payment_behavior: 'default_incomplete',
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+      },
+      expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+      trial_period_days: 14, // 14-day trial
+      metadata: {
+        userId: userId.toString(),
+        tier
+      }
+    });
+
+    // Get the payment intent client secret
+    const paymentIntent = subscription.latest_invoice.payment_intent;
+    const setupIntent = subscription.pending_setup_intent;
+
+    // Return the client secret (use setup intent for trial, payment intent for immediate payment)
+    const clientSecret = setupIntent ? setupIntent.client_secret : paymentIntent.client_secret;
+
+    return {
+      subscriptionId: subscription.id,
+      clientSecret,
+      customerId
+    };
+  } catch (error) {
+    console.error('Error creating subscription checkout:', error);
+    throw error;
+  }
+};
+
 module.exports = exports;

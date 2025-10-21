@@ -14,6 +14,7 @@ router.use(verifyToken);
 
 router.get('/my', subscriptionController.getMySubscription);
 router.get('/history', subscriptionController.getSubscriptionHistory);
+router.post('/create-checkout', subscriptionController.createCheckout);
 router.post('/', subscriptionController.createSubscription);
 router.put('/', subscriptionController.updateSubscription);
 router.post('/cancel', subscriptionController.cancelSubscription);
