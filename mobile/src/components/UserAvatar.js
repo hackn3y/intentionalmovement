@@ -29,6 +29,8 @@ const UserAvatar = ({
   const imageUri = React.useMemo(() => {
     if (!uri) return null;
 
+    let finalUri = uri;
+
     // If it's a base64 image (starts with data:), use it directly
     if (uri.startsWith('data:')) {
       return uri;
@@ -41,12 +43,18 @@ const UserAvatar = ({
       const baseUrl = typeof window !== 'undefined' && window.location
         ? window.location.origin.replace(':8081', ':3001') // Web: use current origin but port 3001
         : API_URL.replace('/api', ''); // Mobile: use API_URL
-      const fullUrl = `${baseUrl}${uri}`;
-      return fullUrl;
+      finalUri = `${baseUrl}${uri}`;
+    }
+
+    // Add cache-busting parameter for S3 URLs and local uploads to force image refresh
+    // This is only for display purposes - the database stores the clean URL
+    if (finalUri.includes('s3.') || finalUri.includes('/uploads')) {
+      const separator = finalUri.includes('?') ? '&' : '?';
+      return `${finalUri}${separator}t=${Date.now()}`;
     }
 
     // Otherwise use the URI as-is (for Google images, etc.)
-    return uri;
+    return finalUri;
   }, [uri]);
 
   const avatarStyle = {
