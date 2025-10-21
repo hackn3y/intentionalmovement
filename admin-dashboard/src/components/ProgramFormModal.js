@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import toast from 'react-hot-toast';
+import { adminService } from '../services/adminService';
 
 function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
   const [formData, setFormData] = useState({
@@ -20,6 +21,8 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Update form data when initialData changes (for editing)
   useEffect(() => {
@@ -39,6 +42,9 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
         features: Array.isArray(initialData.features) ? initialData.features.join('\n') : '',
         outcomes: Array.isArray(initialData.outcomes) ? initialData.outcomes.join('\n') : ''
       });
+      // Set image preview for existing cover image
+      setImagePreview(initialData.coverImage || null);
+      setSelectedImage(null);
     } else {
       // Reset form when creating new
       setFormData({
@@ -56,6 +62,8 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
         features: '',
         outcomes: ''
       });
+      setImagePreview(null);
+      setSelectedImage(null);
     }
   }, [initialData, isOpen]);
 
@@ -82,6 +90,37 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
     }
   };
 
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setSelectedImage(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(initialData?.coverImage || null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -103,15 +142,32 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
       const features = formData.features ? formData.features.split('\n').map(f => f.trim()).filter(Boolean) : [];
       const outcomes = formData.outcomes ? formData.outcomes.split('\n').map(o => o.trim()).filter(Boolean) : [];
 
-      await onSubmit({
+      const programData = {
         ...formData,
         price: formData.price ? parseFloat(formData.price) : 0,
         duration: formData.duration ? parseInt(formData.duration) : null,
         tags,
         features,
         outcomes
-      });
-      toast.success(initialData ? 'Program updated successfully' : 'Program created successfully');
+      };
+
+      // Create or update the program
+      const result = await onSubmit(programData);
+
+      // Upload image if one was selected
+      if (selectedImage && result?.program?.id) {
+        try {
+          const uploadResult = await adminService.uploadProgramImage(result.program.id, selectedImage);
+          console.log('Program image uploaded:', uploadResult);
+          toast.success(initialData ? 'Program and image updated successfully' : 'Program created and image uploaded successfully');
+        } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
+          toast.error('Program saved but image upload failed: ' + (uploadError.response?.data?.error || uploadError.message));
+        }
+      } else {
+        toast.success(initialData ? 'Program updated successfully' : 'Program created successfully');
+      }
+
       onClose();
     } catch (error) {
       toast.error(error.message || 'Failed to save program');
@@ -271,16 +327,69 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Cover Image URL
+            Cover Image
           </label>
-          <input
-            type="url"
-            name="coverImage"
-            value={formData.coverImage}
-            onChange={handleChange}
-            placeholder="https://example.com/image.jpg"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
-          />
+
+          {/* Image Preview */}
+          {imagePreview && (
+            <div className="mb-3 relative">
+              <img
+                src={imagePreview}
+                alt="Cover preview"
+                className="w-full h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+              />
+              {selectedImage && (
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors"
+                  title="Remove image"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* File Input */}
+          <div className="flex items-center gap-3">
+            <label className="flex-1 cursor-pointer">
+              <div className="px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary-500 dark:hover:border-primary-400 transition-colors text-center">
+                <svg className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedImage ? selectedImage.name : 'Click to upload cover image'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  PNG, JPG, GIF or WebP (max 5MB)
+                </p>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {/* Optional: Allow URL input as fallback */}
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+              Or enter image URL
+            </label>
+            <input
+              type="url"
+              name="coverImage"
+              value={formData.coverImage}
+              onChange={handleChange}
+              placeholder="https://example.com/image.jpg"
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
+            />
+          </div>
         </div>
 
         <div>

@@ -432,3 +432,51 @@ exports.updateProgramProgress = async (req, res, next) => {
     next(error);
   }
 };
+
+// Upload program cover image (admin only)
+exports.uploadProgramCoverImage = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    const program = await Program.findByPk(id);
+
+    if (!program) {
+      return res.status(404).json({ error: 'Program not found' });
+    }
+
+    let imageUrl;
+
+    // Upload to S3 if configured, otherwise use local storage
+    if (process.env.STORAGE_MODE === 's3') {
+      try {
+        const s3Service = require('../services/s3Service');
+        const s3Result = await s3Service.uploadImage(req.file, 'programs', {
+          width: 1200,
+          height: 675,
+          quality: 85
+        });
+        imageUrl = s3Result.url;
+        console.log('Program cover image uploaded to S3:', imageUrl);
+      } catch (s3Error) {
+        console.error('S3 upload error:', s3Error);
+        return res.status(500).json({ error: 'Failed to upload image to S3', details: s3Error.message });
+      }
+    } else {
+      // Local storage fallback
+      imageUrl = `/uploads/programs/${req.file.filename}`;
+    }
+
+    await program.update({ coverImage: imageUrl });
+
+    res.json({
+      message: 'Program cover image uploaded successfully',
+      coverImage: imageUrl
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -107,7 +107,7 @@ export const adminService = {
   uploadProgramImage: async (programId, file) => {
     const formData = new FormData();
     formData.append('image', file);
-    const response = await api.post(`/admin/programs/${programId}/image`, formData, {
+    const response = await api.post(`/programs/${programId}/upload-cover-image`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;

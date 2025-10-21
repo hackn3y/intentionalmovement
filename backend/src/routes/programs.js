@@ -3,6 +3,7 @@ const router = express.Router();
 const programController = require('../controllers/programController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const { cacheMiddleware } = require('../middleware/cache');
+const { uploadImage } = require('../config/upload');
 
 // Public routes (with caching)
 router.get('/', verifyToken, cacheMiddleware(5 * 60 * 1000), programController.getPrograms);
@@ -17,5 +18,6 @@ router.put('/:id/progress', verifyToken, programController.updateProgramProgress
 router.post('/', verifyToken, isAdmin, programController.createProgram);
 router.put('/:id', verifyToken, isAdmin, programController.updateProgram);
 router.delete('/:id', verifyToken, isAdmin, programController.deleteProgram);
+router.post('/:id/upload-cover-image', verifyToken, isAdmin, uploadImage.single('image'), programController.uploadProgramCoverImage);
 
 module.exports = router;
