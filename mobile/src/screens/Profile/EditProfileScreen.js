@@ -40,7 +40,11 @@ const EditProfileScreen = ({ navigation }) => {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permission Required', 'Please allow access to your photo library to change your profile picture.');
+          if (Platform.OS === 'web') {
+            window.alert('Please allow access to your photo library to change your profile picture.');
+          } else {
+            Alert.alert('Permission Required', 'Please allow access to your photo library to change your profile picture.');
+          }
           return;
         }
       }
@@ -58,7 +62,11 @@ const EditProfileScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error selecting image:', error);
-      Alert.alert('Error', 'Failed to select image. Please try again.');
+      if (Platform.OS === 'web') {
+        window.alert('Failed to select image. Please try again.');
+      } else {
+        Alert.alert('Error', 'Failed to select image. Please try again.');
+      }
     }
   };
 
@@ -111,7 +119,12 @@ const EditProfileScreen = ({ navigation }) => {
         } catch (imageError) {
           console.error('Image upload error:', imageError);
           console.error('Error details:', imageError.response?.data);
-          Alert.alert('Error', `Failed to upload image: ${imageError.response?.data?.message || imageError.message || 'Unknown error'}`);
+          const errorMsg = `Failed to upload image: ${imageError.response?.data?.message || imageError.message || 'Unknown error'}`;
+          if (Platform.OS === 'web') {
+            window.alert(errorMsg);
+          } else {
+            Alert.alert('Error', errorMsg);
+          }
           return; // Stop execution if image upload fails
         }
       }
@@ -121,7 +134,11 @@ const EditProfileScreen = ({ navigation }) => {
       console.log('Profile update result:', result);
 
       // Show success message
-      Alert.alert('Success', 'Profile updated successfully!');
+      if (Platform.OS === 'web') {
+        window.alert('Profile updated successfully!');
+      } else {
+        Alert.alert('Success', 'Profile updated successfully!');
+      }
 
       // Navigate back with refresh parameter to reload profile
       if (navigation && navigation.canGoBack && navigation.canGoBack()) {
@@ -133,7 +150,12 @@ const EditProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error('updateProfile error:', error);
       console.error('Error details:', error.response?.data);
-      Alert.alert('Error', error.response?.data?.message || error.message || error || 'Failed to update profile');
+      const errorMsg = error.response?.data?.message || error.message || error || 'Failed to update profile';
+      if (Platform.OS === 'web') {
+        window.alert(errorMsg);
+      } else {
+        Alert.alert('Error', errorMsg);
+      }
     }
   };
 
