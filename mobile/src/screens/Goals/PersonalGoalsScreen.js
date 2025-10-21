@@ -124,12 +124,12 @@ const PersonalGoalsScreen = () => {
     setShowModal(true);
   };
 
-  const increaseProgress = () => {
+  const increaseProgress = (amount) => {
     if (!selectedCategory) return;
 
     const updated = categories.map((cat) => {
       if (cat.id === selectedCategory.id) {
-        let newProgress = cat.progress + 10;
+        let newProgress = cat.progress + amount;
         let newLevel = cat.level;
 
         // Level up when progress reaches 100
@@ -155,12 +155,12 @@ const PersonalGoalsScreen = () => {
     setSelectedCategory(updated.find((c) => c.id === selectedCategory.id));
   };
 
-  const decreaseProgress = () => {
+  const decreaseProgress = (amount) => {
     if (!selectedCategory) return;
 
     const updated = categories.map((cat) => {
       if (cat.id === selectedCategory.id) {
-        let newProgress = Math.max(0, cat.progress - 10);
+        let newProgress = Math.max(0, cat.progress - amount);
         return { ...cat, progress: newProgress };
       }
       return cat;
@@ -265,8 +265,8 @@ const PersonalGoalsScreen = () => {
         <View style={styles.infoCard}>
           <Ionicons name="information-circle" size={24} color={colors.primary} />
           <Text style={styles.infoText}>
-            Tap any category to increase your progress. Each level requires 100% progress.
-            Track your growth across all 6 areas of life!
+            Tap any category to track your progress. Increase by 1%, 5%, or 10% increments.
+            Each level requires 100% progress. Make 1% daily improvements!
           </Text>
         </View>
 
@@ -337,25 +337,63 @@ const PersonalGoalsScreen = () => {
                   </View>
                 </View>
 
+                <Text style={styles.buttonSectionTitle}>Increase Progress</Text>
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.decreaseButton]}
-                    onPress={decreaseProgress}
+                    style={[
+                      styles.modalButton,
+                      styles.smallButton,
+                      { backgroundColor: selectedCategory.color },
+                    ]}
+                    onPress={() => increaseProgress(1)}
                   >
-                    <Ionicons name="remove" size={24} color={colors.white} />
-                    <Text style={styles.modalButtonText}>-10%</Text>
+                    <Text style={styles.modalButtonText}>+1%</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={[
                       styles.modalButton,
-                      styles.increaseButton,
+                      styles.mediumButton,
                       { backgroundColor: selectedCategory.color },
                     ]}
-                    onPress={increaseProgress}
+                    onPress={() => increaseProgress(5)}
                   >
-                    <Ionicons name="add" size={24} color={colors.white} />
+                    <Text style={styles.modalButtonText}>+5%</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      styles.largeButton,
+                      { backgroundColor: selectedCategory.color },
+                    ]}
+                    onPress={() => increaseProgress(10)}
+                  >
                     <Text style={styles.modalButtonText}>+10%</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.buttonSectionTitle}>Decrease Progress</Text>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.smallButton, styles.decreaseButton]}
+                    onPress={() => decreaseProgress(1)}
+                  >
+                    <Text style={styles.modalButtonText}>-1%</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.mediumButton, styles.decreaseButton]}
+                    onPress={() => decreaseProgress(5)}
+                  >
+                    <Text style={styles.modalButtonText}>-5%</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.largeButton, styles.decreaseButton]}
+                    onPress={() => decreaseProgress(10)}
+                  >
+                    <Text style={styles.modalButtonText}>-10%</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -623,19 +661,33 @@ const getStyles = (colors) =>
       height: '100%',
       borderRadius: 8,
     },
+    buttonSectionTitle: {
+      fontSize: FONT_SIZES.sm,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: SIZES.sm,
+      marginTop: SIZES.xs,
+    },
     modalButtons: {
       flexDirection: 'row',
-      gap: SIZES.md,
-      marginBottom: SIZES.lg,
+      gap: SIZES.sm,
+      marginBottom: SIZES.md,
     },
     modalButton: {
       flex: 1,
-      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: SIZES.md,
-      borderRadius: 12,
-      gap: SIZES.xs,
+      paddingVertical: SIZES.sm + 2,
+      borderRadius: 10,
+    },
+    smallButton: {
+      // Smallest button for 1%
+    },
+    mediumButton: {
+      // Medium button for 5%
+    },
+    largeButton: {
+      // Largest button for 10%
     },
     decreaseButton: {
       backgroundColor: colors.gray[400],
