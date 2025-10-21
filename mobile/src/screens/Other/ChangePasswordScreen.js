@@ -82,7 +82,15 @@ const ChangePasswordScreen = ({ navigation }) => {
         ? { newPassword }
         : { currentPassword, newPassword };
 
-      await api.put(endpoint, payload);
+      console.log('[ChangePasswordScreen] Changing password:', {
+        endpoint,
+        isGoogleUser,
+        hasCurrentPassword: !!currentPassword,
+        hasNewPassword: !!newPassword,
+      });
+
+      const response = await api.put(endpoint, payload);
+      console.log('[ChangePasswordScreen] Password change response:', response.data);
 
       // If user was a Google-only user and just set a password, update Redux state
       if (isGoogleUser) {
@@ -109,7 +117,12 @@ const ChangePasswordScreen = ({ navigation }) => {
 
       navigation.goBack();
     } catch (error) {
-      const message = error.response?.data?.message || 'Failed to change password';
+      console.error('[ChangePasswordScreen] Error changing password:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      const message = error.response?.data?.message || error.response?.data?.error || 'Failed to change password';
       if (Platform.OS === 'web') {
         window.alert(message);
       } else {
