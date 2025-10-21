@@ -111,7 +111,11 @@ exports.login = async (req, res, next) => {
     const { email, username, password } = req.body;
     const loginIdentifier = email || username;
 
-    console.log('Login attempt:', { identifier: loginIdentifier, passwordProvided: !!password });
+    console.log('[login] Login attempt:', {
+      identifier: loginIdentifier,
+      passwordProvided: !!password,
+      passwordLength: password?.length,
+    });
 
     // Find user by email OR username
     const user = await User.findOne({
@@ -124,18 +128,31 @@ exports.login = async (req, res, next) => {
       attributes: ['id', 'firebaseUid', 'email', 'username', 'displayName', 'password', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt']
     });
 
-    console.log('User found:', !!user, 'Has password:', user ? !!user.password : false);
+    console.log('[login] User found:', !!user, 'Has password:', user ? !!user.password : false);
+
+    if (user) {
+      console.log('[login] User details:', {
+        email: user.email,
+        hasPassword: !!user.password,
+        passwordHashPrefix: user.password?.substring(0, 20),
+      });
+    }
 
     if (!user || !user.password) {
-      console.log('Rejected: User not found or no password');
+      console.log('[login] Rejected: User not found or no password');
       return response.unauthorized(res, 'Invalid credentials');
     }
 
+    console.log('[login] Attempting password comparison...');
     const isValidPassword = await user.comparePassword(password);
-    console.log('Password valid:', isValidPassword);
+    console.log('[login] Password valid:', isValidPassword);
 
     if (!isValidPassword) {
-      console.log('Rejected: Invalid password');
+      console.log('[login] Rejected: Invalid password');
+      // Also try direct bcrypt comparison for debugging
+      const bcrypt = require('bcrypt');
+      const directComparison = await bcrypt.compare(password, user.password);
+      console.log('[login] Direct bcrypt comparison:', directComparison);
       return response.unauthorized(res, 'Invalid credentials');
     }
 

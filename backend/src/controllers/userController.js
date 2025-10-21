@@ -561,6 +561,14 @@ exports.changePassword = async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.id;
 
+    console.log('[changePassword] Request received:', {
+      userId,
+      hasCurrentPassword: !!currentPassword,
+      currentPasswordLength: currentPassword?.length,
+      hasNewPassword: !!newPassword,
+      newPasswordLength: newPassword?.length,
+    });
+
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Current password and new password are required' });
     }
@@ -576,12 +584,19 @@ exports.changePassword = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    console.log('[changePassword] User found:', {
+      email: user.email,
+      hasPassword: !!user.password,
+      currentHashPrefix: user.password?.substring(0, 20),
+    });
+
     if (!user.password) {
       return res.status(400).json({ error: 'No password set. Use set-password endpoint to create a password.' });
     }
 
     // Verify current password
     const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    console.log('[changePassword] Current password valid:', isValidPassword);
 
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Current password is incorrect' });
@@ -589,12 +604,29 @@ exports.changePassword = async (req, res, next) => {
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+    console.log('[changePassword] New password hashed:', {
+      hashPrefix: hashedPassword.substring(0, 20),
+      hashLength: hashedPassword.length,
+    });
 
     // Update password
     await user.update({ password: hashedPassword });
+    console.log('[changePassword] Password updated in database');
+
+    // Verify the update worked by re-fetching the user
+    const updatedUser = await User.findByPk(userId);
+    console.log('[changePassword] Verification - user refetched:', {
+      hashPrefix: updatedUser.password?.substring(0, 20),
+      hashMatches: updatedUser.password === hashedPassword,
+    });
+
+    // Test if the new password works immediately
+    const testNewPassword = await bcrypt.compare(newPassword, updatedUser.password);
+    console.log('[changePassword] Test new password immediately:', testNewPassword);
 
     res.json({ message: 'Password changed successfully' });
   } catch (error) {
+    console.error('[changePassword] Error:', error);
     next(error);
   }
 };
