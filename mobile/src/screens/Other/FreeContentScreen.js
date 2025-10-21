@@ -29,46 +29,101 @@ const FreeContentScreen = ({ navigation }) => {
           id: 1,
           type: 'article',
           title: 'The Power of Intentional Movement',
-          description: 'Discover how small, intentional actions create lasting change in your life.',
+          description: 'Discover how small, intentional actions create lasting change in your life and elevate your lifestyle.',
           icon: 'book-outline',
           color: '#ec4899',
           available: true,
+          duration: '8 min read',
         },
         {
           id: 2,
           type: 'video',
           title: '5-Minute Morning Routine',
-          description: 'Start your day with purpose and energy using this simple routine.',
+          description: 'Start your day with purpose and energy using this simple routine designed for busy people.',
           icon: 'play-circle-outline',
           color: '#10b981',
           available: true,
+          duration: '5:32',
         },
         {
           id: 3,
           type: 'audio',
           title: 'Planted Mind Meditation',
-          description: 'A guided meditation to center your mind and cultivate intention.',
+          description: 'A guided meditation to center your mind, cultivate intention, and find inner peace.',
           icon: 'headset-outline',
           color: '#8b5cf6',
           available: true,
+          duration: '12 min',
         },
         {
           id: 4,
           type: 'article',
           title: 'Building Your Movement Practice',
-          description: 'Tips and strategies for creating a sustainable movement practice.',
+          description: 'Tips and strategies for creating a sustainable movement practice that fits your lifestyle.',
           icon: 'book-outline',
           color: '#f59e0b',
           available: true,
+          duration: '6 min read',
         },
         {
           id: 5,
           type: 'challenge',
           title: '7-Day Gratitude Challenge',
-          description: 'Transform your mindset with daily gratitude practices.',
+          description: 'Transform your mindset with daily gratitude practices and unlock joy in everyday moments.',
           icon: 'trophy-outline',
           color: '#3b82f6',
           available: true,
+          duration: '7 days',
+        },
+        {
+          id: 6,
+          type: 'video',
+          title: 'Mindful Breathing Techniques',
+          description: 'Learn powerful breathing exercises to reduce stress and increase mental clarity.',
+          icon: 'play-circle-outline',
+          color: '#14b8a6',
+          available: true,
+          duration: '8:15',
+        },
+        {
+          id: 7,
+          type: 'article',
+          title: 'Creating Your Vision Board',
+          description: 'Step-by-step guide to manifesting your goals through visualization and intentional planning.',
+          icon: 'book-outline',
+          color: '#6366f1',
+          available: true,
+          duration: '10 min read',
+        },
+        {
+          id: 8,
+          type: 'audio',
+          title: 'Evening Wind-Down Meditation',
+          description: 'Release the day\'s tension and prepare for restorative sleep with this calming meditation.',
+          icon: 'headset-outline',
+          color: '#a855f7',
+          available: true,
+          duration: '15 min',
+        },
+        {
+          id: 9,
+          type: 'video',
+          title: 'Quick Desk Stretches',
+          description: 'Combat sitting fatigue with these simple stretches you can do anywhere, anytime.',
+          icon: 'play-circle-outline',
+          color: '#ef4444',
+          available: true,
+          duration: '6:45',
+        },
+        {
+          id: 10,
+          type: 'challenge',
+          title: '30-Day Hydration Challenge',
+          description: 'Build the habit of proper hydration and feel the difference in your energy and skin.',
+          icon: 'trophy-outline',
+          color: '#06b6d4',
+          available: true,
+          duration: '30 days',
         },
       ];
 
@@ -182,6 +237,13 @@ const FreeContentScreen = ({ navigation }) => {
             <View style={styles.contentInfo}>
               <Text style={styles.contentTitle}>{item.title}</Text>
               <Text style={styles.contentDescription}>{item.description}</Text>
+
+              {item.duration && (
+                <View style={styles.durationContainer}>
+                  <Ionicons name="time-outline" size={14} color={colors.gray[500]} />
+                  <Text style={styles.durationText}>{item.duration}</Text>
+                </View>
+              )}
 
               <View style={styles.contentFooter}>
                 <View style={[styles.typeBadge, { backgroundColor: item.color }]}>
@@ -354,7 +416,17 @@ const getStyles = (colors) => StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: colors.gray[600],
     lineHeight: 18,
+    marginBottom: SIZES.xs,
+  },
+  durationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginBottom: SIZES.sm,
+  },
+  durationText: {
+    fontSize: FONT_SIZES.xs,
+    color: colors.gray[500],
   },
   contentFooter: {
     flexDirection: 'row',
