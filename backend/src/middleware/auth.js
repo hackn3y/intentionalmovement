@@ -14,9 +14,18 @@ if (process.env.FIREBASE_PROJECT_ID) {
       // Use service account from environment variable (for production)
       console.log('Attempting to parse FIREBASE_SERVICE_ACCOUNT...');
 
-      // Replace literal \n with actual newlines in the private key
-      const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT.replace(/\\n/g, '\n');
-      const serviceAccount = JSON.parse(serviceAccountString);
+      let serviceAccount;
+      try {
+        // First, try parsing as-is (in case it's already valid JSON)
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        console.log('Parsed service account without replacement');
+      } catch (e) {
+        // If that fails, try replacing literal \n with actual newlines
+        console.log('First parse failed, trying with newline replacement...');
+        const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT.replace(/\\n/g, '\n');
+        serviceAccount = JSON.parse(serviceAccountString);
+        console.log('Parsed service account with newline replacement');
+      }
       console.log('Parsed service account, project_id:', serviceAccount.project_id);
 
       admin.initializeApp({
