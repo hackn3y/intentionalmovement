@@ -376,6 +376,7 @@ exports.createSubscriptionCheckoutSession = async ({ customerId, priceId, userId
       customer: customerId,
       payment_method_types: ['card'],
       mode: 'subscription',
+      locale: 'en',
       line_items: [
         {
           price: priceId,
