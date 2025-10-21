@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Create Purchase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background: #ec4899;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #db2777;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Purchase (Admin)</h1>
+
+    <div class="info">
+        <strong>Instructions:</strong><br>
+        1. Enter your admin password<br>
+        2. Click "Login & Create Purchase"<br>
+        3. This will create the "Own Your Sale" purchase for hackn3y@gmail.com
+    </div>
+
+    <form id="purchaseForm">
+        <label>Admin Email:</label>
+        <input type="email" id="email" value="hackn3y@gmail.com" readonly>
+
+        <label>Admin Password:</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+
+        <button type="submit">Login & Create Purchase</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'https://intentionalmovement-production.up.railway.app/api';
+
+        document.getElementById('purchaseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">Processing...</div>';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Step 1: Login
+                console.log('Logging in...');
+                const loginResponse = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const loginData = await loginResponse.json();
+
+                if (!loginResponse.ok || !loginData.success) {
+                    throw new Error(loginData.message || 'Login failed');
+                }
+
+                const token = loginData.data.token;
+                console.log('Login successful, token:', token.substring(0, 20) + '...');
+
+                // Step 2: Create purchase
+                console.log('Creating purchase...');
+                const purchaseResponse = await fetch(`${API_URL}/admin/purchases/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        userEmail: 'hackn3y@gmail.com',
+                        programSlug: 'own-your-sale',
+                        amount: 777
+                    })
+                });
+
+                const purchaseData = await purchaseResponse.json();
+
+                if (!purchaseResponse.ok) {
+                    // Check if purchase already exists
+                    if (purchaseData.error && purchaseData.error.includes('already exists')) {
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <strong>✓ Purchase Already Exists!</strong><br>
+                                The "Own Your Sale" program is already purchased.<br>
+                                Check Settings → My Programs in the app.
+                            </div>
+                        `;
+                        return;
+                    }
+                    throw new Error(purchaseData.error || purchaseData.message || 'Failed to create purchase');
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <strong>✓ Purchase Created Successfully!</strong><br>
+                        Program: ${purchaseData.purchase.program.title}<br>
+                        Amount: $${purchaseData.purchase.amount}<br>
+                        Status: ${purchaseData.purchase.status}<br><br>
+                        Go to Settings → My Programs in the app to see it!
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>✗ Error:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

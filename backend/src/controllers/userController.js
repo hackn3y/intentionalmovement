@@ -602,22 +602,15 @@ exports.changePassword = async (req, res, next) => {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    console.log('[changePassword] New password hashed:', {
-      hashPrefix: hashedPassword.substring(0, 20),
-      hashLength: hashedPassword.length,
-    });
-
-    // Update password
-    await user.update({ password: hashedPassword });
+    // Update password with plaintext - the beforeUpdate hook will hash it
+    // DO NOT hash here, or it will be double-hashed by the beforeUpdate hook
+    await user.update({ password: newPassword });
     console.log('[changePassword] Password updated in database');
 
     // Verify the update worked by re-fetching the user
     const updatedUser = await User.findByPk(userId);
     console.log('[changePassword] Verification - user refetched:', {
       hashPrefix: updatedUser.password?.substring(0, 20),
-      hashMatches: updatedUser.password === hashedPassword,
     });
 
     // Test if the new password works immediately
@@ -657,11 +650,9 @@ exports.setPassword = async (req, res, next) => {
       return res.status(400).json({ error: 'Password already set. Use change-password endpoint to change it.' });
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Set password
-    await user.update({ password: hashedPassword });
+    // Set password with plaintext - the beforeUpdate hook will hash it
+    // DO NOT hash here, or it will be double-hashed by the beforeUpdate hook
+    await user.update({ password: newPassword });
 
     res.json({ message: 'Password set successfully. You can now log in with email and password.' });
   } catch (error) {

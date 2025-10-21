@@ -36,18 +36,14 @@ exports.register = async (req, res, next) => {
 
     console.log('No existing user, proceeding with registration...');
 
-    // Hash password manually
-    console.log('Hashing password...');
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('Password hashed successfully');
-
-    // Create user using Sequelize model (works with both SQLite and PostgreSQL)
+    // Create user with plaintext password - the beforeCreate hook will hash it
+    // DO NOT hash here, or it will be double-hashed by the beforeCreate hook
     console.log('Creating user with Sequelize...');
     const user = await User.create({
       email,
       username,
       displayName,
-      password: hashedPassword
+      password: password
     });
     console.log('User created successfully, ID:', user.id);
 
