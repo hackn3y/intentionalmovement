@@ -40,6 +40,7 @@ const filesToCopy = [
   { src: '../web/manifest.json', dest: 'manifest.json' },
   { src: '../web/service-worker.js', dest: 'service-worker.js' },
   { src: '../web/offline.html', dest: 'offline.html' },
+  { src: '../public/_redirects', dest: '_redirects' },
 ];
 
 filesToCopy.forEach(({ src, dest }) => {
