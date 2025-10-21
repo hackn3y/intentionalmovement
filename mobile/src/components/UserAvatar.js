@@ -29,19 +29,15 @@ const UserAvatar = ({
   const imageUri = React.useMemo(() => {
     if (!uri) return null;
 
-    console.log('[UserAvatar] Processing URI:', uri);
-
     let finalUri = uri;
 
     // If it's a base64 image (starts with data:), use it directly
     if (uri.startsWith('data:')) {
-      console.log('[UserAvatar] Base64 image detected');
       return uri;
     }
 
     // If it's a blob URL (local file selection), use it directly
     if (uri.startsWith('blob:')) {
-      console.log('[UserAvatar] Blob URL detected, using as-is');
       return uri;
     }
 
@@ -53,7 +49,6 @@ const UserAvatar = ({
         ? window.location.origin.replace(':8081', ':3001') // Web: use current origin but port 3001
         : API_URL.replace('/api', ''); // Mobile: use API_URL
       finalUri = `${baseUrl}${uri}`;
-      console.log('[UserAvatar] Converted relative path to:', finalUri);
     }
 
     // Add cache-busting parameter for S3 URLs and server uploads to force image refresh
@@ -61,13 +56,10 @@ const UserAvatar = ({
     // Don't add for blob URLs (local file selection)
     if ((finalUri.includes('s3.') || finalUri.includes('/uploads/')) && !finalUri.startsWith('blob:')) {
       const separator = finalUri.includes('?') ? '&' : '?';
-      const cacheBustedUri = `${finalUri}${separator}t=${Date.now()}`;
-      console.log('[UserAvatar] Added cache-buster:', cacheBustedUri);
-      return cacheBustedUri;
+      return `${finalUri}${separator}t=${Date.now()}`;
     }
 
     // Otherwise use the URI as-is (for Google images, etc.)
-    console.log('[UserAvatar] Using URI as-is:', finalUri);
     return finalUri;
   }, [uri]);
 
@@ -93,13 +85,6 @@ const UserAvatar = ({
     setImageError(false);
   }, [imageUri]);
 
-  // Log for debugging
-  React.useEffect(() => {
-    console.log('[UserAvatar] URI changed:', uri);
-    console.log('[UserAvatar] Image URI:', imageUri);
-    console.log('[UserAvatar] Image error:', imageError);
-  }, [uri, imageUri, imageError]);
-
   return (
     <View style={[styles.container, avatarStyle, style]}>
       {imageUri && !imageError ? (
@@ -107,12 +92,8 @@ const UserAvatar = ({
           key={imageUri} // Force re-render when URI changes
           source={{ uri: imageUri }}
           style={[styles.image, avatarStyle]}
-          onError={(error) => {
-            console.error('[UserAvatar] Image load error:', error.nativeEvent?.error);
+          onError={() => {
             setImageError(true);
-          }}
-          onLoad={() => {
-            console.log('[UserAvatar] Image loaded successfully:', imageUri);
           }}
         />
       ) : (
