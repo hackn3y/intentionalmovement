@@ -111,11 +111,8 @@ const EditProfileScreen = ({ navigation }) => {
 
           // Get the uploaded image URL from response
           if (uploadResponse.data && uploadResponse.data.profileImage) {
-            // Add cache-busting timestamp to force image reload
-            const imageUrl = uploadResponse.data.profileImage;
-            const cacheBuster = `?t=${Date.now()}`;
-            const separator = imageUrl.includes('?') ? '&' : '?';
-            updateData.profileImage = `${imageUrl}${separator}t=${Date.now()}`;
+            // Store the clean URL without cache-buster in database
+            updateData.profileImage = uploadResponse.data.profileImage;
             console.log('Setting profileImage to:', updateData.profileImage);
           } else {
             console.warn('No profileImage in upload response:', uploadResponse.data);
@@ -136,6 +133,9 @@ const EditProfileScreen = ({ navigation }) => {
       console.log('Updating profile with data:', updateData);
       const result = await dispatch(updateProfile(updateData)).unwrap();
       console.log('Profile update result:', result);
+
+      // Clear the selected image to force UserAvatar to show updated image
+      setSelectedImage(null);
 
       // Show success message
       if (Platform.OS === 'web') {
