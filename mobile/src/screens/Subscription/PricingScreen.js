@@ -7,12 +7,27 @@ import {
   ActivityIndicator,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
-import { useStripe } from '@stripe/stripe-react-native';
 import WebScrollView from '../../components/WebScrollView';
 import api from '../../services/api';
+
+// Conditionally import Stripe hook
+let useStripe;
+if (Platform.OS !== 'web') {
+  try {
+    const stripeModule = require('@stripe/stripe-react-native');
+    useStripe = stripeModule.useStripe;
+  } catch (e) {
+    // Stripe not available
+    useStripe = () => null;
+  }
+} else {
+  // On web, provide a no-op hook
+  useStripe = () => null;
+}
 
 const COLORS = {
   primary: '#ec4899',
@@ -36,7 +51,8 @@ const SIZES = {
 
 const PricingScreen = ({ navigation }) => {
   const { user } = useSelector((state) => state.auth);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  // Call useStripe hook (which is either the real hook or a no-op depending on platform)
+  const stripe = useStripe();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isYearly, setIsYearly] = useState(false);
@@ -66,6 +82,16 @@ const PricingScreen = ({ navigation }) => {
       return;
     }
 
+    // On web, show message that payment should be done on mobile app
+    if (Platform.OS === 'web') {
+      Alert.alert(
+        'Mobile App Required',
+        'To subscribe, please download our mobile app from the App Store or Google Play. Subscriptions are processed securely through our mobile application.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     setProcessingPlan(plan.id);
 
     try {
@@ -75,9 +101,9 @@ const PricingScreen = ({ navigation }) => {
         tier: plan.tier,
       });
 
-      if (response.data.clientSecret) {
+      if (response.data.clientSecret && stripe) {
         // Initialize payment sheet
-        const { error: initError } = await initPaymentSheet({
+        const { error: initError } = await stripe.initPaymentSheet({
           merchantDisplayName: 'Intentional Movement',
           paymentIntentClientSecret: response.data.clientSecret,
           defaultBillingDetails: {
@@ -91,7 +117,7 @@ const PricingScreen = ({ navigation }) => {
         }
 
         // Present payment sheet
-        const { error: presentError } = await presentPaymentSheet();
+        const { error: presentError } = await stripe.presentPaymentSheet();
 
         if (presentError) {
           Alert.alert('Payment Cancelled', presentError.message);
