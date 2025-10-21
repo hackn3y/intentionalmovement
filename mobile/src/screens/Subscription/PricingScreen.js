@@ -44,6 +44,19 @@ const PricingScreen = ({ navigation }) => {
 
   useEffect(() => {
     fetchPlans();
+
+    // Handle Stripe Checkout redirect success/cancel (web only)
+    if (Platform.OS === 'web') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('success') === 'true') {
+        window.alert('Success! Your subscription has been activated. Welcome to the community!');
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (urlParams.get('canceled') === 'true') {
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
   }, []);
 
   const fetchPlans = async () => {
@@ -79,11 +92,14 @@ const PricingScreen = ({ navigation }) => {
     try {
       // On web, use Stripe Checkout (redirect-based flow)
       if (Platform.OS === 'web') {
+        // Get the current URL without hash/query params
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+
         const response = await api.post('/subscriptions/create-checkout-session', {
           priceId: plan.priceId,
           tier: plan.tier,
-          successUrl: `${window.location.origin}/subscription-success`,
-          cancelUrl: `${window.location.origin}/pricing`,
+          successUrl: `${baseUrl}?success=true`,
+          cancelUrl: `${baseUrl}?canceled=true`,
         });
 
         if (response.data.url) {

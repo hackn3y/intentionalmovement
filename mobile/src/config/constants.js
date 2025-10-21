@@ -41,6 +41,7 @@ export const COLORS = {
   background: '#ffffff',    // Main background (white)
   card: '#ffffff',          // Card/surface background (white)
   text: '#111827',          // Primary text color
+  textSecondary: '#6b7280', // Secondary text color (gray)
   border: '#fbcfe8',        // Border color (light pink)
   isDark: false,            // Light mode indicator
   gray: {
@@ -78,6 +79,7 @@ export const DARK_COLORS = {
   background: '#0f172a',   // Main background (darker blue-gray)
   card: '#1e293b',         // Card/surface background (lighter than bg)
   text: '#f1f5f9',         // Primary text color (light)
+  textSecondary: '#94a3b8', // Secondary text color (lighter gray)
   border: '#334155',       // Border color
   isDark: true,            // Dark mode indicator
   gray: {
