@@ -5,6 +5,8 @@ import FeedScreen from '../screens/Main/FeedScreen';
 import PostDetailScreen from '../screens/Posts/PostDetailScreen';
 import CreatePostScreen from '../screens/Posts/CreatePostScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import CommunityGuidelinesScreen from '../screens/Other/CommunityGuidelinesScreen';
+import FreeContentScreen from '../screens/Other/FreeContentScreen';
 import { COLORS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 
@@ -69,6 +71,20 @@ const HomeStack = () => {
         options={({ route }) => ({
           title: route.params?.username || 'Profile',
         })}
+      />
+      <Stack.Screen
+        name="CommunityGuidelines"
+        component={CommunityGuidelinesScreen}
+        options={{
+          title: 'Community Guidelines',
+        }}
+      />
+      <Stack.Screen
+        name="FreeContent"
+        component={FreeContentScreen}
+        options={{
+          title: 'Free Content',
+        }}
       />
     </Stack.Navigator>
   );
