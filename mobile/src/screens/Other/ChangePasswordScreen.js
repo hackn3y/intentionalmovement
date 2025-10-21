@@ -10,12 +10,14 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import { useTheme } from '../../context/ThemeContext';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import api from '../../services/api';
 
 const ChangePasswordScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const { user } = useSelector((state) => state.auth);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,10 +26,16 @@ const ChangePasswordScreen = ({ navigation }) => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Check if user signed up with Google (has firebaseUid but no password)
+  const isGoogleUser = user?.firebaseUid && !user?.password;
+
   const validatePasswords = () => {
-    if (!currentPassword) {
-      Alert.alert('Error', 'Please enter your current password');
-      return false;
+    // For Google users, they don't need current password (they're setting it for the first time)
+    if (!isGoogleUser) {
+      if (!currentPassword) {
+        Alert.alert('Error', 'Please enter your current password');
+        return false;
+      }
     }
 
     if (!newPassword) {
@@ -45,7 +53,7 @@ const ChangePasswordScreen = ({ navigation }) => {
       return false;
     }
 
-    if (currentPassword === newPassword) {
+    if (!isGoogleUser && currentPassword === newPassword) {
       Alert.alert('Error', 'New password must be different from current password');
       return false;
     }
@@ -58,15 +66,21 @@ const ChangePasswordScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      await api.put('/users/change-password', {
-        currentPassword,
-        newPassword,
-      });
+      const endpoint = isGoogleUser ? '/users/set-password' : '/users/change-password';
+      const payload = isGoogleUser
+        ? { newPassword }
+        : { currentPassword, newPassword };
+
+      await api.put(endpoint, payload);
+
+      const successMessage = isGoogleUser
+        ? 'Password set successfully! You can now log in with email and password.'
+        : 'Password changed successfully!';
 
       if (Platform.OS === 'web') {
-        window.alert('Password changed successfully!');
+        window.alert(successMessage);
       } else {
-        Alert.alert('Success', 'Password changed successfully!');
+        Alert.alert('Success', successMessage);
       }
 
       navigation.goBack();
@@ -87,32 +101,50 @@ const ChangePasswordScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>Change Password</Text>
+        <Text style={styles.header}>
+          {isGoogleUser ? 'Set Password' : 'Change Password'}
+        </Text>
         <Text style={styles.description}>
-          Choose a strong password to keep your account secure
+          {isGoogleUser
+            ? 'You signed up with Google. Set a password to also log in with email and password.'
+            : 'Choose a strong password to keep your account secure'}
         </Text>
 
-        {/* Current Password */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Current Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry={!showCurrentPassword}
-              placeholder="Enter current password"
-              placeholderTextColor={colors.gray[400]}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              style={styles.eyeButton}
-              onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-            >
-              <Text style={styles.eyeText}>{showCurrentPassword ? '👁️' : '👁️‍🗨️'}</Text>
-            </TouchableOpacity>
+        {/* Info box for Google users */}
+        {isGoogleUser && (
+          <View style={[styles.requirementsBox, { marginBottom: SIZES.lg, backgroundColor: colors.primary + '20' }]}>
+            <Text style={[styles.requirementsTitle, { color: colors.primary }]}>
+              ℹ️ Google Sign In Detected
+            </Text>
+            <Text style={styles.requirement}>
+              You can continue using Google Sign In, or set a password to log in with your email ({user?.email}) and password.
+            </Text>
           </View>
-        </View>
+        )}
+
+        {/* Current Password - only show for non-Google users */}
+        {!isGoogleUser && (
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Current Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.input}
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry={!showCurrentPassword}
+                placeholder="Enter current password"
+                placeholderTextColor={colors.gray[400]}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+              >
+                <Text style={styles.eyeText}>{showCurrentPassword ? '👁️' : '👁️‍🗨️'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* New Password */}
         <View style={styles.inputGroup}>
@@ -163,7 +195,9 @@ const ChangePasswordScreen = ({ navigation }) => {
         <View style={styles.requirementsBox}>
           <Text style={styles.requirementsTitle}>Password Requirements:</Text>
           <Text style={styles.requirement}>• At least 8 characters</Text>
-          <Text style={styles.requirement}>• Different from current password</Text>
+          {!isGoogleUser && (
+            <Text style={styles.requirement}>• Different from current password</Text>
+          )}
           <Text style={styles.requirement}>• Recommended: Include numbers and special characters</Text>
         </View>
 
@@ -176,7 +210,9 @@ const ChangePasswordScreen = ({ navigation }) => {
           {loading ? (
             <ActivityIndicator color={colors.white} />
           ) : (
-            <Text style={styles.changeButtonText}>Change Password</Text>
+            <Text style={styles.changeButtonText}>
+              {isGoogleUser ? 'Set Password' : 'Change Password'}
+            </Text>
           )}
         </TouchableOpacity>
 

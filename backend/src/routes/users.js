@@ -8,6 +8,9 @@ const { uploadImage } = require('../config/upload');
 router.use(verifyToken);
 
 router.get('/search', userController.searchUsers);
+// Password management routes (before /:id routes to avoid conflicts)
+router.put('/change-password', userController.changePassword);
+router.put('/set-password', userController.setPassword);
 // Privacy settings routes (before /:id routes to avoid conflicts)
 router.get('/privacy-settings', userController.getPrivacySettings);
 router.put('/privacy-settings', userController.updatePrivacySettings);

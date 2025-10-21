@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 const { User, Follow, Post, Purchase, Program, Achievement, UserAchievement } = require('../models');
 const AchievementService = require('../services/achievementService');
 const s3Service = require('../services/s3Service');
@@ -549,6 +550,88 @@ exports.updatePrivacySettings = async (req, res, next) => {
       message: 'Privacy settings updated successfully',
       settings: metadata.privacySettings
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Change password
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters long' });
+    }
+
+    // Get user with password field
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({ error: 'No password set. Use set-password endpoint to create a password.' });
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await user.update({ password: hashedPassword });
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Set password (for Google/Firebase users who don't have a password yet)
+exports.setPassword = async (req, res, next) => {
+  try {
+    const { newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!newPassword) {
+      return res.status(400).json({ error: 'New password is required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+
+    // Get user
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if user already has a password
+    if (user.password) {
+      return res.status(400).json({ error: 'Password already set. Use change-password endpoint to change it.' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Set password
+    await user.update({ password: hashedPassword });
+
+    res.json({ message: 'Password set successfully. You can now log in with email and password.' });
   } catch (error) {
     next(error);
   }
