@@ -3,7 +3,7 @@ import Modal from './Modal';
 import toast from 'react-hot-toast';
 import { adminService } from '../services/adminService';
 
-function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
+function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null, onComplete = null }) {
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -160,6 +160,11 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
           const uploadResult = await adminService.uploadProgramImage(result.program.id, selectedImage);
           console.log('Program image uploaded:', uploadResult);
           toast.success(initialData ? 'Program and image updated successfully' : 'Program created and image uploaded successfully');
+
+          // Call onComplete callback to trigger parent refresh
+          if (onComplete) {
+            await onComplete();
+          }
         } catch (uploadError) {
           console.error('Image upload error:', uploadError);
           toast.error('Program saved but image upload failed: ' + (uploadError.response?.data?.error || uploadError.message));

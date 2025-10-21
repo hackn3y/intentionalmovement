@@ -38,16 +38,20 @@ function Programs() {
   };
 
   const handleCreateProgram = async (programData) => {
-    await adminService.createProgram(programData);
+    const result = await adminService.createProgram(programData);
     setIsCreateModalOpen(false);
-    fetchPrograms();
+    // Refresh immediately to show new program, then again after potential image upload
+    await fetchPrograms();
+    return result; // Return result so modal can upload image if needed
   };
 
   const handleEditProgram = async (programData) => {
-    await adminService.updateProgram(selectedProgram.id, programData);
+    const result = await adminService.updateProgram(selectedProgram.id, programData);
     setIsEditModalOpen(false);
     setSelectedProgram(null);
-    fetchPrograms();
+    // Refresh immediately, then again after potential image upload
+    await fetchPrograms();
+    return result; // Return result so modal can upload image if needed
   };
 
   const openEditModal = (program) => {
@@ -95,7 +99,7 @@ function Programs() {
             <div className="mb-4">
               {program.coverImage ? (
                 <img
-                  src={program.coverImage}
+                  src={`${program.coverImage}${program.coverImage.includes('?') ? '&' : '?'}t=${Date.now()}`}
                   alt={program.title}
                   className="w-full h-48 object-cover rounded-lg"
                   onError={(e) => {
@@ -200,6 +204,7 @@ function Programs() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateProgram}
+        onComplete={fetchPrograms}
       />
 
       {/* Edit Program Modal */}
@@ -211,6 +216,7 @@ function Programs() {
         }}
         onSubmit={handleEditProgram}
         initialData={selectedProgram}
+        onComplete={fetchPrograms}
       />
     </div>
   );
