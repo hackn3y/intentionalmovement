@@ -240,6 +240,8 @@ module.exports = (sequelize) => {
 
   User.prototype.toJSON = function() {
     const values = Object.assign({}, this.get());
+    // Add hasPassword boolean before deleting password field
+    values.hasPassword = !!values.password;
     delete values.password;
     return values;
   };
