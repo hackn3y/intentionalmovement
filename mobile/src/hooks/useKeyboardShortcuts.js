@@ -36,6 +36,7 @@ export const useKeyboardShortcuts = (shortcuts, deps = []) => {
       // Check for exact match
       if (shortcuts[keyCombo]) {
         event.preventDefault();
+        event.stopPropagation();
         shortcuts[keyCombo](event);
         return;
       }
@@ -44,15 +45,17 @@ export const useKeyboardShortcuts = (shortcuts, deps = []) => {
       const lowerKeyCombo = keyCombo.toLowerCase();
       if (shortcuts[lowerKeyCombo]) {
         event.preventDefault();
+        event.stopPropagation();
         shortcuts[lowerKeyCombo](event);
         return;
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
+    // Use capture phase to catch events before they reach the input
+    window.addEventListener('keydown', handleKeyPress, true);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyPress, true);
     };
   }, deps);
 };
