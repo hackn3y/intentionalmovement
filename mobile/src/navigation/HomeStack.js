@@ -7,6 +7,7 @@ import CreatePostScreen from '../screens/Posts/CreatePostScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import CommunityGuidelinesScreen from '../screens/Other/CommunityGuidelinesScreen';
 import FreeContentScreen from '../screens/Other/FreeContentScreen';
+import PersonalGoalsScreen from '../screens/Goals/PersonalGoalsScreen';
 import { COLORS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 
@@ -84,6 +85,13 @@ const HomeStack = () => {
         component={FreeContentScreen}
         options={{
           title: 'Free Content',
+        }}
+      />
+      <Stack.Screen
+        name="PersonalGoals"
+        component={PersonalGoalsScreen}
+        options={{
+          title: 'Personal Goals',
         }}
       />
     </Stack.Navigator>
