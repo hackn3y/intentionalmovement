@@ -10,6 +10,9 @@
   # Build command - npm run build now includes CI=false by default
   command = "npm run build"
 
+  # Environment variables
+  environment = { SECRETS_SCAN_SMART_DETECTION_ENABLED = "false" }
+
 # Redirect all requests to index.html for client-side routing
 [[redirects]]
   from = "/*"
