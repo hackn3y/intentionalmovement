@@ -25,7 +25,18 @@ function App() {
       <DarkModeProvider>
         <AuthProvider>
           <Router>
-            <Toaster position="top-right" />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 5000, // 5 seconds instead of default 2 seconds
+                success: {
+                  duration: 4000,
+                },
+                error: {
+                  duration: 6000, // Errors stay longer
+                },
+              }}
+            />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
