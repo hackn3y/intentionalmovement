@@ -172,6 +172,7 @@ exports.firebaseAuth = async (req, res, next) => {
     let verifiedEmail = email;
     let verifiedDisplayName = displayName;
     let verifiedProfileImage = profileImage;
+    let firebaseUid = null;
 
     // If idToken is provided, verify it using Firebase Admin SDK
     if (idToken) {
@@ -184,6 +185,7 @@ exports.firebaseAuth = async (req, res, next) => {
         verifiedEmail = decodedToken.email;
         verifiedDisplayName = decodedToken.name || displayName;
         verifiedProfileImage = decodedToken.picture || profileImage;
+        firebaseUid = decodedToken.uid;
       } catch (verifyError) {
         console.error('Firebase token verification failed:', verifyError.message);
         return response.unauthorized(res, 'Invalid Firebase token');
@@ -242,14 +244,15 @@ exports.firebaseAuth = async (req, res, next) => {
         counter++;
       }
 
-      console.log('Creating new user from Firebase OAuth:', { email: verifiedEmail, username, displayName: verifiedDisplayName });
+      console.log('Creating new user from Firebase OAuth:', { email: verifiedEmail, username, displayName: verifiedDisplayName, firebaseUid });
 
       // Create user using Sequelize model (works with both SQLite and PostgreSQL)
       user = await User.create({
         email: verifiedEmail,
         username,
         displayName: verifiedDisplayName || username,
-        profileImage: verifiedProfileImage || null
+        profileImage: verifiedProfileImage || null,
+        firebaseUid: firebaseUid
       });
 
       console.log('New user created:', { id: user.id, email: user.email });
@@ -289,6 +292,12 @@ exports.firebaseAuth = async (req, res, next) => {
 
       if (verifiedProfileImage && user.profileImage !== verifiedProfileImage) {
         updateData.profileImage = verifiedProfileImage;
+      }
+
+      // Update firebaseUid if not set and we have one from the token
+      if (firebaseUid && !user.firebaseUid) {
+        updateData.firebaseUid = firebaseUid;
+        console.log('Setting firebaseUid for existing user:', firebaseUid);
       }
 
       // Only update if there are changes
