@@ -3,36 +3,56 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { COLORS } from '../config/constants';
 
 // Post Screens
+import FeedScreen from '../screens/Main/FeedScreen';
 import CreatePostScreen from '../screens/Posts/CreatePostScreen';
 import PostDetailScreen from '../screens/Posts/PostDetailScreen';
 
 const Stack = createStackNavigator();
 
 /**
- * Post navigation stack
+ * Post navigation stack for Community tab
  */
 const PostStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: {
-          backgroundColor: COLORS.white,
-        },
-        headerTintColor: COLORS.dark,
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        headerShown: false,
       }}
     >
       <Stack.Screen
+        name="Feed"
+        component={FeedScreen}
+        options={{ title: 'Community' }}
+      />
+      <Stack.Screen
         name="CreatePost"
         component={CreatePostScreen}
-        options={{ title: 'Create Post' }}
+        options={{
+          title: 'Create Post',
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: COLORS.white,
+          },
+          headerTintColor: COLORS.dark,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
       <Stack.Screen
         name="PostDetail"
         component={PostDetailScreen}
-        options={{ title: 'Post' }}
+        options={{
+          title: 'Post',
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: COLORS.white,
+          },
+          headerTintColor: COLORS.dark,
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );

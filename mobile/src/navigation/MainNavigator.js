@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector, useDispatch } from 'react-redux';
 import { COLORS } from '../config/constants';
@@ -12,6 +12,7 @@ import MessageStack from './MessageStack';
 import ProfileStack from './ProfileStack';
 import DailyContentStack from './DailyContentStack';
 import PlantedMindStack from './PlantedMindStack';
+import PostStack from './PostStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,8 +67,12 @@ const MainNavigator = () => {
           height: 60,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
+          marginTop: -2,
+        },
+        tabBarIconStyle: {
+          marginTop: 2,
         },
       }}
     >
@@ -92,21 +97,13 @@ const MainNavigator = () => {
       />
       <Tab.Screen
         name="CommunityTab"
-        component={HomeStack}
+        component={PostStack}
         options={{
           tabBarLabel: 'Community',
           tabBarIcon: ({ color, size }) => (
             <Text style={{ fontSize: size, color }}>👥</Text>
           ),
         }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.navigate('HomeTab', {
-              screen: 'Feed',
-            });
-          },
-        })}
       />
       <Tab.Screen
         name="ProgramsTab"
@@ -139,7 +136,38 @@ const MainNavigator = () => {
         name="MessagesTab"
         component={MessageStack}
         options={{
-          tabBarButton: () => null,
+          tabBarLabel: 'Messages',
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ position: 'relative' }}>
+              <Text style={{ fontSize: size, color }}>💬</Text>
+              {unreadCount > 0 && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -8,
+                    backgroundColor: colors.primary,
+                    borderRadius: 10,
+                    minWidth: 18,
+                    height: 18,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: '#FFFFFF',
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ),
         }}
       />
       <Tab.Screen
