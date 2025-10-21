@@ -2,6 +2,8 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { auth } from '../config/firebase';
 
 // Enable dismissal of web browser on completion
 // Note: This may show a COOP warning in console on web browsers, but it's harmless
@@ -69,36 +71,55 @@ export const getGoogleUserInfo = async (accessToken) => {
  * Get Firebase ID token from Google authentication
  * @param {Object} googleAuth - Google auth response from expo-auth-session
  * @param {string} googleAuth.accessToken - Google access token
- * @param {string} googleAuth.idToken - Google/Firebase ID token (OpenID Connect)
+ * @param {string} googleAuth.idToken - Google ID token (optional, from OpenID Connect)
  * @returns {Object} Auth data for backend
  */
 export const getFirebaseAuthData = async (googleAuth) => {
-  if (!googleAuth?.accessToken) {
-    throw new Error('No Google access token available');
+  if (!googleAuth?.accessToken && !googleAuth?.idToken) {
+    throw new Error('No Google access token or ID token available');
   }
 
-  // Get user info from Google
-  const userInfo = await getGoogleUserInfo(googleAuth.accessToken);
+  try {
+    // Get user info from Google
+    const userInfo = await getGoogleUserInfo(googleAuth.accessToken);
 
-  if (!userInfo) {
-    throw new Error('Failed to get user info from Google');
+    if (!userInfo) {
+      throw new Error('Failed to get user info from Google');
+    }
+
+    // Log for debugging
+    console.log('[googleAuth] Google auth data:', {
+      hasAccessToken: !!googleAuth.accessToken,
+      hasIdToken: !!googleAuth.idToken,
+      email: userInfo.email,
+    });
+
+    // Sign in to Firebase with Google credential
+    // Use the Google ID token from expo-auth-session if available,
+    // otherwise use the access token
+    const credential = GoogleAuthProvider.credential(
+      googleAuth.idToken, // Google ID token
+      googleAuth.accessToken // Google access token
+    );
+
+    console.log('[googleAuth] Signing in to Firebase...');
+    const userCredential = await signInWithCredential(auth, credential);
+
+    // Get Firebase ID token
+    const firebaseIdToken = await userCredential.user.getIdToken();
+    console.log('[googleAuth] Firebase ID token obtained:', !!firebaseIdToken);
+
+    // Return auth data for our backend with Firebase ID token
+    return {
+      provider: 'google',
+      email: userInfo.email,
+      displayName: userInfo.name,
+      profileImage: userInfo.picture,
+      userInfo,
+      idToken: firebaseIdToken, // Firebase ID token for backend to verify and extract firebaseUid
+    };
+  } catch (error) {
+    console.error('[googleAuth] Error getting Firebase auth data:', error);
+    throw new Error(`Failed to authenticate with Firebase: ${error.message}`);
   }
-
-  // Log for debugging
-  console.log('[googleAuth] Google auth data:', {
-    hasAccessToken: !!googleAuth.accessToken,
-    hasIdToken: !!googleAuth.idToken,
-    email: userInfo.email,
-  });
-
-  // Return auth data for our backend
-  // Include idToken so backend can extract firebaseUid from Firebase Admin SDK
-  return {
-    provider: 'google',
-    email: userInfo.email,
-    displayName: userInfo.name,
-    profileImage: userInfo.picture,
-    userInfo,
-    idToken: googleAuth.idToken, // Send ID token for backend to verify and extract firebaseUid
-  };
 };
