@@ -7,12 +7,16 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
     title: '',
     slug: '',
     description: '',
+    longDescription: '',
     instructorName: '',
     price: '',
     category: '',
     difficulty: 'beginner',
     duration: '',
-    coverImage: ''
+    coverImage: '',
+    tags: '',
+    features: '',
+    outcomes: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -24,12 +28,16 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
         title: initialData.title || '',
         slug: initialData.slug || '',
         description: initialData.description || '',
+        longDescription: initialData.longDescription || '',
         instructorName: initialData.instructorName || '',
         price: initialData.price || '',
         category: initialData.category || '',
         difficulty: initialData.difficulty || 'beginner',
         duration: initialData.duration || '',
-        coverImage: initialData.coverImage || ''
+        coverImage: initialData.coverImage || '',
+        tags: Array.isArray(initialData.tags) ? initialData.tags.join(', ') : '',
+        features: Array.isArray(initialData.features) ? initialData.features.join('\n') : '',
+        outcomes: Array.isArray(initialData.outcomes) ? initialData.outcomes.join('\n') : ''
       });
     } else {
       // Reset form when creating new
@@ -37,12 +45,16 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
         title: '',
         slug: '',
         description: '',
+        longDescription: '',
         instructorName: '',
         price: '',
         category: '',
         difficulty: 'beginner',
         duration: '',
-        coverImage: ''
+        coverImage: '',
+        tags: '',
+        features: '',
+        outcomes: ''
       });
     }
   }, [initialData, isOpen]);
@@ -86,10 +98,18 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
 
     setLoading(true);
     try {
+      // Convert string fields to arrays
+      const tags = formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const features = formData.features ? formData.features.split('\n').map(f => f.trim()).filter(Boolean) : [];
+      const outcomes = formData.outcomes ? formData.outcomes.split('\n').map(o => o.trim()).filter(Boolean) : [];
+
       await onSubmit({
         ...formData,
         price: formData.price ? parseFloat(formData.price) : 0,
-        duration: formData.duration ? parseInt(formData.duration) : null
+        duration: formData.duration ? parseInt(formData.duration) : null,
+        tags,
+        features,
+        outcomes
       });
       toast.success(initialData ? 'Program updated successfully' : 'Program created successfully');
       onClose();
@@ -141,15 +161,30 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Description *
+            Description * (Short)
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            rows={4}
+            rows={3}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
+            placeholder="Brief description for program listings"
             required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Long Description
+          </label>
+          <textarea
+            name="longDescription"
+            value={formData.longDescription}
+            onChange={handleChange}
+            rows={8}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
+            placeholder="Detailed description with bullet points (use • for bullets)"
           />
         </div>
 
@@ -210,6 +245,7 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
             >
               <option value="">Select a category</option>
+              <option value="insurance">Insurance</option>
               <option value="real-estate">Real Estate</option>
               <option value="personal-development">Personal Development</option>
               <option value="all-levels">All Levels</option>
@@ -245,6 +281,57 @@ function ProgramFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
             placeholder="https://example.com/image.jpg"
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Tags (comma-separated)
+          </label>
+          <input
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="sales, insurance, real-estate, mindset"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Separate tags with commas
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Features (one per line)
+          </label>
+          <textarea
+            name="features"
+            value={formData.features}
+            onChange={handleChange}
+            rows={6}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100 font-mono text-sm"
+            placeholder="12 comprehensive modules covering all aspects of sales&#10;Weekly live Q&A sessions with sales experts&#10;Private community access for networking and support"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Each line becomes a feature bullet point
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Expected Outcomes (one per line)
+          </label>
+          <textarea
+            name="outcomes"
+            value={formData.outcomes}
+            onChange={handleChange}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-100 font-mono text-sm"
+            placeholder="Increased confidence in sales conversations&#10;Systematic approach to generating and closing leads&#10;Higher conversion rates and income"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Each line becomes an outcome bullet point
+          </p>
         </div>
 
         <div className="flex justify-end gap-3 pt-4">
