@@ -363,13 +363,15 @@ exports.updateProfile = async (req, res, next) => {
     if (profileImage !== undefined) updateData.profileImage = profileImage;
     if (coverImage !== undefined) updateData.coverImage = coverImage;
     if (movementGoals !== undefined) updateData.movementGoals = movementGoals;
-    if (location !== undefined) updateData.location = location;
-    if (website !== undefined) updateData.website = website;
+    // Skip location and website - these columns may not exist in production
+    // if (location !== undefined) updateData.location = location;
+    // if (website !== undefined) updateData.website = website;
 
     await req.user.update(updateData);
 
     return response.success(res, { user: req.user }, 'Profile updated successfully');
   } catch (error) {
+    console.error('Profile update error:', error);
     next(error);
   }
 };
