@@ -41,4 +41,7 @@ router.get('/reports/:id', isModerator, adminController.getReport);
 router.put('/reports/:id', isModerator, adminController.updateReport);
 router.get('/moderation-queue', isModerator, adminController.getModerationQueue);
 
+// Purchase management (admin only)
+router.post('/purchases/create', isAdmin, adminController.createPurchaseForUser);
+
 module.exports = router;

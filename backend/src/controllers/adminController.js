@@ -933,3 +933,78 @@ exports.bulkAction = async (req, res, next) => {
     next(error);
   }
 };
+
+// Create purchase for user (admin only)
+exports.createPurchaseForUser = async (req, res, next) => {
+  try {
+    const { userEmail, programSlug, amount } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({
+      where: { email: userEmail },
+      attributes: SAFE_USER_ATTRIBUTES
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find program by slug
+    const program = await Program.findOne({
+      where: { slug: programSlug }
+    });
+
+    if (!program) {
+      return res.status(404).json({ error: 'Program not found' });
+    }
+
+    // Check if purchase already exists
+    const existingPurchase = await Purchase.findOne({
+      where: {
+        userId: user.id,
+        programId: program.id
+      }
+    });
+
+    if (existingPurchase) {
+      return res.status(400).json({
+        error: 'Purchase already exists',
+        purchase: existingPurchase
+      });
+    }
+
+    // Create purchase
+    const purchase = await Purchase.create({
+      userId: user.id,
+      programId: program.id,
+      status: 'completed',
+      amount: amount || program.price,
+      stripePaymentIntentId: 'admin-created',
+      metadata: JSON.stringify({
+        createdBy: 'admin',
+        adminUserId: req.user.id,
+        note: 'Manually created by admin'
+      })
+    });
+
+    res.json({
+      message: 'Purchase created successfully',
+      purchase: {
+        id: purchase.id,
+        user: {
+          email: user.email,
+          username: user.username
+        },
+        program: {
+          title: program.title,
+          slug: program.slug
+        },
+        amount: purchase.amount,
+        status: purchase.status,
+        createdAt: purchase.createdAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
