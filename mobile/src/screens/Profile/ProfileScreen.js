@@ -47,6 +47,11 @@ const ProfileScreen = ({ route, navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const isOwnProfile = !paramUserId || currentUser?.id === userId || currentUser?._id === userId;
+
+  // For own profile, use currentUser from auth slice (always up-to-date after edits)
+  // For other profiles, use currentProfile from user slice
+  const profile = isOwnProfile ? { ...currentProfile, ...currentUser } : currentProfile;
+
   const styles = getStyles(colors);
 
   /**
@@ -125,41 +130,41 @@ const ProfileScreen = ({ route, navigation }) => {
    * Render header with profile info
    */
   const renderHeader = () => {
-    if (!currentProfile) return null;
+    if (!profile) return null;
 
     return (
       <View style={styles.headerContainer}>
         {/* Profile Info */}
         <View style={styles.profileInfo}>
           <UserAvatar
-            uri={currentProfile.profileImage || currentProfile.profilePicture}
-            firstName={currentProfile.displayName?.split(' ')[0] || currentProfile.firstName}
-            lastName={currentProfile.displayName?.split(' ')[1] || currentProfile.lastName}
+            uri={profile.profileImage || profile.profilePicture}
+            firstName={profile.displayName?.split(' ')[0] || profile.firstName}
+            lastName={profile.displayName?.split(' ')[1] || profile.lastName}
             size={100}
           />
 
           <View style={styles.nameContainer}>
             <Text style={styles.name}>
-              {currentProfile.displayName || `${currentProfile.firstName || ''} ${currentProfile.lastName || ''}`.trim() || currentProfile.username || 'User'}
+              {profile.displayName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.username || 'User'}
             </Text>
-            <Text style={styles.username}>@{currentProfile.username}</Text>
+            <Text style={styles.username}>@{profile.username}</Text>
           </View>
 
-          {currentProfile.bio ? (
-            <Text style={styles.bio}>{currentProfile.bio}</Text>
+          {profile.bio ? (
+            <Text style={styles.bio}>{profile.bio}</Text>
           ) : null}
 
-          {currentProfile.location ? (
+          {profile.location ? (
             <View style={styles.locationContainer}>
               <Text style={styles.locationIcon}>📍</Text>
-              <Text style={styles.location}>{currentProfile.location}</Text>
+              <Text style={styles.location}>{profile.location}</Text>
             </View>
           ) : null}
 
-          {currentProfile.website ? (
+          {profile.website ? (
             <TouchableOpacity style={styles.websiteContainer}>
               <Text style={styles.websiteIcon}>🔗</Text>
-              <Text style={styles.website}>{currentProfile.website}</Text>
+              <Text style={styles.website}>{profile.website}</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -168,21 +173,21 @@ const ProfileScreen = ({ route, navigation }) => {
         <View style={styles.statsContainer}>
           <TouchableOpacity style={styles.stat}>
             <Text style={styles.statValue}>
-              {formatters.formatCompactNumber(currentProfile.stats?.posts || 0)}
+              {formatters.formatCompactNumber(profile.stats?.posts || 0)}
             </Text>
             <Text style={styles.statLabel}>Posts</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.stat} onPress={handleViewFollowers}>
             <Text style={styles.statValue}>
-              {formatters.formatCompactNumber(currentProfile.stats?.followers || 0)}
+              {formatters.formatCompactNumber(profile.stats?.followers || 0)}
             </Text>
             <Text style={styles.statLabel}>Followers</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.stat} onPress={handleViewFollowing}>
             <Text style={styles.statValue}>
-              {formatters.formatCompactNumber(currentProfile.stats?.following || 0)}
+              {formatters.formatCompactNumber(profile.stats?.following || 0)}
             </Text>
             <Text style={styles.statLabel}>Following</Text>
           </TouchableOpacity>
@@ -208,8 +213,8 @@ const ProfileScreen = ({ route, navigation }) => {
           ) : (
             <>
               <Button
-                title={currentProfile.isFollowing ? 'Following' : 'Follow'}
-                variant={currentProfile.isFollowing ? 'outline' : 'primary'}
+                title={profile.isFollowing ? 'Following' : 'Follow'}
+                variant={profile.isFollowing ? 'outline' : 'primary'}
                 onPress={handleFollowToggle}
                 loading={followLoading[userId]}
                 disabled={followLoading[userId]}
@@ -263,7 +268,7 @@ const ProfileScreen = ({ route, navigation }) => {
     if (activeTab === 'posts') {
       return (
         <FlatList
-          data={currentProfile?.posts || []}
+          data={profile?.posts || []}
           renderItem={({ item }) => {
             const postId = item.id || item._id;
             return (
@@ -283,7 +288,7 @@ const ProfileScreen = ({ route, navigation }) => {
               message={isOwnProfile ? 'Share your first post!' : 'No posts to show'}
             />
           }
-          contentContainerStyle={currentProfile?.posts?.length === 0 && styles.emptyContainer}
+          contentContainerStyle={profile?.posts?.length === 0 && styles.emptyContainer}
         />
       );
     }
@@ -308,7 +313,7 @@ const ProfileScreen = ({ route, navigation }) => {
     return null;
   };
 
-  if (loading && !currentProfile) {
+  if (loading && !profile) {
     return <LoadingSpinner text="Loading profile..." />;
   }
 
