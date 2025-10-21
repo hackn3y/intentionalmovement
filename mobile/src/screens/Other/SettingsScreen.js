@@ -27,7 +27,7 @@ const SettingsScreen = ({ navigation }) => {
   const handleInviteFriends = async () => {
     try {
       const message = 'Join me on Intentional Movement Corp - Elevate Your LifeStyle through intentional living and personal development!';
-      const url = 'https://intentionalmovementcorp.com'; // Update with actual app URL/store links
+      const url = 'https://intentionalmovementcorporation.com'; // Update with actual app URL/store links
 
       if (Platform.OS === 'web') {
         // For web, use native share if available, otherwise copy to clipboard

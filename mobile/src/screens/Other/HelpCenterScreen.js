@@ -78,8 +78,8 @@ const HelpCenterScreen = ({ navigation }) => {
     {
       id: 2,
       title: 'Visit Our Website',
-      subtitle: 'intentionalmovementcorp.com',
-      action: () => Linking.openURL('https://intentionalmovementcorp.com'),
+      subtitle: 'intentionalmovementcorporation.com',
+      action: () => Linking.openURL('https://intentionalmovementcorporation.com'),
     },
     {
       id: 3,

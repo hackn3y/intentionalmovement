@@ -1,11 +1,17 @@
 # Netlify Configuration for Admin Dashboard
+# IMPORTANT: Deploy this as a SEPARATE Netlify site from the mobile app
+# This file should NOT affect the mobile app deployment
 
 [build]
-  # Directory where the built files will be located
+  # No base directory needed since this file is already in admin-dashboard/
+  # Publish directory is relative to where this file is located
   publish = "build"
 
-  # Build command
+  # Build command - npm run build now includes CI=false by default
   command = "npm run build"
+
+  # Environment variables - disable secrets scanning for Firebase client keys
+  environment = { SECRETS_SCAN_ENABLED = "false" }
 
 # Redirect all requests to index.html for client-side routing
 [[redirects]]

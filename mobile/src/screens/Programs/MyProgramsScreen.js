@@ -3,12 +3,14 @@ import { View, StyleSheet, FlatList, TouchableOpacity, Text, RefreshControl } fr
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMyPrograms } from '../../store/slices/programsSlice';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
+import { useTheme } from '../../context/ThemeContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
 
 const MyProgramsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { myPrograms, loading } = useSelector((state) => state.programs);
+  const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -21,10 +23,12 @@ const MyProgramsScreen = ({ navigation }) => {
     setTimeout(() => setRefreshing(false), 1000);
   }, [dispatch]);
 
+  const styles = getStyles(colors);
+
   const renderProgram = ({ item }) => (
     <TouchableOpacity
       style={styles.programCard}
-      onPress={() => navigation.navigate('ProgramDetail', { programId: item._id })}
+      onPress={() => navigation.navigate('ProgramDetail', { programId: item._id || item.id })}
     >
       <View style={styles.programImage}>
         <Text style={styles.imagePlaceholder}>📚</Text>
@@ -52,23 +56,25 @@ const MyProgramsScreen = ({ navigation }) => {
       renderItem={renderProgram}
       keyExtractor={(item) => item._id || item.id || String(Math.random())}
       ListEmptyComponent={<EmptyState icon="📚" title="No Programs" message="Purchase programs to get started" />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} colors={[COLORS.primary]} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} colors={[colors.primary]} />}
       contentContainerStyle={myPrograms.length === 0 && styles.emptyContainer}
+      style={styles.container}
     />
   );
 };
 
-const styles = StyleSheet.create({
-  programCard: { flexDirection: 'row', padding: SIZES.md, borderBottomWidth: 1, borderBottomColor: COLORS.gray[200] },
-  programImage: { width: 80, height: 80, borderRadius: SIZES.sm, backgroundColor: COLORS.gray[100], justifyContent: 'center', alignItems: 'center' },
+const getStyles = (colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.gray[50] },
+  programCard: { flexDirection: 'row', padding: SIZES.md, backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.gray[200] },
+  programImage: { width: 80, height: 80, borderRadius: SIZES.sm, backgroundColor: colors.gray[100], justifyContent: 'center', alignItems: 'center' },
   imagePlaceholder: { fontSize: 40 },
   programInfo: { flex: 1, marginLeft: SIZES.md, justifyContent: 'space-between' },
-  title: { fontSize: FONT_SIZES.md, fontWeight: 'bold', color: COLORS.dark },
-  instructor: { fontSize: FONT_SIZES.sm, color: COLORS.gray[600] },
+  title: { fontSize: FONT_SIZES.md, fontWeight: 'bold', color: colors.dark },
+  instructor: { fontSize: FONT_SIZES.sm, color: colors.gray[600] },
   progressContainer: { marginTop: SIZES.sm },
-  progressBar: { height: 6, backgroundColor: COLORS.gray[200], borderRadius: 3 },
-  progressFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 3 },
-  progressText: { fontSize: FONT_SIZES.xs, color: COLORS.gray[600], marginTop: SIZES.xs },
+  progressBar: { height: 6, backgroundColor: colors.gray[200], borderRadius: 3 },
+  progressFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
+  progressText: { fontSize: FONT_SIZES.xs, color: colors.gray[600], marginTop: SIZES.xs },
   emptyContainer: { flex: 1 },
 });
 
