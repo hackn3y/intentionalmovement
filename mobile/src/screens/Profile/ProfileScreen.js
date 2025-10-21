@@ -250,6 +250,13 @@ const ProfileScreen = ({ route, navigation }) => {
   };
 
   /**
+   * Navigate to achievements screen
+   */
+  const handleViewAchievements = () => {
+    navigation.navigate('Achievements', { userId });
+  };
+
+  /**
    * Render tab content
    */
   const renderTabContent = () => {
@@ -281,13 +288,24 @@ const ProfileScreen = ({ route, navigation }) => {
       );
     }
 
-    return (
-      <EmptyState
-        icon="🏆"
-        title="Achievements"
-        message="Achievement badges will appear here"
-      />
-    );
+    if (activeTab === 'achievements') {
+      return (
+        <View style={styles.achievementsPreview}>
+          <EmptyState
+            icon="🏆"
+            title="Achievements"
+            message="View your achievement badges and progress"
+          />
+          <Button
+            title="View All Achievements"
+            onPress={handleViewAchievements}
+            style={styles.viewAchievementsButton}
+          />
+        </View>
+      );
+    }
+
+    return null;
   };
 
   if (loading && !currentProfile) {
@@ -452,6 +470,16 @@ const getStyles = (colors) => StyleSheet.create({
   emptyContainer: {
     flex: 1,
     minHeight: 300,
+  },
+  achievementsPreview: {
+    flex: 1,
+    padding: SIZES.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  viewAchievementsButton: {
+    marginTop: SIZES.lg,
+    paddingHorizontal: SIZES.xl,
   },
 });
 

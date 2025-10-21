@@ -80,6 +80,15 @@ const MainNavigator = () => {
             <Text style={{ fontSize: size, color }}>🏠</Text>
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            // Navigate to Home screen in HomeStack
+            e.preventDefault();
+            navigation.navigate('HomeTab', {
+              screen: 'Home',
+            });
+          },
+        })}
       />
       <Tab.Screen
         name="CommunityTab"
