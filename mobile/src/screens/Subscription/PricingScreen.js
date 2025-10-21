@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { useTheme } from '../../context/ThemeContext';
+import { SIZES } from '../../config/constants';
 import WebScrollView from '../../components/WebScrollView';
 import api from '../../services/api';
 
@@ -30,28 +32,9 @@ if (Platform.OS !== 'web') {
   useStripe = () => null;
 }
 
-const COLORS = {
-  primary: '#ec4899',
-  light: '#fdf2f8',
-  white: '#ffffff',
-  dark: '#1f2937',
-  gray: '#6b7280',
-  lightGray: '#f3f4f6',
-  success: '#10b981',
-  warning: '#f59e0b',
-};
-
-const SIZES = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-};
-
 const PricingScreen = ({ navigation }) => {
   const { user } = useSelector((state) => state.auth);
+  const { colors } = useTheme();
   // Call useStripe hook (which is either the real hook or a no-op depending on platform)
   const stripe = useStripe();
   const [plans, setPlans] = useState([]);
@@ -215,7 +198,7 @@ const PricingScreen = ({ navigation }) => {
               <Ionicons
                 name="checkmark-circle"
                 size={20}
-                color={isPremium ? COLORS.primary : COLORS.success}
+                color={isPremium ? colors.primary : colors.success}
               />
               <Text style={styles.featureText}>{feature}</Text>
             </View>
@@ -237,7 +220,7 @@ const PricingScreen = ({ navigation }) => {
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <ActivityIndicator color={COLORS.white} />
+              <ActivityIndicator color={colors.white} />
             ) : (
               <>
                 <Text style={styles.selectButtonText}>
@@ -245,7 +228,7 @@ const PricingScreen = ({ navigation }) => {
                     ? 'Get Started'
                     : 'Upgrade Now'}
                 </Text>
-                <Ionicons name="arrow-forward" size={20} color={COLORS.white} />
+                <Ionicons name="arrow-forward" size={20} color={colors.white} />
               </>
             )}
           </TouchableOpacity>
@@ -254,10 +237,12 @@ const PricingScreen = ({ navigation }) => {
     );
   };
 
+  const styles = getStyles(colors);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -282,8 +267,8 @@ const PricingScreen = ({ navigation }) => {
         <Switch
           value={isYearly}
           onValueChange={setIsYearly}
-          trackColor={{ false: COLORS.lightGray, true: COLORS.primary }}
-          thumbColor={COLORS.white}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor={colors.white}
         />
         <Text style={[styles.toggleLabel, isYearly && styles.activeToggleLabel]}>
           Yearly
@@ -305,19 +290,19 @@ const PricingScreen = ({ navigation }) => {
 
         <View style={styles.featuresContainer}>
           <View style={styles.featureRow}>
-            <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.featureText}>Browse community posts</Text>
           </View>
           <View style={styles.featureRow}>
-            <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.featureText}>50 likes per day</Text>
           </View>
           <View style={styles.featureRow}>
-            <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.featureText}>50 comments per day</Text>
           </View>
           <View style={styles.featureRow}>
-            <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
             <Text style={styles.featureText}>Follow up to 100 users</Text>
           </View>
         </View>
@@ -380,17 +365,17 @@ const PricingScreen = ({ navigation }) => {
           });
         }}
       >
-        <Ionicons name="help-circle-outline" size={20} color={COLORS.primary} />
+        <Ionicons name="help-circle-outline" size={20} color={colors.primary} />
         <Text style={styles.supportText}>Need help? Contact support</Text>
       </TouchableOpacity>
     </WebScrollView>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
   },
   content: {
     padding: SIZES.lg,
@@ -400,7 +385,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.background,
   },
   header: {
     alignItems: 'center',
@@ -409,12 +394,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.sm,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.gray,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   billingToggle: {
@@ -426,39 +411,39 @@ const styles = StyleSheet.create({
   },
   toggleLabel: {
     fontSize: 16,
-    color: COLORS.gray,
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   activeToggleLabel: {
-    color: COLORS.dark,
+    color: colors.text,
     fontWeight: 'bold',
   },
   savingsBanner: {
-    backgroundColor: COLORS.success,
+    backgroundColor: colors.success,
     paddingHorizontal: SIZES.md,
     paddingVertical: SIZES.xs,
     borderRadius: 12,
   },
   savingsBannerText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
   freePlanCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: SIZES.lg,
     marginBottom: SIZES.lg,
     borderWidth: 2,
-    borderColor: COLORS.lightGray,
+    borderColor: colors.border,
   },
   planCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: SIZES.lg,
     marginBottom: SIZES.lg,
     borderWidth: 2,
-    borderColor: COLORS.lightGray,
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -466,7 +451,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   premiumCard: {
-    borderColor: COLORS.primary,
+    borderColor: colors.primary,
     borderWidth: 3,
   },
   popularBadge: {
@@ -474,13 +459,13 @@ const styles = StyleSheet.create({
     top: -12,
     left: '50%',
     transform: [{ translateX: -50 }],
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: SIZES.lg,
     paddingVertical: SIZES.xs,
     borderRadius: 12,
   },
   popularText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -491,11 +476,11 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.sm,
   },
   premiumText: {
-    color: COLORS.primary,
+    color: colors.primary,
   },
   priceContainer: {
     flexDirection: 'row',
@@ -504,26 +489,26 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
   },
   priceInterval: {
     fontSize: 16,
-    color: COLORS.gray,
+    color: colors.textSecondary,
     marginLeft: SIZES.xs,
   },
   premiumTextLight: {
-    color: COLORS.primary,
+    color: colors.primary,
     opacity: 0.7,
   },
   savingsBadge: {
-    backgroundColor: COLORS.success,
+    backgroundColor: colors.success,
     paddingHorizontal: SIZES.md,
     paddingVertical: SIZES.xs,
     borderRadius: 12,
     marginTop: SIZES.sm,
   },
   savingsText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -539,11 +524,11 @@ const styles = StyleSheet.create({
   featureText: {
     flex: 1,
     fontSize: 16,
-    color: COLORS.dark,
+    color: colors.text,
   },
   selectButton: {
     flexDirection: 'row',
-    backgroundColor: COLORS.success,
+    backgroundColor: colors.success,
     paddingVertical: SIZES.lg,
     paddingHorizontal: SIZES.xl,
     borderRadius: 12,
@@ -552,24 +537,24 @@ const styles = StyleSheet.create({
     gap: SIZES.sm,
   },
   premiumButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   processingButton: {
     opacity: 0.7,
   },
   selectButtonText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   currentPlanButton: {
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: colors.border,
     paddingVertical: SIZES.lg,
     borderRadius: 12,
     alignItems: 'center',
   },
   currentPlanText: {
-    color: COLORS.gray,
+    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -580,7 +565,7 @@ const styles = StyleSheet.create({
   faqTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.lg,
   },
   faqItem: {
@@ -589,12 +574,12 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.text,
     marginBottom: SIZES.xs,
   },
   faqAnswer: {
     fontSize: 14,
-    color: COLORS.gray,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   supportButton: {
@@ -606,7 +591,7 @@ const styles = StyleSheet.create({
   },
   supportText: {
     fontSize: 16,
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: '600',
   },
 });
