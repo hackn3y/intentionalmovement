@@ -58,7 +58,7 @@ const DashboardHomeScreen = ({ navigation }) => {
       id: 'personal-goals',
       title: 'Personal Goals',
       subtitle: '6 Life Categories',
-      icon: 'target',
+      icon: 'flag',
       color: '#eab308', // Yellow/Gold
       gradient: ['#eab308', '#facc15'],
       onPress: () => navigation.navigate('PersonalGoals'),
