@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
 /**
@@ -64,13 +64,21 @@ export const useKeyboardShortcuts = (shortcuts, deps = []) => {
  * @param {boolean} multiline - If true, requires Ctrl+Enter instead of just Enter
  */
 export const useEnterToSubmit = (onSubmit, disabled = false, multiline = false) => {
+  // Use refs to avoid stale closures
+  const disabledRef = useRef(disabled);
+  const onSubmitRef = useRef(onSubmit);
+
+  // Update refs on every render
+  disabledRef.current = disabled;
+  onSubmitRef.current = onSubmit;
+
   useKeyboardShortcuts({
     [multiline ? 'ctrl+enter' : 'enter']: () => {
-      if (!disabled) {
-        onSubmit();
+      if (!disabledRef.current) {
+        onSubmitRef.current();
       }
     },
-  }, [onSubmit]); // Removed 'disabled' from deps - checked inside handler instead
+  }, []); // Empty deps - handler uses refs which always have current values
 };
 
 /**
@@ -78,7 +86,12 @@ export const useEnterToSubmit = (onSubmit, disabled = false, multiline = false) 
  * @param {Function} onEscape - Escape handler (usually navigation.goBack)
  */
 export const useEscapeToClose = (onEscape) => {
+  const onEscapeRef = useRef(onEscape);
+
+  // Update ref on every render
+  onEscapeRef.current = onEscape;
+
   useKeyboardShortcuts({
-    'Escape': onEscape,
-  }, [onEscape]);
+    'Escape': () => onEscapeRef.current(),
+  }, []); // Empty deps - handler uses ref which always has current value
 };
