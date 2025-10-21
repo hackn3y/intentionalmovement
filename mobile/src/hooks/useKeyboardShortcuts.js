@@ -65,7 +65,7 @@ export const useKeyboardShortcuts = (shortcuts, deps = []) => {
  */
 export const useEnterToSubmit = (onSubmit, disabled = false, multiline = false) => {
   useKeyboardShortcuts({
-    [multiline ? 'ctrl+Enter' : 'Enter']: () => {
+    [multiline ? 'ctrl+enter' : 'enter']: () => {
       if (!disabled) {
         onSubmit();
       }

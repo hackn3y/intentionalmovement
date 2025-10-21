@@ -111,8 +111,12 @@ const EditProfileScreen = ({ navigation }) => {
 
           // Get the uploaded image URL from response
           if (uploadResponse.data && uploadResponse.data.profileImage) {
-            updateData.profileImage = uploadResponse.data.profileImage;
-            console.log('Setting profileImage to:', uploadResponse.data.profileImage);
+            // Add cache-busting timestamp to force image reload
+            const imageUrl = uploadResponse.data.profileImage;
+            const cacheBuster = `?t=${Date.now()}`;
+            const separator = imageUrl.includes('?') ? '&' : '?';
+            updateData.profileImage = `${imageUrl}${separator}t=${Date.now()}`;
+            console.log('Setting profileImage to:', updateData.profileImage);
           } else {
             console.warn('No profileImage in upload response:', uploadResponse.data);
           }
