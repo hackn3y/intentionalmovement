@@ -10,13 +10,15 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../../store/slices/authSlice';
 import { useTheme } from '../../context/ThemeContext';
 import { COLORS, SIZES, FONT_SIZES } from '../../config/constants';
 import api from '../../services/api';
 
 const ChangePasswordScreen = ({ navigation }) => {
   const { colors } = useTheme();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -81,6 +83,19 @@ const ChangePasswordScreen = ({ navigation }) => {
         : { currentPassword, newPassword };
 
       await api.put(endpoint, payload);
+
+      // If user was a Google-only user and just set a password, update Redux state
+      if (isGoogleUser) {
+        const updatedUser = {
+          ...user,
+          hasPassword: true,
+          password: true // Backend never sends actual password, just a flag
+        };
+        dispatch(setUser(updatedUser));
+        // Also update in storage
+        const { storage } = await import('../../utils/storage');
+        await storage.set('user', JSON.stringify(updatedUser));
+      }
 
       const successMessage = isGoogleUser
         ? 'Password set successfully! You can now log in with email and password.'
