@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { COLORS } from '../config/constants';
+import { useTheme } from '../context/ThemeContext';
 
 // Post Screens
 import FeedScreen from '../screens/Main/FeedScreen';
@@ -13,6 +14,8 @@ const Stack = createStackNavigator();
  * Post navigation stack for Community tab
  */
 const PostStack = () => {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -31,9 +34,9 @@ const PostStack = () => {
           title: 'Create Post',
           headerShown: true,
           headerStyle: {
-            backgroundColor: COLORS.white,
+            backgroundColor: colors.card,
           },
-          headerTintColor: COLORS.dark,
+          headerTintColor: colors.text,
           headerTitleStyle: {
             fontWeight: 'bold',
           },
@@ -46,9 +49,9 @@ const PostStack = () => {
           title: 'Post',
           headerShown: true,
           headerStyle: {
-            backgroundColor: COLORS.white,
+            backgroundColor: colors.card,
           },
-          headerTintColor: COLORS.dark,
+          headerTintColor: colors.text,
           headerTitleStyle: {
             fontWeight: 'bold',
           },
