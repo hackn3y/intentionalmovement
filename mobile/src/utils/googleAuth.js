@@ -21,7 +21,7 @@ export const useGoogleAuth = () => {
     webClientId: GOOGLE_WEB_CLIENT_ID,
     iosClientId: GOOGLE_IOS_CLIENT_ID,
     androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-    scopes: ['profile', 'email'],
+    scopes: ['openid', 'profile', 'email'], // Include 'openid' to ensure idToken is returned
   });
 
   return {
@@ -67,9 +67,9 @@ export const getGoogleUserInfo = async (accessToken) => {
 
 /**
  * Get Firebase ID token from Google authentication
- * Note: We're not using Firebase Auth on the frontend, so we send user info directly
- * The backend will handle authentication without verifying a Firebase token
- * @param {Object} googleAuth - Google auth response
+ * @param {Object} googleAuth - Google auth response from expo-auth-session
+ * @param {string} googleAuth.accessToken - Google access token
+ * @param {string} googleAuth.idToken - Google/Firebase ID token (OpenID Connect)
  * @returns {Object} Auth data for backend
  */
 export const getFirebaseAuthData = async (googleAuth) => {
@@ -84,14 +84,21 @@ export const getFirebaseAuthData = async (googleAuth) => {
     throw new Error('Failed to get user info from Google');
   }
 
+  // Log for debugging
+  console.log('[googleAuth] Google auth data:', {
+    hasAccessToken: !!googleAuth.accessToken,
+    hasIdToken: !!googleAuth.idToken,
+    email: userInfo.email,
+  });
+
   // Return auth data for our backend
-  // Don't send idToken since we're not using Firebase Auth on frontend
-  // Backend will use the email/userInfo to authenticate
+  // Include idToken so backend can extract firebaseUid from Firebase Admin SDK
   return {
     provider: 'google',
     email: userInfo.email,
     displayName: userInfo.name,
     profileImage: userInfo.picture,
     userInfo,
+    idToken: googleAuth.idToken, // Send ID token for backend to verify and extract firebaseUid
   };
 };
