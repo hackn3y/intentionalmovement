@@ -263,9 +263,9 @@ const PostDetailScreen = ({ route, navigation }) => {
         onSubmit={handleAddComment}
       >
         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => {
-          // Enable Enter key to submit comment and Escape to go back
+          // Enable Ctrl+Enter to submit comment and Escape to go back
           const isDisabled = !values.text.trim();
-          useEnterToSubmit(handleSubmit, isDisabled);
+          useEnterToSubmit(handleSubmit, isDisabled, true); // multiline=true for Ctrl+Enter
           useEscapeToClose(() => navigation.goBack());
 
           return (
