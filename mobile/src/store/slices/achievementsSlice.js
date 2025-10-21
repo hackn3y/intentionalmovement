@@ -10,7 +10,8 @@ export const fetchAchievements = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await achievementService.getAchievements(userId);
-      return response.data;
+      // API returns { achievements: [...] }, extract the array
+      return response.data.achievements || response.data || [];
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch achievements');
     }
@@ -25,7 +26,8 @@ export const fetchAllAchievements = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await achievementService.getAllAchievements();
-      return response.data;
+      // API returns { achievements: [...] }, extract the array
+      return response.data.achievements || response.data || [];
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch all achievements');
     }
@@ -138,8 +140,10 @@ const achievementsSlice = createSlice({
       })
       .addCase(fetchAchievements.fulfilled, (state, action) => {
         state.loading = false;
-        state.userAchievements = action.payload;
-        state.unclaimedAchievements = action.payload.filter(a => !a.claimed);
+        // Ensure payload is an array
+        const achievements = Array.isArray(action.payload) ? action.payload : [];
+        state.userAchievements = achievements;
+        state.unclaimedAchievements = achievements.filter(a => !a.claimed);
       })
       .addCase(fetchAchievements.rejected, (state, action) => {
         state.loading = false;

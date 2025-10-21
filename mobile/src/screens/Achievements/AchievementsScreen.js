@@ -37,7 +37,7 @@ const AchievementBadge = ({ achievement, colors }) => {
 
 const AchievementsScreen = () => {
   const dispatch = useDispatch();
-  const { achievements = [], loading } = useSelector((state) => state.achievements);
+  const { userAchievements = [], loading } = useSelector((state) => state.achievements);
   const { colors } = useTheme();
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const AchievementsScreen = () => {
 
   const styles = getStyles(colors);
 
-  if (loading && achievements.length === 0) {
+  if (loading && userAchievements.length === 0) {
     return <LoadingSpinner text="Loading achievements..." />;
   }
 
@@ -54,16 +54,16 @@ const AchievementsScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Your Achievements</Text>
-        <Text style={styles.subtitle}>{achievements.filter(a => a.unlocked).length} / {achievements.length} Unlocked</Text>
+        <Text style={styles.subtitle}>{userAchievements.filter(a => a.unlocked || a.isEarned).length} / {userAchievements.length} Unlocked</Text>
       </View>
 
       <FlatList
-        data={achievements}
+        data={userAchievements}
         renderItem={({ item }) => <AchievementBadge achievement={item} colors={colors} />}
         keyExtractor={(item) => item._id || item.id || String(Math.random())}
         numColumns={2}
         ListEmptyComponent={<EmptyState icon="🏆" title="No Achievements" message="Complete challenges to earn achievements" />}
-        contentContainerStyle={achievements.length === 0 && styles.emptyContainer}
+        contentContainerStyle={userAchievements.length === 0 && styles.emptyContainer}
         scrollEnabled={false}
       />
     </ScrollView>
