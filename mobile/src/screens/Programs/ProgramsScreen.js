@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  SectionList,
   TouchableOpacity,
   RefreshControl,
   TextInput,
@@ -151,6 +151,33 @@ const ProgramsScreen = ({ navigation }) => {
     );
   };
 
+  const renderSectionHeader = ({ section: { title } }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionHeaderText}>{title}</Text>
+    </View>
+  );
+
+  // Create sections: My Programs at top, then Available Programs
+  const sections = [];
+
+  // Add My Programs section if user has purchased programs
+  if (myPrograms && myPrograms.length > 0) {
+    sections.push({
+      title: 'My Programs',
+      data: myPrograms,
+    });
+  }
+
+  // Filter out purchased programs from available programs to avoid duplicates
+  const purchasedProgramIds = myPrograms.map(p => p.id || p._id);
+  const availablePrograms = programs.filter(p => !purchasedProgramIds.includes(p.id || p._id));
+
+  // Add Available Programs section
+  sections.push({
+    title: 'Available Programs',
+    data: availablePrograms,
+  });
+
   return (
     <View style={styles.container}>
       {/* Search Bar */}
@@ -167,31 +194,40 @@ const ProgramsScreen = ({ navigation }) => {
 
       {/* Categories */}
       <View style={styles.categoriesContainer}>
-        <FlatList
-          horizontal
-          data={categories}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[styles.categoryButton, selectedCategory === item && styles.categoryButtonActive]}
-              onPress={() => setSelectedCategory(item)}
-            >
-              <Text style={[styles.categoryText, selectedCategory === item && styles.categoryTextActive]}>
-                {item === 'real-estate' ? 'Real Estate' : item === 'personal-development' ? 'Personal Development' : item.charAt(0).toUpperCase() + item.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesList}
-        />
+        <View style={styles.categoriesList}>
+          <TouchableOpacity
+            style={[styles.categoryButton, selectedCategory === 'all' && styles.categoryButtonActive]}
+            onPress={() => setSelectedCategory('all')}
+          >
+            <Text style={[styles.categoryText, selectedCategory === 'all' && styles.categoryTextActive]}>
+              All
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.categoryButton, selectedCategory === 'real-estate' && styles.categoryButtonActive]}
+            onPress={() => setSelectedCategory('real-estate')}
+          >
+            <Text style={[styles.categoryText, selectedCategory === 'real-estate' && styles.categoryTextActive]}>
+              Real Estate
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.categoryButton, selectedCategory === 'personal-development' && styles.categoryButtonActive]}
+            onPress={() => setSelectedCategory('personal-development')}
+          >
+            <Text style={[styles.categoryText, selectedCategory === 'personal-development' && styles.categoryTextActive]}>
+              Personal Development
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Programs List */}
-      <FlatList
-        data={programs}
+      {/* Programs List with Sections */}
+      <SectionList
+        sections={sections}
         renderItem={renderProgram}
+        renderSectionHeader={renderSectionHeader}
         keyExtractor={(item) => `${item.id || item._id}-${item.price}-${item.updatedAt || Date.now()}`}
-        extraData={programs}
         ListEmptyComponent={
           loading && page === 1 ? (
             <LoadingSpinner text="Loading programs..." />
@@ -210,7 +246,8 @@ const ProgramsScreen = ({ navigation }) => {
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        contentContainerStyle={programs.length === 0 && styles.emptyContainer}
+        contentContainerStyle={sections.every(s => s.data.length === 0) && styles.emptyContainer}
+        stickySectionHeadersEnabled={false}
       />
     </View>
   );
@@ -238,6 +275,7 @@ const getStyles = (colors) => StyleSheet.create({
     borderBottomColor: colors.gray[200],
   },
   categoriesList: {
+    flexDirection: 'row',
     padding: SIZES.md,
     gap: SIZES.sm,
   },
@@ -246,7 +284,6 @@ const getStyles = (colors) => StyleSheet.create({
     paddingHorizontal: SIZES.md,
     borderRadius: SIZES.sm,
     backgroundColor: colors.gray[100],
-    marginRight: SIZES.sm,
   },
   categoryButtonActive: {
     backgroundColor: colors.primary,
@@ -341,6 +378,18 @@ const getStyles = (colors) => StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
+  },
+  sectionHeader: {
+    backgroundColor: colors.background,
+    paddingVertical: SIZES.md,
+    paddingHorizontal: SIZES.md,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.primary,
+  },
+  sectionHeaderText: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: 'bold',
+    color: colors.primary,
   },
 });
 
