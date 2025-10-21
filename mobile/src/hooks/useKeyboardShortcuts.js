@@ -15,12 +15,17 @@ import { Platform } from 'react-native';
  */
 export const useKeyboardShortcuts = (shortcuts, deps = []) => {
   useEffect(() => {
+    console.log('[useKeyboardShortcuts] Setting up, Platform.OS:', Platform.OS);
+    console.log('[useKeyboardShortcuts] Shortcuts:', Object.keys(shortcuts));
+
     // Only enable keyboard shortcuts on web
     if (Platform.OS !== 'web') {
+      console.log('[useKeyboardShortcuts] Not web, skipping');
       return;
     }
 
     const handleKeyPress = (event) => {
+      console.log('[useKeyboardShortcuts] Key event:', event.key, 'Ctrl:', event.ctrlKey);
       // Build key combination string
       let key = event.key;
       const modifiers = [];
