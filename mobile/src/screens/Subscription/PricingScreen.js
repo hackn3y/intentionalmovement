@@ -78,7 +78,7 @@ const PricingScreen = ({ navigation }) => {
 
   const handleSubscribe = async (plan) => {
     if (!plan.priceId) {
-      Alert.alert('Coming Soon', 'Subscription payments will be available soon!');
+      Alert.alert('Coming Soon', 'Membership payments will be available soon!');
       return;
     }
 
@@ -86,7 +86,7 @@ const PricingScreen = ({ navigation }) => {
     if (Platform.OS === 'web') {
       Alert.alert(
         'Mobile App Required',
-        'To subscribe, please download our mobile app from the App Store or Google Play. Subscriptions are processed securely through our mobile application.',
+        'To subscribe, please download our mobile app from the App Store or Google Play. Memberships are processed securely through our mobile application.',
         [{ text: 'OK' }]
       );
       return;
@@ -124,7 +124,7 @@ const PricingScreen = ({ navigation }) => {
         } else {
           Alert.alert(
             'Success!',
-            'Your subscription has been activated. Enjoy your premium features!',
+            'Your membership has been activated. Enjoy your premium features!',
             [
               {
                 text: 'OK',
@@ -138,7 +138,7 @@ const PricingScreen = ({ navigation }) => {
       console.error('Subscription error:', error);
       Alert.alert(
         'Error',
-        error.response?.data?.message || 'Failed to process subscription'
+        error.response?.data?.message || 'Failed to process membership'
       );
     } finally {
       setProcessingPlan(null);
@@ -320,7 +320,7 @@ const PricingScreen = ({ navigation }) => {
         <View style={styles.faqItem}>
           <Text style={styles.faqQuestion}>Can I cancel anytime?</Text>
           <Text style={styles.faqAnswer}>
-            Yes! You can cancel your subscription at any time. You'll still have access until the
+            Yes! You can cancel your membership at any time. You'll still have access until the
             end of your billing period.
           </Text>
         </View>

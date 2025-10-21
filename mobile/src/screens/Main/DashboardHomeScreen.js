@@ -93,7 +93,7 @@ const DashboardHomeScreen = ({ navigation }) => {
     },
     {
       id: 'subscription',
-      title: 'Subscription',
+      title: 'Membership',
       subtitle: 'Manage Plan',
       icon: 'star',
       color: '#ef4444', // Red

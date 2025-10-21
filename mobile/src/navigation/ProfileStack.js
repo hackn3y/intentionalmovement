@@ -16,7 +16,7 @@ import ChangePasswordScreen from '../screens/Other/ChangePasswordScreen';
 import PrivacySettingsScreen from '../screens/Other/PrivacySettingsScreen';
 import HelpCenterScreen from '../screens/Other/HelpCenterScreen';
 
-// Subscription Screens
+// Membership Screens
 import SubscriptionScreen from '../screens/Subscription/SubscriptionScreen';
 import PricingScreen from '../screens/Subscription/PricingScreen';
 
@@ -93,7 +93,7 @@ const ProfileStack = () => {
       <Stack.Screen
         name="Subscription"
         component={SubscriptionScreen}
-        options={{ title: 'My Subscription' }}
+        options={{ title: 'My Membership' }}
       />
       <Stack.Screen
         name="Pricing"

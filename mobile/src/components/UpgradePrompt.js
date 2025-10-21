@@ -115,7 +115,7 @@ const UpgradePrompt = ({
                 <Text style={styles.message}>{message}</Text>
               ) : (
                 <Text style={styles.message}>
-                  {feature} requires a {tier.name} subscription.
+                  {feature} requires a {tier.name} membership.
                 </Text>
               )}
 

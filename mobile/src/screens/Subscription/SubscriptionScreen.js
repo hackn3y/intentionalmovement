@@ -56,7 +56,7 @@ const SubscriptionScreen = ({ navigation }) => {
   const handleManageSubscription = async () => {
     // For now, show options
     Alert.alert(
-      'Manage Subscription',
+      'Manage Membership',
       'Choose an action',
       [
         {
@@ -64,7 +64,7 @@ const SubscriptionScreen = ({ navigation }) => {
           onPress: () => navigation.navigate('Pricing'),
         },
         {
-          text: 'Cancel Subscription',
+          text: 'Cancel Membership',
           onPress: () => handleCancelSubscription(),
           style: 'destructive',
         },
@@ -78,11 +78,11 @@ const SubscriptionScreen = ({ navigation }) => {
 
   const handleCancelSubscription = () => {
     Alert.alert(
-      'Cancel Subscription',
+      'Cancel Membership',
       'Are you sure you want to cancel? You will still have access until the end of your billing period.',
       [
         {
-          text: 'Keep Subscription',
+          text: 'Keep Membership',
           style: 'cancel',
         },
         {
@@ -90,11 +90,11 @@ const SubscriptionScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await api.post('/subscriptions/cancel', { immediately: false });
-              Alert.alert('Success', 'Your subscription has been cancelled. You will have access until the end of your billing period.');
+              Alert.alert('Success', 'Your membership has been cancelled. You will have access until the end of your billing period.');
               fetchSubscription();
             } catch (error) {
               console.error('Failed to cancel subscription:', error);
-              Alert.alert('Error', 'Failed to cancel subscription. Please try again.');
+              Alert.alert('Error', 'Failed to cancel membership. Please try again.');
             }
           },
           style: 'destructive',
@@ -198,9 +198,9 @@ const SubscriptionScreen = ({ navigation }) => {
         )}
       </View>
 
-      {/* Subscription Details */}
+      {/* Membership Details */}
       <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Subscription Details</Text>
+        <Text style={styles.sectionTitle}>Membership Details</Text>
 
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Status</Text>
@@ -280,7 +280,7 @@ const SubscriptionScreen = ({ navigation }) => {
       {tier !== 'free' && !cancelAtPeriodEnd && (
         <TouchableOpacity style={styles.manageButton} onPress={handleManageSubscription}>
           <Ionicons name="settings-outline" size={20} color={colors.primary} />
-          <Text style={styles.manageButtonText}>Manage Subscription</Text>
+          <Text style={styles.manageButtonText}>Manage Membership</Text>
         </TouchableOpacity>
       )}
 
@@ -290,15 +290,15 @@ const SubscriptionScreen = ({ navigation }) => {
           onPress={async () => {
             try {
               await api.post('/subscriptions/reactivate');
-              Alert.alert('Success', 'Your subscription has been reactivated!');
+              Alert.alert('Success', 'Your membership has been reactivated!');
               fetchSubscription();
             } catch (error) {
-              Alert.alert('Error', 'Failed to reactivate subscription');
+              Alert.alert('Error', 'Failed to reactivate membership');
             }
           }}
         >
           <Ionicons name="refresh-outline" size={20} color={colors.white} />
-          <Text style={styles.reactivateButtonText}>Reactivate Subscription</Text>
+          <Text style={styles.reactivateButtonText}>Reactivate Membership</Text>
         </TouchableOpacity>
       )}
 
@@ -397,7 +397,7 @@ const getStyles = (colors) => StyleSheet.create({
   },
   trialText: {
     fontSize: 14,
-    color: colors.warning,
+    color: '#d97706',
     fontWeight: '500',
   },
   cancelBanner: {
@@ -492,7 +492,7 @@ const getStyles = (colors) => StyleSheet.create({
   limitText: {
     flex: 1,
     fontSize: 14,
-    color: colors.warning,
+    color: '#d97706',
   },
   upgradeButton: {
     flexDirection: 'row',

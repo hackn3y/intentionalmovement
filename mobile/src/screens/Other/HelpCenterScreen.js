@@ -33,13 +33,13 @@ const HelpCenterScreen = ({ navigation }) => {
     },
     {
       id: 2,
-      question: 'How do I change my subscription plan?',
-      answer: 'Go to Settings → Subscription to view and change your current plan. You can upgrade or downgrade at any time.',
+      question: 'How do I change my membership plan?',
+      answer: 'Go to Settings → Membership to view and change your current plan. You can upgrade or downgrade at any time.',
     },
     {
       id: 3,
-      question: 'Can I cancel my subscription?',
-      answer: 'Yes, you can cancel your subscription anytime from Settings → Subscription. You\'ll continue to have access until the end of your billing period.',
+      question: 'Can I cancel my membership?',
+      answer: 'Yes, you can cancel your membership anytime from Settings → Membership. You\'ll continue to have access until the end of your billing period.',
     },
     {
       id: 4,

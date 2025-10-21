@@ -86,7 +86,7 @@ const SettingsScreen = ({ navigation }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
         <SettingItem
-          title="Subscription"
+          title="Membership"
           subtitle={`${user?.subscriptionTier?.charAt(0).toUpperCase() + user?.subscriptionTier?.slice(1) || 'Free'} Plan`}
           onPress={() => navigation.navigate('Subscription')}
           rightElement={<Text style={styles.arrow}>›</Text>}
