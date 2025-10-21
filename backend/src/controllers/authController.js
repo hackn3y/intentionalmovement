@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const admin = require('firebase-admin');
 const response = require('../utils/response');
 const mixpanel = require('../services/mixpanelService');
+const mailchimp = require('../services/mailchimpService');
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -66,6 +67,28 @@ exports.register = async (req, res, next) => {
       });
     } catch (mixpanelError) {
       console.error('Mixpanel tracking failed (non-critical):', mixpanelError.message);
+    }
+
+    // Subscribe to Mailchimp newsletter
+    console.log('Subscribing to Mailchimp newsletter...');
+    try {
+      const nameParts = (user.displayName || user.username).split(' ');
+      const firstName = nameParts[0] || user.username;
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const mailchimpResult = await mailchimp.subscribeUser({
+        email: user.email,
+        firstName,
+        lastName,
+      });
+
+      if (mailchimpResult.success) {
+        console.log('User subscribed to Mailchimp newsletter:', user.email);
+      } else {
+        console.log('Mailchimp subscription skipped or failed:', mailchimpResult.message);
+      }
+    } catch (mailchimpError) {
+      console.error('Mailchimp subscription failed (non-critical):', mailchimpError.message);
     }
 
     console.log('Registration successful, sending response');
@@ -230,6 +253,30 @@ exports.firebaseAuth = async (req, res, next) => {
       });
 
       console.log('New user created:', { id: user.id, email: user.email });
+
+      // Subscribe new Firebase/Google users to Mailchimp newsletter
+      console.log('Subscribing Firebase/Google user to Mailchimp newsletter...');
+      try {
+        const nameParts = (verifiedDisplayName || username).split(' ');
+        const firstName = nameParts[0] || username;
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const mailchimpResult = await mailchimp.subscribeUser({
+          email: verifiedEmail,
+          firstName,
+          lastName,
+        });
+
+        if (mailchimpResult.success) {
+          console.log('User subscribed to Mailchimp newsletter:', verifiedEmail);
+          // Add tag to identify Firebase/Google signups
+          await mailchimp.addTags(verifiedEmail, ['Google Signup']);
+        } else {
+          console.log('Mailchimp subscription skipped or failed:', mailchimpResult.message);
+        }
+      } catch (mailchimpError) {
+        console.error('Mailchimp subscription failed (non-critical):', mailchimpError.message);
+      }
     } else {
       console.log('Existing user found:', { id: user.id, email: user.email, role: user.role });
 
