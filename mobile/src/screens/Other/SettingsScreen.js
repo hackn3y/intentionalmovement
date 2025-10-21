@@ -134,26 +134,6 @@ const SettingsScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Content Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Content</Text>
-        <SettingItem
-          title="My Programs"
-          subtitle="View purchased programs"
-          onPress={() => navigation.navigate('MyPrograms')}
-          rightElement={<Text style={styles.arrow}>›</Text>}
-          colors={colors}
-        />
-        <SettingItem
-          title="Achievements"
-          subtitle="View your achievements"
-          onPress={() => navigation.navigate('Achievements')}
-          rightElement={<Text style={styles.arrow}>›</Text>}
-          showBorder={false}
-          colors={colors}
-        />
-      </View>
-
       {/* Support Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Support</Text>
