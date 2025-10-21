@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,97 @@ import { useEnterToSubmit, useEscapeToClose } from '../../hooks/useKeyboardShort
 import api from '../../services/api';
 
 /**
+ * Form content component that properly uses keyboard shortcuts
+ */
+const CreatePostForm = ({ handleChange, handleBlur, handleSubmit, values, errors, touched, createLoading, styles, selectedMedia, mediaType, handleSelectMedia, handleRemoveMedia, editPost, navigation }) => {
+  // Enable Ctrl+Enter to submit (multiline) and Escape to cancel
+  const isDisabled = createLoading || !values.content.trim();
+  useEnterToSubmit(handleSubmit, isDisabled, true);
+
+  return (
+    <View style={styles.form}>
+      <Input
+        placeholder="What's on your mind?"
+        value={values.content}
+        onChangeText={handleChange('content')}
+        onBlur={handleBlur('content')}
+        error={touched.content && errors.content}
+        multiline
+        numberOfLines={8}
+        style={styles.contentInput}
+        inputStyle={styles.contentInputField}
+      />
+
+      {/* Media Preview */}
+      {selectedMedia && (
+        <View style={styles.mediaPreview}>
+          {mediaType === 'image' && selectedMedia.uri ? (
+            <Image
+              source={{ uri: selectedMedia.uri }}
+              style={styles.imagePreviewImg}
+              resizeMode="cover"
+            />
+          ) : mediaType === 'video' && selectedMedia.uri ? (
+            <View style={styles.videoPreview}>
+              <Text style={styles.mediaPlaceholder}>🎥 Video</Text>
+              <Text style={styles.videoFilename}>
+                {selectedMedia.uri.split('/').pop()}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.imagePreview}>
+              <Text style={styles.mediaPlaceholder}>📷 Image Selected</Text>
+            </View>
+          )}
+          <TouchableOpacity
+            style={styles.removeMediaButton}
+            onPress={handleRemoveMedia}
+          >
+            <Text style={styles.removeMediaIcon}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Media Buttons */}
+      <View style={styles.mediaButtons}>
+        <TouchableOpacity
+          style={styles.mediaButton}
+          onPress={() => handleSelectMedia('image')}
+        >
+          <Text style={styles.mediaButtonIcon}>📷</Text>
+          <Text style={styles.mediaButtonText}>Photo</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.mediaButton}
+          onPress={() => handleSelectMedia('video')}
+        >
+          <Text style={styles.mediaButtonIcon}>🎥</Text>
+          <Text style={styles.mediaButtonText}>Video</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Actions */}
+      <View style={styles.actions}>
+        <Button
+          title={editPost ? 'Update Post' : 'Post'}
+          onPress={handleSubmit}
+          loading={createLoading}
+          disabled={createLoading || !values.content.trim()}
+        />
+
+        <Button
+          title="Cancel"
+          variant="outline"
+          onPress={() => navigation.goBack()}
+          style={styles.cancelButton}
+        />
+      </View>
+    </View>
+  );
+};
+
+/**
  * Create/edit post screen with media picker
  */
 const CreatePostScreen = ({ route, navigation }) => {
@@ -41,6 +132,9 @@ const CreatePostScreen = ({ route, navigation }) => {
 
   // Check if user can create posts
   const canCreatePosts = user?.subscriptionTier !== 'free';
+
+  // Enable Escape to cancel
+  useEscapeToClose(() => navigation.goBack());
 
   /**
    * Handle media picker
@@ -173,94 +267,19 @@ const CreatePostScreen = ({ route, navigation }) => {
           validationSchema={postSchema}
           onSubmit={handleCreatePost}
         >
-          {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => {
-            // Enable Ctrl+Enter to submit (multiline) and Escape to cancel
-            const isDisabled = createLoading || !values.content.trim();
-            useEnterToSubmit(handleSubmit, isDisabled, true);
-            useEscapeToClose(() => navigation.goBack());
-
-            return (
-            <View style={styles.form}>
-              <Input
-                placeholder="What's on your mind?"
-                value={values.content}
-                onChangeText={handleChange('content')}
-                onBlur={handleBlur('content')}
-                error={touched.content && errors.content}
-                multiline
-                numberOfLines={8}
-                style={styles.contentInput}
-                inputStyle={styles.contentInputField}
-              />
-
-              {/* Media Preview */}
-              {selectedMedia && (
-                <View style={styles.mediaPreview}>
-                  {mediaType === 'image' && selectedMedia.uri ? (
-                    <Image
-                      source={{ uri: selectedMedia.uri }}
-                      style={styles.imagePreviewImg}
-                      resizeMode="cover"
-                    />
-                  ) : mediaType === 'video' && selectedMedia.uri ? (
-                    <View style={styles.videoPreview}>
-                      <Text style={styles.mediaPlaceholder}>🎥 Video</Text>
-                      <Text style={styles.videoFilename}>
-                        {selectedMedia.uri.split('/').pop()}
-                      </Text>
-                    </View>
-                  ) : (
-                    <View style={styles.imagePreview}>
-                      <Text style={styles.mediaPlaceholder}>📷 Image Selected</Text>
-                    </View>
-                  )}
-                  <TouchableOpacity
-                    style={styles.removeMediaButton}
-                    onPress={handleRemoveMedia}
-                  >
-                    <Text style={styles.removeMediaIcon}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Media Buttons */}
-              <View style={styles.mediaButtons}>
-                <TouchableOpacity
-                  style={styles.mediaButton}
-                  onPress={() => handleSelectMedia('image')}
-                >
-                  <Text style={styles.mediaButtonIcon}>📷</Text>
-                  <Text style={styles.mediaButtonText}>Photo</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.mediaButton}
-                  onPress={() => handleSelectMedia('video')}
-                >
-                  <Text style={styles.mediaButtonIcon}>🎥</Text>
-                  <Text style={styles.mediaButtonText}>Video</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Actions */}
-              <View style={styles.actions}>
-                <Button
-                  title={editPost ? 'Update Post' : 'Post'}
-                  onPress={handleSubmit}
-                  loading={createLoading}
-                  disabled={createLoading || !values.content.trim()}
-                />
-
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  onPress={() => navigation.goBack()}
-                  style={styles.cancelButton}
-                />
-              </View>
-            </View>
-          );
-        }}
+          {(formikProps) => (
+            <CreatePostForm
+              {...formikProps}
+              createLoading={createLoading}
+              styles={styles}
+              selectedMedia={selectedMedia}
+              mediaType={mediaType}
+              handleSelectMedia={handleSelectMedia}
+              handleRemoveMedia={handleRemoveMedia}
+              editPost={editPost}
+              navigation={navigation}
+            />
+          )}
         </Formik>
       </ScrollView>
 

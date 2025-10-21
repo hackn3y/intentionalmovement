@@ -29,6 +29,36 @@ import EmptyState from '../../components/EmptyState';
 import { useEnterToSubmit, useEscapeToClose } from '../../hooks/useKeyboardShortcuts';
 
 /**
+ * Comment form component that properly uses keyboard shortcuts
+ */
+const CommentForm = ({ handleChange, handleBlur, handleSubmit, values, errors, touched, commentInputRef, styles }) => {
+  // Enable Ctrl+Enter to submit comment
+  const isDisabled = !values.text.trim();
+  useEnterToSubmit(handleSubmit, isDisabled, true); // multiline=true for Ctrl+Enter
+
+  return (
+    <View style={styles.commentInputContainer}>
+      <Input
+        ref={commentInputRef}
+        placeholder="Add a comment..."
+        value={values.text}
+        onChangeText={handleChange('text')}
+        onBlur={handleBlur('text')}
+        error={touched.text && errors.text}
+        style={styles.commentInput}
+      />
+      <Button
+        title="Post"
+        onPress={handleSubmit}
+        disabled={!values.text.trim()}
+        size="small"
+        style={styles.postButton}
+      />
+    </View>
+  );
+};
+
+/**
  * Post detail screen with comments
  */
 const PostDetailScreen = ({ route, navigation }) => {
@@ -40,6 +70,9 @@ const PostDetailScreen = ({ route, navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const commentInputRef = useRef(null);
   const styles = getStyles(colors, isDarkMode);
+
+  // Enable Escape to go back
+  useEscapeToClose(() => navigation.goBack());
 
   useEffect(() => {
     loadPost();
@@ -262,33 +295,13 @@ const PostDetailScreen = ({ route, navigation }) => {
         validationSchema={commentSchema}
         onSubmit={handleAddComment}
       >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => {
-          // Enable Ctrl+Enter to submit comment and Escape to go back
-          const isDisabled = !values.text.trim();
-          useEnterToSubmit(handleSubmit, isDisabled, true); // multiline=true for Ctrl+Enter
-          useEscapeToClose(() => navigation.goBack());
-
-          return (
-          <View style={styles.commentInputContainer}>
-            <Input
-              ref={commentInputRef}
-              placeholder="Add a comment..."
-              value={values.text}
-              onChangeText={handleChange('text')}
-              onBlur={handleBlur('text')}
-              error={touched.text && errors.text}
-              style={styles.commentInput}
-            />
-            <Button
-              title="Post"
-              onPress={handleSubmit}
-              disabled={!values.text.trim()}
-              size="small"
-              style={styles.postButton}
-            />
-          </View>
-        );
-      }}
+        {(formikProps) => (
+          <CommentForm
+            {...formikProps}
+            commentInputRef={commentInputRef}
+            styles={styles}
+          />
+        )}
       </Formik>
     </KeyboardAvoidingView>
   );
