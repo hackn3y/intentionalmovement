@@ -17,17 +17,44 @@
    - **Publishable key** (starts with `pk_test_`)
    - **Secret key** (starts with `sk_test_`)
 
-### Step 3: Configure Backend
+### Step 3: Create Subscription Products
+
+Before configuring the backend, create subscription products in Stripe:
+
+1. Go to **Products** in Stripe Dashboard
+2. Click **+ Add product**
+
+**Basic Membership:**
+- Name: "Basic Membership"
+- Description: "Create unlimited posts, purchase up to 3 programs, basic achievements"
+- Add Monthly pricing: $9.99/month (recurring)
+- Add Yearly pricing: $99/year (recurring)
+- Copy both Price IDs (they start with `price_`)
+
+**Premium Membership:**
+- Name: "Premium Membership"
+- Description: "Unlimited programs, messaging, achievements, priority support"
+- Add Monthly pricing: $29.99/month (recurring)
+- Add Yearly pricing: $299/year (recurring)
+- Copy both Price IDs
+
+### Step 4: Configure Backend
 Update `backend/.env`:
 
 ```env
 # Stripe (Payments) - Replace with your test values
 STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
 STRIPE_PUBLIC_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
-STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE  # Set this up in Step 5
+STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE  # Set this up in Step 6
+
+# Subscription Price IDs (from products you created above)
+STRIPE_BASIC_MONTHLY_PRICE_ID=price_YOUR_BASIC_MONTHLY_ID
+STRIPE_BASIC_YEARLY_PRICE_ID=price_YOUR_BASIC_YEARLY_ID
+STRIPE_PREMIUM_MONTHLY_PRICE_ID=price_YOUR_PREMIUM_MONTHLY_ID
+STRIPE_PREMIUM_YEARLY_PRICE_ID=price_YOUR_PREMIUM_YEARLY_ID
 ```
 
-### Step 4: Configure Mobile App
+### Step 5: Configure Mobile App
 Update `mobile/.env`:
 
 ```env
@@ -35,7 +62,7 @@ Update `mobile/.env`:
 STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
 ```
 
-### Step 5: Set Up Webhooks (Optional but Recommended)
+### Step 6: Set Up Webhooks (Required for Subscriptions)
 
 #### Local Development (using Stripe CLI)
 1. Install Stripe CLI: https://stripe.com/docs/stripe-cli
