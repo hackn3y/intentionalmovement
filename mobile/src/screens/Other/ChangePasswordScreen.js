@@ -28,7 +28,15 @@ const ChangePasswordScreen = ({ navigation }) => {
 
   // Check if user signed up with Google (has firebaseUid but no password)
   // Use hasPassword field from backend (password field is never sent for security)
-  const isGoogleUser = user?.firebaseUid && !user?.hasPassword;
+  // For older versions that don't have hasPassword, check if password is undefined
+  console.log('[ChangePasswordScreen] User data:', {
+    email: user?.email,
+    firebaseUid: user?.firebaseUid,
+    hasPassword: user?.hasPassword,
+    password: user?.password
+  });
+  const isGoogleUser = user?.firebaseUid && (user?.hasPassword === false || user?.password === undefined);
+  console.log('[ChangePasswordScreen] isGoogleUser:', isGoogleUser);
 
   const validatePasswords = () => {
     // For Google users, they don't need current password (they're setting it for the first time)
