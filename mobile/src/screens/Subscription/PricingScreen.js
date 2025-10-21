@@ -70,7 +70,11 @@ const PricingScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Failed to fetch plans:', error);
-      Alert.alert('Error', 'Failed to load subscription plans');
+      if (Platform.OS === 'web') {
+        window.alert('Failed to load subscription plans');
+      } else {
+        Alert.alert('Error', 'Failed to load subscription plans');
+      }
     } finally {
       setLoading(false);
     }
@@ -78,17 +82,17 @@ const PricingScreen = ({ navigation }) => {
 
   const handleSubscribe = async (plan) => {
     if (!plan.priceId) {
-      Alert.alert('Coming Soon', 'Membership payments will be available soon!');
+      if (Platform.OS === 'web') {
+        window.alert('Membership payments will be available soon!');
+      } else {
+        Alert.alert('Coming Soon', 'Membership payments will be available soon!');
+      }
       return;
     }
 
     // On web, show message that payment should be done on mobile app
     if (Platform.OS === 'web') {
-      Alert.alert(
-        'Mobile App Required',
-        'To subscribe, please download our mobile app from the App Store or Google Play. Memberships are processed securely through our mobile application.',
-        [{ text: 'OK' }]
-      );
+      window.alert('To subscribe, please download our mobile app from the App Store or Google Play. Memberships are processed securely through our mobile application.');
       return;
     }
 
@@ -136,10 +140,15 @@ const PricingScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Subscription error:', error);
-      Alert.alert(
-        'Error',
-        error.response?.data?.message || 'Failed to process membership'
-      );
+      // This should never happen on web since we return early, but just in case
+      if (Platform.OS === 'web') {
+        window.alert(error.response?.data?.message || 'Failed to process membership');
+      } else {
+        Alert.alert(
+          'Error',
+          error.response?.data?.message || 'Failed to process membership'
+        );
+      }
     } finally {
       setProcessingPlan(null);
     }
