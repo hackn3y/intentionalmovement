@@ -98,20 +98,30 @@ const EditProfileScreen = ({ navigation }) => {
           // Upload the image to the server
           const uploadResponse = await userService.uploadProfilePicture(user.id, formData);
 
+          console.log('Upload response:', uploadResponse);
+          console.log('Upload response data:', uploadResponse.data);
+
           // Get the uploaded image URL from response
           if (uploadResponse.data && uploadResponse.data.profileImage) {
             updateData.profileImage = uploadResponse.data.profileImage;
+            console.log('Setting profileImage to:', uploadResponse.data.profileImage);
+          } else {
+            console.warn('No profileImage in upload response:', uploadResponse.data);
           }
         } catch (imageError) {
-          if (__DEV__) {
-            console.error('Image upload error:', imageError);
-          }
-          Alert.alert('Error', 'Failed to upload image. Please try again.');
+          console.error('Image upload error:', imageError);
+          console.error('Error details:', imageError.response?.data);
+          Alert.alert('Error', `Failed to upload image: ${imageError.response?.data?.message || imageError.message || 'Unknown error'}`);
           return; // Stop execution if image upload fails
         }
       }
 
+      console.log('Updating profile with data:', updateData);
       const result = await dispatch(updateProfile(updateData)).unwrap();
+      console.log('Profile update result:', result);
+
+      // Show success message
+      Alert.alert('Success', 'Profile updated successfully!');
 
       // Navigate back with refresh parameter to reload profile
       if (navigation && navigation.canGoBack && navigation.canGoBack()) {
@@ -121,10 +131,9 @@ const EditProfileScreen = ({ navigation }) => {
         });
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('updateProfile error:', error);
-      }
-      Alert.alert('Error', error || 'Failed to update profile');
+      console.error('updateProfile error:', error);
+      console.error('Error details:', error.response?.data);
+      Alert.alert('Error', error.response?.data?.message || error.message || error || 'Failed to update profile');
     }
   };
 

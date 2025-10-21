@@ -3,6 +3,9 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 
+// Configure memory storage for S3 uploads
+const memoryStorage = multer.memoryStorage();
+
 // Configure storage for local development
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -62,8 +65,12 @@ const videoFileFilter = (req, file, cb) => {
 };
 
 // Upload middleware configurations
+// Use memory storage for S3 uploads when STORAGE_MODE=s3
+const useS3 = process.env.STORAGE_MODE === 's3';
+const storageToUse = useS3 ? memoryStorage : storage;
+
 const uploadImage = multer({
-  storage: storage,
+  storage: storageToUse,
   fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit for images
@@ -71,7 +78,7 @@ const uploadImage = multer({
 });
 
 const uploadVideo = multer({
-  storage: storage,
+  storage: storageToUse,
   fileFilter: videoFileFilter,
   limits: {
     fileSize: 100 * 1024 * 1024 // 100MB limit for videos
@@ -79,7 +86,7 @@ const uploadVideo = multer({
 });
 
 const uploadAny = multer({
-  storage: storage,
+  storage: storageToUse,
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB limit for general files
   }
@@ -89,5 +96,7 @@ module.exports = {
   uploadImage,
   uploadVideo,
   uploadAny,
-  storage
+  storage,
+  memoryStorage,
+  useS3
 };

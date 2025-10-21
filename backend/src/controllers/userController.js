@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { User, Follow, Post, Purchase, Program, Achievement, UserAchievement } = require('../models');
 const AchievementService = require('../services/achievementService');
+const s3Service = require('../services/s3Service');
 
 // Safe attributes that exist in production database
 const SAFE_USER_ATTRIBUTES = ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt'];
@@ -387,8 +388,26 @@ exports.uploadProfileImage = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Construct the image URL (includes subfolder path)
-    const imageUrl = `/uploads/profiles/${req.file.filename}`;
+    let imageUrl;
+
+    // Upload to S3 if configured, otherwise use local storage
+    if (process.env.STORAGE_MODE === 's3') {
+      try {
+        const s3Result = await s3Service.uploadImage(req.file, 'profiles', {
+          width: 800,
+          height: 800,
+          quality: 85
+        });
+        imageUrl = s3Result.url;
+        console.log('Profile image uploaded to S3:', imageUrl);
+      } catch (s3Error) {
+        console.error('S3 upload error:', s3Error);
+        return res.status(500).json({ error: 'Failed to upload image to S3', details: s3Error.message });
+      }
+    } else {
+      // Local storage fallback
+      imageUrl = `/uploads/profiles/${req.file.filename}`;
+    }
 
     await user.update({ profileImage: imageUrl });
 
@@ -421,8 +440,26 @@ exports.uploadCoverImage = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Construct the image URL (includes subfolder path)
-    const imageUrl = `/uploads/profiles/${req.file.filename}`;
+    let imageUrl;
+
+    // Upload to S3 if configured, otherwise use local storage
+    if (process.env.STORAGE_MODE === 's3') {
+      try {
+        const s3Result = await s3Service.uploadImage(req.file, 'covers', {
+          width: 1500,
+          height: 500,
+          quality: 85
+        });
+        imageUrl = s3Result.url;
+        console.log('Cover image uploaded to S3:', imageUrl);
+      } catch (s3Error) {
+        console.error('S3 upload error:', s3Error);
+        return res.status(500).json({ error: 'Failed to upload image to S3', details: s3Error.message });
+      }
+    } else {
+      // Local storage fallback
+      imageUrl = `/uploads/profiles/${req.file.filename}`;
+    }
 
     await user.update({ coverImage: imageUrl });
 
