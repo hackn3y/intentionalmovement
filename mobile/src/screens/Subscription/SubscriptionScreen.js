@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -32,7 +33,11 @@ const SubscriptionScreen = ({ navigation }) => {
       console.error('Failed to fetch subscription:', error);
       // Don't show alert if user just doesn't have a subscription yet
       if (error.response?.status !== 404) {
-        Alert.alert('Error', 'Failed to load subscription details');
+        if (Platform.OS === 'web') {
+          window.alert('Failed to load subscription details');
+        } else {
+          Alert.alert('Error', 'Failed to load subscription details');
+        }
       }
     } finally {
       setLoading(false);
@@ -54,6 +59,15 @@ const SubscriptionScreen = ({ navigation }) => {
   };
 
   const handleManageSubscription = async () => {
+    // For web, directly navigate to pricing instead of showing alert
+    if (Platform.OS === 'web') {
+      const action = window.confirm('Would you like to change your plan? Click OK to view plans, or Cancel to stay on this page.');
+      if (action) {
+        navigation.navigate('Pricing');
+      }
+      return;
+    }
+
     // For now, show options
     Alert.alert(
       'Manage Membership',
@@ -77,6 +91,22 @@ const SubscriptionScreen = ({ navigation }) => {
   };
 
   const handleCancelSubscription = () => {
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to cancel? You will still have access until the end of your billing period.');
+      if (confirmed) {
+        api.post('/subscriptions/cancel', { immediately: false })
+          .then(() => {
+            window.alert('Your membership has been cancelled. You will have access until the end of your billing period.');
+            fetchSubscription();
+          })
+          .catch((error) => {
+            console.error('Failed to cancel subscription:', error);
+            window.alert('Failed to cancel membership. Please try again.');
+          });
+      }
+      return;
+    }
+
     Alert.alert(
       'Cancel Membership',
       'Are you sure you want to cancel? You will still have access until the end of your billing period.',
@@ -290,10 +320,18 @@ const SubscriptionScreen = ({ navigation }) => {
           onPress={async () => {
             try {
               await api.post('/subscriptions/reactivate');
-              Alert.alert('Success', 'Your membership has been reactivated!');
+              if (Platform.OS === 'web') {
+                window.alert('Your membership has been reactivated!');
+              } else {
+                Alert.alert('Success', 'Your membership has been reactivated!');
+              }
               fetchSubscription();
             } catch (error) {
-              Alert.alert('Error', 'Failed to reactivate membership');
+              if (Platform.OS === 'web') {
+                window.alert('Failed to reactivate membership');
+              } else {
+                Alert.alert('Error', 'Failed to reactivate membership');
+              }
             }
           }}
         >
