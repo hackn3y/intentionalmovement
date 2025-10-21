@@ -91,16 +91,26 @@ const PricingScreen = ({ navigation }) => {
       return;
     }
 
-    // On web, show message that payment should be done on mobile app
-    if (Platform.OS === 'web') {
-      window.alert('To subscribe, please download our mobile app from the App Store or Google Play. Memberships are processed securely through our mobile application.');
-      return;
-    }
-
     setProcessingPlan(plan.id);
 
     try {
-      // Create checkout session
+      // On web, use Stripe Checkout (redirect-based flow)
+      if (Platform.OS === 'web') {
+        const response = await api.post('/subscriptions/create-checkout-session', {
+          priceId: plan.priceId,
+          tier: plan.tier,
+          successUrl: `${window.location.origin}/subscription-success`,
+          cancelUrl: `${window.location.origin}/pricing`,
+        });
+
+        if (response.data.url) {
+          // Redirect to Stripe Checkout
+          window.location.href = response.data.url;
+        }
+        return;
+      }
+
+      // On mobile, use Payment Sheet (modal flow)
       const response = await api.post('/subscriptions/create-checkout', {
         priceId: plan.priceId,
         tier: plan.tier,
@@ -141,7 +151,6 @@ const PricingScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Subscription error:', error);
-      // This should never happen on web since we return early, but just in case
       if (Platform.OS === 'web') {
         window.alert(error.response?.data?.message || 'Failed to process membership');
       } else {

@@ -365,4 +365,43 @@ exports.createSubscriptionCheckout = async ({ customerId, priceId, userId, tier 
   }
 };
 
+// Create subscription checkout session (for web redirect flow)
+exports.createSubscriptionCheckoutSession = async ({ customerId, priceId, userId, tier, successUrl, cancelUrl }) => {
+  if (!stripe) {
+    throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      subscription_data: {
+        trial_period_days: 14,
+        metadata: {
+          userId: userId.toString(),
+          tier
+        }
+      },
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      metadata: {
+        userId: userId.toString(),
+        tier
+      }
+    });
+
+    return session;
+  } catch (error) {
+    console.error('Error creating subscription checkout session:', error);
+    throw error;
+  }
+};
+
 module.exports = exports;

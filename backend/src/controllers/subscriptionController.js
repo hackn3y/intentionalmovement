@@ -128,6 +128,49 @@ exports.createCheckout = async (req, res, next) => {
   }
 };
 
+// Create checkout session for subscription (web redirect flow)
+exports.createCheckoutSession = async (req, res, next) => {
+  try {
+    const { priceId, tier, successUrl, cancelUrl } = req.body;
+    const userId = req.user.id;
+
+    if (!priceId || !tier) {
+      return res.status(400).json({ error: 'Price ID and tier are required' });
+    }
+
+    if (!['basic', 'premium'].includes(tier)) {
+      return res.status(400).json({ error: 'Invalid subscription tier' });
+    }
+
+    if (!successUrl || !cancelUrl) {
+      return res.status(400).json({ error: 'Success and cancel URLs are required' });
+    }
+
+    // Get or create Stripe customer
+    const user = await User.findByPk(userId);
+    const customerId = await stripeService.getOrCreateCustomer(user);
+
+    // Create subscription checkout session
+    const session = await stripeService.createSubscriptionCheckoutSession({
+      customerId,
+      priceId,
+      userId,
+      tier,
+      successUrl,
+      cancelUrl
+    });
+
+    res.json({
+      success: true,
+      url: session.url,
+      sessionId: session.id
+    });
+  } catch (error) {
+    console.error('Create checkout session error:', error);
+    next(error);
+  }
+};
+
 // Get user's subscription
 exports.getMySubscription = async (req, res, next) => {
   try {
@@ -355,6 +398,10 @@ exports.handleWebhook = async (req, res, next) => {
     const event = stripeService.constructWebhookEvent(req.body, sig);
 
     switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object);
+        break;
+
       case 'customer.subscription.updated':
         await handleSubscriptionUpdated(event.data.object);
         break;
@@ -381,6 +428,37 @@ exports.handleWebhook = async (req, res, next) => {
     return res.status(400).json({ error: error.message });
   }
 };
+
+// Handle checkout session completed
+async function handleCheckoutSessionCompleted(session) {
+  const userId = session.metadata?.userId;
+  const tier = session.metadata?.tier;
+
+  if (!userId || !tier) {
+    console.error('Missing userId or tier in checkout session metadata');
+    return;
+  }
+
+  // Get the subscription from the session
+  const subscriptionId = session.subscription;
+  if (!subscriptionId) {
+    console.error('No subscription ID in checkout session');
+    return;
+  }
+
+  try {
+    // Retrieve the full subscription details
+    const stripeSubscription = await require('stripe')(process.env.STRIPE_SECRET_KEY)
+      .subscriptions.retrieve(subscriptionId);
+
+    // Update user subscription status
+    await handleSubscriptionUpdated(stripeSubscription);
+
+    console.log(`Checkout session completed for user ${userId}: ${tier}`);
+  } catch (error) {
+    console.error('Error handling checkout session:', error);
+  }
+}
 
 // Handle subscription updated
 async function handleSubscriptionUpdated(stripeSubscription) {
