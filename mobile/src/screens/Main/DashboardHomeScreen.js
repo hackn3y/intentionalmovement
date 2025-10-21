@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Linking,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
@@ -100,6 +101,33 @@ const DashboardHomeScreen = ({ navigation }) => {
       onPress: () => navigation.navigate('ProfileTab', {
         screen: 'Subscription',
       }),
+    },
+    {
+      id: 'guidelines',
+      title: 'Community Guidelines',
+      subtitle: 'Our Values',
+      icon: 'shield-checkmark',
+      color: '#14b8a6', // Teal
+      gradient: ['#14b8a6', '#2dd4bf'],
+      onPress: () => navigation.navigate('CommunityGuidelines'),
+    },
+    {
+      id: 'free-content',
+      title: 'Free Content',
+      subtitle: 'Resources & More',
+      icon: 'gift',
+      color: '#a855f7', // Purple
+      gradient: ['#a855f7', '#c084fc'],
+      onPress: () => navigation.navigate('FreeContent'),
+    },
+    {
+      id: 'website',
+      title: 'Visit Website',
+      subtitle: 'Learn More',
+      icon: 'globe',
+      color: '#06b6d4', // Cyan
+      gradient: ['#06b6d4', '#22d3ee'],
+      onPress: () => Linking.openURL('https://intentionalmovementcorporation.com/'),
     },
   ];
 

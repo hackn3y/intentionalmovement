@@ -10,31 +10,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { useTheme } from '../../context/ThemeContext';
+import { SIZES } from '../../config/constants';
 import WebScrollView from '../../components/WebScrollView';
 import api from '../../services/api';
 
-const COLORS = {
-  primary: '#ec4899',
-  light: '#fdf2f8',
-  white: '#ffffff',
-  dark: '#1f2937',
-  gray: '#6b7280',
-  lightGray: '#f3f4f6',
-  success: '#10b981',
-  warning: '#f59e0b',
-};
-
-const SIZES = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-};
-
 const SubscriptionScreen = ({ navigation }) => {
   const { user } = useSelector((state) => state.auth);
+  const { colors } = useTheme();
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -123,11 +106,12 @@ const SubscriptionScreen = ({ navigation }) => {
   const getTierColor = (tier) => {
     switch (tier) {
       case 'premium':
-        return COLORS.primary;
+        return colors.primary;
       case 'basic':
-        return COLORS.success;
+        return colors.success;
+      case 'free':
       default:
-        return COLORS.gray;
+        return colors.gray[500];
     }
   };
 
@@ -137,10 +121,13 @@ const SubscriptionScreen = ({ navigation }) => {
         return 'trophy';
       case 'basic':
         return 'star';
+      case 'free':
       default:
         return 'person';
     }
   };
+
+  const styles = getStyles(colors);
 
   const formatDate = (date) => {
     if (!date) return 'N/A';
@@ -154,57 +141,58 @@ const SubscriptionScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
-  if (!subscription) {
-    return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={48} color={COLORS.gray} />
-        <Text style={styles.errorText}>Unable to load subscription</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={fetchSubscription}>
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  // Add safe defaults for subscription data
+  const subscriptionData = subscription || {};
+  const tier = subscriptionData.tier || 'free';
+  const status = subscriptionData.status || 'active';
+  const isActive = subscriptionData.isActive !== undefined ? subscriptionData.isActive : true;
+  const isOnTrial = subscriptionData.isOnTrial || false;
+  const cancelAtPeriodEnd = subscriptionData.cancelAtPeriodEnd || false;
+  const features = subscriptionData.features || {
+    canCreatePosts: true,
+    canSendMessages: true,
+    canPurchasePrograms: true,
+  };
 
   return (
     <WebScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
       }
     >
       {/* Current Plan Card */}
       <View style={styles.planCard}>
-        <View style={[styles.planBadge, { backgroundColor: getTierColor(subscription.tier) }]}>
-          <Ionicons name={getTierIcon(subscription.tier)} size={24} color={COLORS.white} />
+        <View style={[styles.planBadge, { backgroundColor: getTierColor(tier) }]}>
+          <Ionicons name={getTierIcon(tier)} size={24} color={colors.white} />
         </View>
         <Text style={styles.planTitle}>
-          {subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1)} Plan
+          {tier.charAt(0).toUpperCase() + tier.slice(1)} Plan
         </Text>
         <Text style={styles.planStatus}>
-          {subscription.isOnTrial ? '🎉 Free Trial Active' : subscription.status.toUpperCase()}
+          {isOnTrial ? '🎉 Free Trial Active' : status.toUpperCase()}
         </Text>
 
-        {subscription.isOnTrial && (
+        {isOnTrial && (
           <View style={styles.trialBanner}>
-            <Ionicons name="time-outline" size={16} color={COLORS.warning} />
+            <Ionicons name="time-outline" size={16} color={colors.warning} />
             <Text style={styles.trialText}>
-              Trial ends {formatDate(subscription.trialEndsAt)}
+              Trial ends {formatDate(subscriptionData.trialEndsAt)}
             </Text>
           </View>
         )}
 
-        {subscription.cancelAtPeriodEnd && (
+        {cancelAtPeriodEnd && (
           <View style={styles.cancelBanner}>
-            <Ionicons name="alert-circle-outline" size={16} color={COLORS.warning} />
+            <Ionicons name="alert-circle-outline" size={16} color={colors.warning} />
             <Text style={styles.cancelText}>
-              Cancels on {formatDate(subscription.subscriptionEndDate)}
+              Cancels on {formatDate(subscriptionData.subscriptionEndDate)}
             </Text>
           </View>
         )}
@@ -217,25 +205,25 @@ const SubscriptionScreen = ({ navigation }) => {
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Status</Text>
           <View style={[styles.statusBadge, {
-            backgroundColor: subscription.isActive ? COLORS.success : COLORS.gray
+            backgroundColor: isActive ? colors.success : colors.gray[500]
           }]}>
             <Text style={styles.statusText}>
-              {subscription.isActive ? 'Active' : 'Inactive'}
+              {isActive ? 'Active' : 'Inactive'}
             </Text>
           </View>
         </View>
 
-        {subscription.subscriptionStartDate && (
+        {subscriptionData.subscriptionStartDate && (
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Started</Text>
-            <Text style={styles.detailValue}>{formatDate(subscription.subscriptionStartDate)}</Text>
+            <Text style={styles.detailValue}>{formatDate(subscriptionData.subscriptionStartDate)}</Text>
           </View>
         )}
 
-        {subscription.subscriptionEndDate && (
+        {subscriptionData.subscriptionEndDate && (
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Renews</Text>
-            <Text style={styles.detailValue}>{formatDate(subscription.subscriptionEndDate)}</Text>
+            <Text style={styles.detailValue}>{formatDate(subscriptionData.subscriptionEndDate)}</Text>
           </View>
         )}
       </View>
@@ -246,34 +234,34 @@ const SubscriptionScreen = ({ navigation }) => {
 
         <View style={styles.featureRow}>
           <Ionicons
-            name={subscription.features.canCreatePosts ? 'checkmark-circle' : 'close-circle'}
+            name={features.canCreatePosts ? 'checkmark-circle' : 'close-circle'}
             size={20}
-            color={subscription.features.canCreatePosts ? COLORS.success : COLORS.gray}
+            color={features.canCreatePosts ? colors.success : colors.gray[500]}
           />
           <Text style={styles.featureText}>Create Posts</Text>
         </View>
 
         <View style={styles.featureRow}>
           <Ionicons
-            name={subscription.features.canSendMessages ? 'checkmark-circle' : 'close-circle'}
+            name={features.canSendMessages ? 'checkmark-circle' : 'close-circle'}
             size={20}
-            color={subscription.features.canSendMessages ? COLORS.success : COLORS.gray}
+            color={features.canSendMessages ? colors.success : colors.gray[500]}
           />
           <Text style={styles.featureText}>Direct Messaging</Text>
         </View>
 
         <View style={styles.featureRow}>
           <Ionicons
-            name={subscription.features.canPurchasePrograms ? 'checkmark-circle' : 'close-circle'}
+            name={features.canPurchasePrograms ? 'checkmark-circle' : 'close-circle'}
             size={20}
-            color={subscription.features.canPurchasePrograms ? COLORS.success : COLORS.gray}
+            color={features.canPurchasePrograms ? colors.success : colors.gray[500]}
           />
           <Text style={styles.featureText}>Purchase Programs</Text>
         </View>
 
-        {subscription.tier === 'free' && (
+        {tier === 'free' && (
           <View style={styles.limitInfo}>
-            <Ionicons name="information-circle-outline" size={16} color={COLORS.warning} />
+            <Ionicons name="information-circle-outline" size={16} color={colors.warning} />
             <Text style={styles.limitText}>
               Free tier includes 50 likes and 50 comments per day
             </Text>
@@ -282,21 +270,21 @@ const SubscriptionScreen = ({ navigation }) => {
       </View>
 
       {/* Action Buttons */}
-      {subscription.tier === 'free' && (
+      {tier === 'free' && (
         <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
-          <Ionicons name="arrow-up-circle-outline" size={20} color={COLORS.white} />
+          <Ionicons name="arrow-up-circle-outline" size={20} color={colors.white} />
           <Text style={styles.upgradeButtonText}>Upgrade to Premium</Text>
         </TouchableOpacity>
       )}
 
-      {subscription.tier !== 'free' && !subscription.cancelAtPeriodEnd && (
+      {tier !== 'free' && !cancelAtPeriodEnd && (
         <TouchableOpacity style={styles.manageButton} onPress={handleManageSubscription}>
-          <Ionicons name="settings-outline" size={20} color={COLORS.primary} />
+          <Ionicons name="settings-outline" size={20} color={colors.primary} />
           <Text style={styles.manageButtonText}>Manage Subscription</Text>
         </TouchableOpacity>
       )}
 
-      {subscription.tier !== 'free' && subscription.cancelAtPeriodEnd && (
+      {tier !== 'free' && cancelAtPeriodEnd && (
         <TouchableOpacity
           style={styles.reactivateButton}
           onPress={async () => {
@@ -309,17 +297,17 @@ const SubscriptionScreen = ({ navigation }) => {
             }
           }}
         >
-          <Ionicons name="refresh-outline" size={20} color={COLORS.white} />
+          <Ionicons name="refresh-outline" size={20} color={colors.white} />
           <Text style={styles.reactivateButtonText}>Reactivate Subscription</Text>
         </TouchableOpacity>
       )}
 
-      {subscription.tier === 'basic' && (
+      {tier === 'basic' && (
         <TouchableOpacity
           style={[styles.manageButton, { marginTop: SIZES.md }]}
           onPress={() => navigation.navigate('Pricing')}
         >
-          <Ionicons name="arrow-up-circle-outline" size={20} color={COLORS.primary} />
+          <Ionicons name="arrow-up-circle-outline" size={20} color={colors.primary} />
           <Text style={styles.manageButtonText}>Upgrade to Premium</Text>
         </TouchableOpacity>
       )}
@@ -327,10 +315,10 @@ const SubscriptionScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.gray[50],
   },
   content: {
     padding: SIZES.lg,
@@ -340,34 +328,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.gray[50],
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.light,
+    backgroundColor: colors.gray[50],
     padding: SIZES.xl,
   },
   errorText: {
     fontSize: 16,
-    color: COLORS.gray,
+    color: colors.gray[500],
     marginTop: SIZES.md,
     marginBottom: SIZES.xl,
   },
   retryButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: SIZES.xl,
     paddingVertical: SIZES.md,
     borderRadius: 8,
   },
   retryButtonText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
   planCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: SIZES.xl,
     alignItems: 'center',
@@ -389,12 +377,12 @@ const styles = StyleSheet.create({
   planTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.dark,
     marginBottom: SIZES.xs,
   },
   planStatus: {
     fontSize: 14,
-    color: COLORS.gray,
+    color: colors.gray[500],
     fontWeight: '500',
   },
   trialBanner: {
@@ -409,7 +397,7 @@ const styles = StyleSheet.create({
   },
   trialText: {
     fontSize: 14,
-    color: COLORS.warning,
+    color: colors.warning,
     fontWeight: '500',
   },
   cancelBanner: {
@@ -428,7 +416,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   detailsCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: SIZES.lg,
     marginBottom: SIZES.lg,
@@ -441,7 +429,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.dark,
+    color: colors.dark,
     marginBottom: SIZES.md,
   },
   detailRow: {
@@ -450,15 +438,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SIZES.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
+    borderBottomColor: colors.gray[200],
   },
   detailLabel: {
     fontSize: 16,
-    color: COLORS.gray,
+    color: colors.gray[500],
   },
   detailValue: {
     fontSize: 16,
-    color: COLORS.dark,
+    color: colors.dark,
     fontWeight: '500',
   },
   statusBadge: {
@@ -467,12 +455,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 14,
     fontWeight: '600',
   },
   featuresCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: SIZES.lg,
     marginBottom: SIZES.lg,
@@ -490,7 +478,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 16,
-    color: COLORS.dark,
+    color: colors.dark,
   },
   limitInfo: {
     flexDirection: 'row',
@@ -504,11 +492,11 @@ const styles = StyleSheet.create({
   limitText: {
     flex: 1,
     fontSize: 14,
-    color: COLORS.warning,
+    color: colors.warning,
   },
   upgradeButton: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingVertical: SIZES.lg,
     paddingHorizontal: SIZES.xl,
     borderRadius: 12,
@@ -523,13 +511,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   upgradeButtonText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   manageButton: {
     flexDirection: 'row',
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.white,
     paddingVertical: SIZES.lg,
     paddingHorizontal: SIZES.xl,
     borderRadius: 12,
@@ -537,7 +525,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SIZES.sm,
     borderWidth: 2,
-    borderColor: COLORS.primary,
+    borderColor: colors.primary,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -545,13 +533,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   manageButtonText: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: 16,
     fontWeight: 'bold',
   },
   reactivateButton: {
     flexDirection: 'row',
-    backgroundColor: COLORS.success,
+    backgroundColor: colors.success,
     paddingVertical: SIZES.lg,
     paddingHorizontal: SIZES.xl,
     borderRadius: 12,
@@ -566,7 +554,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   reactivateButtonText: {
-    color: COLORS.white,
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },

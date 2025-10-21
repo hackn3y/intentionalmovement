@@ -205,7 +205,19 @@ exports.firebaseAuth = async (req, res, next) => {
 
     if (!user) {
       // Create new user from Google OAuth data
-      const username = verifiedEmail.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
+      // Use email prefix without random suffix for cleaner usernames
+      const baseUsername = verifiedEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '');
+
+      // Check if username exists, if so, add a number suffix
+      let username = baseUsername;
+      let existingUser = await User.findOne({ where: { username } });
+      let counter = 1;
+
+      while (existingUser) {
+        username = `${baseUsername}${counter}`;
+        existingUser = await User.findOne({ where: { username } });
+        counter++;
+      }
 
       console.log('Creating new user from Firebase OAuth:', { email: verifiedEmail, username, displayName: verifiedDisplayName });
 
@@ -221,9 +233,21 @@ exports.firebaseAuth = async (req, res, next) => {
     } else {
       console.log('Existing user found:', { id: user.id, email: user.email, role: user.role });
 
-      // Update profile image if provided and different
+      // Update display name and profile image if provided and different
+      const updateData = {};
+
+      if (verifiedDisplayName && user.displayName !== verifiedDisplayName) {
+        updateData.displayName = verifiedDisplayName;
+      }
+
       if (verifiedProfileImage && user.profileImage !== verifiedProfileImage) {
-        await user.update({ profileImage: verifiedProfileImage });
+        updateData.profileImage = verifiedProfileImage;
+      }
+
+      // Only update if there are changes
+      if (Object.keys(updateData).length > 0) {
+        await user.update(updateData);
+        console.log('User profile updated:', updateData);
       }
     }
 

@@ -82,11 +82,18 @@ const EditProfileScreen = ({ navigation }) => {
           const type = match ? `image/${match[1]}` : 'image/jpeg';
 
           // Append the image file to FormData
-          formData.append('image', {
-            uri: selectedImage,
-            name: filename,
-            type: type,
-          });
+          // On web, we need to fetch the blob first
+          if (Platform.OS === 'web') {
+            const response = await fetch(selectedImage);
+            const blob = await response.blob();
+            formData.append('image', blob, filename);
+          } else {
+            formData.append('image', {
+              uri: selectedImage,
+              name: filename,
+              type: type,
+            });
+          }
 
           // Upload the image to the server
           const uploadResponse = await userService.uploadProfilePicture(user.id, formData);

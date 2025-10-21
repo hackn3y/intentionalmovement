@@ -22,6 +22,7 @@ import PricingScreen from '../screens/Subscription/PricingScreen';
 
 // Program Screens
 import MyProgramsScreen from '../screens/Programs/MyProgramsScreen';
+import ProgramDetailScreen from '../screens/Programs/ProgramDetailScreen';
 
 // Achievement Screens
 import AchievementsScreen from '../screens/Achievements/AchievementsScreen';
@@ -29,6 +30,10 @@ import AchievementsScreen from '../screens/Achievements/AchievementsScreen';
 // Legal Screens
 import TermsOfServiceScreen from '../screens/Legal/TermsOfServiceScreen';
 import PrivacyPolicyScreen from '../screens/Legal/PrivacyPolicyScreen';
+
+// Other Screens
+import CommunityGuidelinesScreen from '../screens/Other/CommunityGuidelinesScreen';
+import FreeContentScreen from '../screens/Other/FreeContentScreen';
 
 const Stack = createStackNavigator();
 
@@ -126,9 +131,24 @@ const ProfileStack = () => {
         options={{ title: 'My Programs' }}
       />
       <Stack.Screen
+        name="ProgramDetail"
+        component={ProgramDetailScreen}
+        options={{ title: 'Program Details' }}
+      />
+      <Stack.Screen
         name="Achievements"
         component={AchievementsScreen}
         options={{ title: 'My Achievements' }}
+      />
+      <Stack.Screen
+        name="CommunityGuidelines"
+        component={CommunityGuidelinesScreen}
+        options={{ title: 'Community Guidelines' }}
+      />
+      <Stack.Screen
+        name="FreeContent"
+        component={FreeContentScreen}
+        options={{ title: 'Free Content' }}
       />
     </Stack.Navigator>
   );
