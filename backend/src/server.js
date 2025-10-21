@@ -124,19 +124,7 @@ app.use(cors(corsOptions));
 console.log('Applying Helmet security headers...');
 app.use(helmet({
   crossOriginResourcePolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https:', 'http:'],
-      connectSrc: ["'self'", ...allowedOrigins],
-      fontSrc: ["'self'", 'data:', 'https:'],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'", 'https:', 'http:'],
-      frameSrc: ["'none'"],
-    },
-  },
+  contentSecurityPolicy: false, // Disable CSP to avoid header issues with dynamic origins
   hsts: {
     maxAge: 31536000, // 1 year
     includeSubDomains: true,
