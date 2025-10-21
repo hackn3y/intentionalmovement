@@ -10,8 +10,9 @@
   # Build command - npm run build now includes CI=false by default
   command = "npm run build"
 
-  # Environment variables
-  environment = { SECRETS_SCAN_SMART_DETECTION_ENABLED = "false" }
+  # Environment variables - disable secrets scanning for Firebase client keys
+  [build.environment]
+    SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyA0TZAIuYoiTG8Q1VzK5wKb6C12K67DClo"
 
 # Redirect all requests to index.html for client-side routing
 [[redirects]]
