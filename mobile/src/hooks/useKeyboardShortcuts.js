@@ -38,8 +38,12 @@ export const useKeyboardShortcuts = (shortcuts, deps = []) => {
         ? `${modifiers.join('+')}+${key}`
         : key;
 
+      console.log('[useKeyboardShortcuts] Built keyCombo:', keyCombo);
+      console.log('[useKeyboardShortcuts] Available shortcuts:', Object.keys(shortcuts));
+
       // Check for exact match
       if (shortcuts[keyCombo]) {
+        console.log('[useKeyboardShortcuts] EXACT MATCH! Executing...');
         event.preventDefault();
         shortcuts[keyCombo](event);
         return;
@@ -47,11 +51,15 @@ export const useKeyboardShortcuts = (shortcuts, deps = []) => {
 
       // Check for case-insensitive match
       const lowerKeyCombo = keyCombo.toLowerCase();
+      console.log('[useKeyboardShortcuts] Checking lowercase:', lowerKeyCombo);
       if (shortcuts[lowerKeyCombo]) {
+        console.log('[useKeyboardShortcuts] CASE-INSENSITIVE MATCH! Executing...');
         event.preventDefault();
         shortcuts[lowerKeyCombo](event);
         return;
       }
+
+      console.log('[useKeyboardShortcuts] No match found');
     };
 
     window.addEventListener('keydown', handleKeyPress);
