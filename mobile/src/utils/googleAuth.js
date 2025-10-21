@@ -67,8 +67,8 @@ export const getGoogleUserInfo = async (accessToken) => {
 
 /**
  * Get Firebase ID token from Google authentication
- * Note: This is a placeholder - actual implementation requires Firebase Auth
- * For now, we'll send the Google access token to our backend
+ * Note: We're not using Firebase Auth on the frontend, so we send user info directly
+ * The backend will handle authentication without verifying a Firebase token
  * @param {Object} googleAuth - Google auth response
  * @returns {Object} Auth data for backend
  */
@@ -85,8 +85,9 @@ export const getFirebaseAuthData = async (googleAuth) => {
   }
 
   // Return auth data for our backend
+  // Don't send idToken since we're not using Firebase Auth on frontend
+  // Backend will use the email/userInfo to authenticate
   return {
-    idToken: googleAuth.accessToken, // In production, this should be Firebase ID token
     provider: 'google',
     email: userInfo.email,
     displayName: userInfo.name,
