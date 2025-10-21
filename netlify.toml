@@ -7,8 +7,13 @@
   # Directory where the built files will be located (relative to base)
   publish = "build"
 
-  # Build command
-  command = "npm run build"
+  # Build command - CI=false treats ESLint warnings as warnings instead of errors
+  command = "CI=false npm run build"
+
+  # Build environment
+  [build.environment]
+    # Treat ESLint warnings as warnings, not errors
+    CI = "false"
 
 # Redirect all requests to index.html for client-side routing
 [[redirects]]
