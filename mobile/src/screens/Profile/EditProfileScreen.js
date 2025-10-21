@@ -70,30 +70,37 @@ const EditProfileScreen = ({ navigation }) => {
     try {
       const updateData = { ...values };
 
-      // Convert image to base64 if one was selected
+      // Upload image first if one was selected
       if (selectedImage) {
         try {
-          // Fetch the image and convert to base64
-          const response = await fetch(selectedImage);
-          const blob = await response.blob();
+          // Create FormData with the image file
+          const formData = new FormData();
 
-          // Convert blob to base64
-          const reader = new FileReader();
-          const base64Promise = new Promise((resolve, reject) => {
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
+          // Extract filename from URI or generate one
+          const filename = selectedImage.split('/').pop() || 'profile-image.jpg';
+          const match = /\.(\w+)$/.exec(filename);
+          const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+          // Append the image file to FormData
+          formData.append('image', {
+            uri: selectedImage,
+            name: filename,
+            type: type,
           });
 
-          const base64Image = await base64Promise;
+          // Upload the image to the server
+          const uploadResponse = await userService.uploadProfilePicture(user.id, formData);
 
-          // Add the base64 image to update data
-          updateData.profileImage = base64Image;
+          // Get the uploaded image URL from response
+          if (uploadResponse.data && uploadResponse.data.profileImage) {
+            updateData.profileImage = uploadResponse.data.profileImage;
+          }
         } catch (imageError) {
           if (__DEV__) {
-            console.error('Image conversion error:', imageError);
+            console.error('Image upload error:', imageError);
           }
-          Alert.alert('Warning', 'Failed to process image, but profile will still be updated');
+          Alert.alert('Error', 'Failed to upload image. Please try again.');
+          return; // Stop execution if image upload fails
         }
       }
 
