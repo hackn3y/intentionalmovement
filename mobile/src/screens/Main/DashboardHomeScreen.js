@@ -21,8 +21,58 @@ const DashboardHomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
 
-  // Navigation cards configuration
+  // Navigation cards configuration - Prioritized by money-making and frequent access
   const navigationCards = [
+    // MONEY-MAKING & SUBSCRIPTION (Priority 1)
+    {
+      id: 'programs',
+      title: 'Programs',
+      subtitle: 'Invest & Elevate 💰',
+      icon: 'book',
+      color: '#8b5cf6', // Purple
+      gradient: ['#8b5cf6', '#a78bfa'],
+      onPress: () => navigation.navigate('ProgramsTab'),
+    },
+    {
+      id: 'subscription',
+      title: 'Membership',
+      subtitle: 'Upgrade Your Access 💎',
+      icon: 'star',
+      color: '#ef4444', // Red
+      gradient: ['#ef4444', '#f87171'],
+      onPress: () => navigation.navigate('ProfileTab', {
+        screen: 'Subscription',
+      }),
+    },
+    // CORE JOURNEY (Priority 2)
+    {
+      id: 'pmmb',
+      title: 'Planted Mind\nMoving Body',
+      subtitle: 'Your Core Journey',
+      icon: 'leaf',
+      color: '#10b981', // Green
+      gradient: ['#10b981', '#34d399'],
+      onPress: () => navigation.navigate('PlantedMindTab'),
+    },
+    {
+      id: 'personal-goals',
+      title: 'Personal Goals',
+      subtitle: '6 Life Categories',
+      icon: 'target',
+      color: '#eab308', // Yellow/Gold
+      gradient: ['#eab308', '#facc15'],
+      onPress: () => navigation.navigate('PersonalGoals'),
+    },
+    // DAILY ENGAGEMENT (Priority 3)
+    {
+      id: 'daily',
+      title: 'Daily Content',
+      subtitle: 'Fresh Insights Daily',
+      icon: 'calendar',
+      color: '#f59e0b', // Amber
+      gradient: ['#f59e0b', '#fbbf24'],
+      onPress: () => navigation.navigate('DailyContentTab'),
+    },
     {
       id: 'community',
       title: 'Community',
@@ -33,33 +83,6 @@ const DashboardHomeScreen = ({ navigation }) => {
       onPress: () => navigation.navigate('Feed'),
     },
     {
-      id: 'pmmb',
-      title: 'Planted Mind\nMoving Body',
-      subtitle: 'Your Journey',
-      icon: 'leaf',
-      color: '#10b981', // Green
-      gradient: ['#10b981', '#34d399'],
-      onPress: () => navigation.navigate('PlantedMindTab'),
-    },
-    {
-      id: 'programs',
-      title: 'Programs',
-      subtitle: 'Learn & Grow',
-      icon: 'book',
-      color: '#8b5cf6', // Purple
-      gradient: ['#8b5cf6', '#a78bfa'],
-      onPress: () => navigation.navigate('ProgramsTab'),
-    },
-    {
-      id: 'daily',
-      title: 'Daily Content',
-      subtitle: 'Fresh Insights',
-      icon: 'calendar',
-      color: '#f59e0b', // Amber
-      gradient: ['#f59e0b', '#fbbf24'],
-      onPress: () => navigation.navigate('DailyContentTab'),
-    },
-    {
       id: 'messages',
       title: 'Messages',
       subtitle: 'Chat & Connect',
@@ -68,10 +91,11 @@ const DashboardHomeScreen = ({ navigation }) => {
       gradient: ['#3b82f6', '#60a5fa'],
       onPress: () => navigation.navigate('MessagesTab'),
     },
+    // PERSONAL SETTINGS (Priority 4)
     {
       id: 'profile',
       title: 'My Profile',
-      subtitle: 'Your Space',
+      subtitle: 'Settings & Account',
       icon: 'person-circle',
       color: '#6366f1', // Indigo
       gradient: ['#6366f1', '#818cf8'],
@@ -83,7 +107,7 @@ const DashboardHomeScreen = ({ navigation }) => {
     {
       id: 'achievements',
       title: 'Achievements',
-      subtitle: 'Track Progress',
+      subtitle: 'Track Your Progress',
       icon: 'trophy',
       color: '#eab308', // Yellow
       gradient: ['#eab308', '#facc15'],
@@ -91,26 +115,7 @@ const DashboardHomeScreen = ({ navigation }) => {
         screen: 'Achievements',
       }),
     },
-    {
-      id: 'subscription',
-      title: 'Membership',
-      subtitle: 'Manage Plan',
-      icon: 'star',
-      color: '#ef4444', // Red
-      gradient: ['#ef4444', '#f87171'],
-      onPress: () => navigation.navigate('ProfileTab', {
-        screen: 'Subscription',
-      }),
-    },
-    {
-      id: 'guidelines',
-      title: 'Community Guidelines',
-      subtitle: 'Our Values',
-      icon: 'shield-checkmark',
-      color: '#14b8a6', // Teal
-      gradient: ['#14b8a6', '#2dd4bf'],
-      onPress: () => navigation.navigate('CommunityGuidelines'),
-    },
+    // FREE RESOURCES (Priority 5)
     {
       id: 'free-content',
       title: 'Free Content',
@@ -120,14 +125,15 @@ const DashboardHomeScreen = ({ navigation }) => {
       gradient: ['#a855f7', '#c084fc'],
       onPress: () => navigation.navigate('FreeContent'),
     },
+    // INFO & EXTERNAL (Priority 6)
     {
-      id: 'personal-goals',
-      title: 'Personal Goals',
-      subtitle: '6 Life Categories',
-      icon: 'trophy',
-      color: '#eab308', // Yellow/Gold
-      gradient: ['#eab308', '#facc15'],
-      onPress: () => navigation.navigate('PersonalGoals'),
+      id: 'guidelines',
+      title: 'Community Guidelines',
+      subtitle: 'Our Values',
+      icon: 'shield-checkmark',
+      color: '#14b8a6', // Teal
+      gradient: ['#14b8a6', '#2dd4bf'],
+      onPress: () => navigation.navigate('CommunityGuidelines'),
     },
     {
       id: 'website',

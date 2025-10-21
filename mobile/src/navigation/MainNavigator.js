@@ -174,22 +174,8 @@ const MainNavigator = () => {
         name="ProfileTab"
         component={ProfileStack}
         options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>👤</Text>
-          ),
+          tabBarButton: () => null, // Hide from tab bar but keep for navigation
         }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            // Always navigate to own profile when tapping Profile tab
-            e.preventDefault();
-            navigation.navigate('ProfileTab', {
-              screen: 'Profile',
-              params: { userId: null, _forceRefresh: Date.now() },
-              initial: false,
-            });
-          },
-        })}
       />
     </Tab.Navigator>
   );
