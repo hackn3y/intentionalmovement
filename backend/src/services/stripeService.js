@@ -37,11 +37,18 @@ exports.getOrCreateCustomer = async (user) => {
   }
 
   try {
-    // If user already has a Stripe customer ID, return it
+    // If user already has a Stripe customer ID, verify it exists
     if (user.stripeCustomerId) {
-      const customer = await stripe.customers.retrieve(user.stripeCustomerId);
-      if (!customer.deleted) {
-        return customer.id;
+      try {
+        const customer = await stripe.customers.retrieve(user.stripeCustomerId);
+        if (!customer.deleted) {
+          return customer.id;
+        }
+      } catch (retrieveError) {
+        // If customer doesn't exist (404), clear the invalid ID and create a new one
+        console.log(`Customer ${user.stripeCustomerId} not found, creating new one for user ${user.email}`);
+        await user.update({ stripeCustomerId: null });
+        // Fall through to create new customer
       }
     }
 
