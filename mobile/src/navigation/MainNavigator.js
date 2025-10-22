@@ -9,6 +9,7 @@ import socketService from '../services/socketService';
 import HomeStack from './HomeStack';
 import ProgramStack from './ProgramStack';
 import MessageStack from './MessageStack';
+import NotificationStack from './NotificationStack';
 import ProfileStack from './ProfileStack';
 import DailyContentStack from './DailyContentStack';
 import PlantedMindStack from './PlantedMindStack';
@@ -130,6 +131,19 @@ const MainNavigator = () => {
         component={PlantedMindStack}
         options={{
           tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="NotificationsTab"
+        component={NotificationStack}
+        options={{
+          tabBarLabel: 'Alerts',
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ position: 'relative' }}>
+              <Text style={{ fontSize: size, color }}>🔔</Text>
+              {/* TODO: Add unread notifications badge */}
+            </View>
+          ),
         }}
       />
       <Tab.Screen
