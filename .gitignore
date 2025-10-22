@@ -85,3 +85,7 @@ coverage/
 # Windows reserved names
 nul
 **/nul
+
+# Test artifacts and reports
+lighthouse*.json
+*.lighthouse.json
