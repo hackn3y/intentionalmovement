@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA0TZAIuYoiTG8Q1VzK5wKb6C12K67DClo",
+  apiKey: "AIzaSyDByO4848KZFWFq0SeH1iMPQu5u8ZJZHZg",
   authDomain: "intentional-movement-corp.firebaseapp.com",
   projectId: "intentional-movement-corp",
   storageBucket: "intentional-movement-corp.firebasestorage.app",
