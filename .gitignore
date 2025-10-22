@@ -23,8 +23,8 @@ GoogleService-Info.plist
 
 # AWS credentials
 .aws/
-credentials
-config
+.aws/credentials
+.aws/config
 *accessKeys.csv
 *_accessKeys.csv
 

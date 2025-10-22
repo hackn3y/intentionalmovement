@@ -1,13 +1,15 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
+// Firebase configuration from environment variables
+// Using REACT_APP_ prefix for Create React App
 const firebaseConfig = {
-  apiKey: "AIzaSyDByO4848KZFWFq0SeH1iMPQu5u8ZJZHZg",
-  authDomain: "intentional-movement-corp.firebaseapp.com",
-  projectId: "intentional-movement-corp",
-  storageBucket: "intentional-movement-corp.firebasestorage.app",
-  messagingSenderId: "528044070931",
-  appId: "1:528044070931:web:dafa368852b5549c6947e6"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
