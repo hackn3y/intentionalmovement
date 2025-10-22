@@ -31,7 +31,7 @@ const DashboardHomeScreen = ({ navigation }) => {
       icon: 'book',
       color: '#8b5cf6', // Purple
       gradient: ['#8b5cf6', '#a78bfa'],
-      onPress: () => navigation.navigate('ProgramsTab'),
+      onPress: () => navigation.navigate('Programs'),
     },
     {
       id: 'subscription',
@@ -52,7 +52,7 @@ const DashboardHomeScreen = ({ navigation }) => {
       icon: 'leaf',
       color: '#10b981', // Green
       gradient: ['#10b981', '#34d399'],
-      onPress: () => navigation.navigate('PlantedMindTab'),
+      onPress: () => navigation.navigate('PlantedMind'),
     },
     {
       id: 'personal-goals',
@@ -71,7 +71,7 @@ const DashboardHomeScreen = ({ navigation }) => {
       icon: 'calendar',
       color: '#f59e0b', // Amber
       gradient: ['#f59e0b', '#fbbf24'],
-      onPress: () => navigation.navigate('DailyContentTab'),
+      onPress: () => navigation.navigate('DailyContent'),
     },
     {
       id: 'community',

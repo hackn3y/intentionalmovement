@@ -10,6 +10,9 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import CommunityGuidelinesScreen from '../screens/Other/CommunityGuidelinesScreen';
 import FreeContentScreen from '../screens/Other/FreeContentScreen';
 import PersonalGoalsScreen from '../screens/Goals/PersonalGoalsScreen';
+import ProgramsScreen from '../screens/Programs/ProgramsScreen';
+import DailyContentScreen from '../screens/Main/DailyContentScreen';
+import PlantedMindScreen from '../screens/Main/PlantedMindScreen';
 
 // Settings Screens
 import SettingsScreen from '../screens/Other/SettingsScreen';
@@ -113,6 +116,27 @@ const HomeStack = () => {
         component={PersonalGoalsScreen}
         options={{
           title: 'Personal Goals',
+        }}
+      />
+      <Stack.Screen
+        name="Programs"
+        component={ProgramsScreen}
+        options={{
+          title: 'Programs',
+        }}
+      />
+      <Stack.Screen
+        name="DailyContent"
+        component={DailyContentScreen}
+        options={{
+          title: 'Daily Content',
+        }}
+      />
+      <Stack.Screen
+        name="PlantedMind"
+        component={PlantedMindScreen}
+        options={{
+          title: 'Planted Mind, Moving Body',
         }}
       />
       <Stack.Screen
