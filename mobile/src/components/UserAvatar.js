@@ -51,15 +51,9 @@ const UserAvatar = ({
       finalUri = `${baseUrl}${uri}`;
     }
 
-    // Add cache-busting parameter for S3 URLs and server uploads to force image refresh
-    // This is only for display purposes - the database stores the clean URL
-    // Don't add for blob URLs (local file selection)
-    if ((finalUri.includes('s3.') || finalUri.includes('/uploads/')) && !finalUri.startsWith('blob:')) {
-      const separator = finalUri.includes('?') ? '&' : '?';
-      return `${finalUri}${separator}t=${Date.now()}`;
-    }
-
-    // Otherwise use the URI as-is (for Google images, etc.)
+    // Return the URI as-is
+    // Note: We don't add cache-busting parameters during render as Date.now() is impure
+    // If cache issues occur, consider adding version to the URL on the backend
     return finalUri;
   }, [uri]);
 

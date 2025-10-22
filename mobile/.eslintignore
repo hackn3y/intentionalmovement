@@ -8,3 +8,6 @@ coverage
 android
 ios
 web-build
+web/service-worker.js
+public-pwa-backup/service-worker.js
+scripts/screenshot.js

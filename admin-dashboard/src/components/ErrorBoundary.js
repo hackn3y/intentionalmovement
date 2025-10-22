@@ -42,7 +42,7 @@ class ErrorBoundary extends React.Component {
                 Something went wrong
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                We're sorry for the inconvenience. An error occurred while rendering this component.
+                We&apos;re sorry for the inconvenience. An error occurred while rendering this component.
               </p>
 
               <div className="flex gap-4 justify-center mb-6">

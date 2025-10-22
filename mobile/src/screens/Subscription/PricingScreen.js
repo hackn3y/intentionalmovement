@@ -340,13 +340,13 @@ const PricingScreen = ({ navigation }) => {
         <View style={styles.faqItem}>
           <Text style={styles.faqQuestion}>Can I cancel anytime?</Text>
           <Text style={styles.faqAnswer}>
-            Yes! You can cancel your membership at any time. You'll still have access until the
+            Yes! You can cancel your membership at any time. You&apos;ll still have access until the
             end of your billing period.
           </Text>
         </View>
 
         <View style={styles.faqItem}>
-          <Text style={styles.faqQuestion}>What's included in the free trial?</Text>
+          <Text style={styles.faqQuestion}>What&apos;s included in the free trial?</Text>
           <Text style={styles.faqAnswer}>
             All paid plans include a 14-day free trial with full access to all features. No credit
             card required to start.

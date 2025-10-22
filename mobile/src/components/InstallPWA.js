@@ -10,7 +10,29 @@ import { SIZES, FONT_SIZES } from '../config/constants';
 const InstallPWA = () => {
   const { colors } = useTheme();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+
+  // Initialize showPrompt based on whether it's already installed or dismissed
+  const getInitialShowPrompt = () => {
+    if (Platform.OS !== 'web') return false;
+    if (typeof window === 'undefined') return false;
+
+    // Check if already installed
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      return false;
+    }
+
+    // Check if dismissed recently
+    if (window.localStorage) {
+      const dismissUntil = localStorage.getItem('pwa-dismiss-until');
+      if (dismissUntil && Date.now() < parseInt(dismissUntil, 10)) {
+        return false;
+      }
+    }
+
+    return false; // Don't show until beforeinstallprompt event
+  };
+
+  const [showPrompt, setShowPrompt] = useState(getInitialShowPrompt);
 
   useEffect(() => {
     // Only run on web platform
@@ -26,11 +48,6 @@ const InstallPWA = () => {
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setShowPrompt(false);
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
@@ -65,16 +82,6 @@ const InstallPWA = () => {
       localStorage.setItem('pwa-dismiss-until', dismissUntil.toString());
     }
   };
-
-  // Check if dismissed recently
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const dismissUntil = localStorage.getItem('pwa-dismiss-until');
-      if (dismissUntil && Date.now() < parseInt(dismissUntil, 10)) {
-        setShowPrompt(false);
-      }
-    }
-  }, []);
 
   if (!showPrompt || Platform.OS !== 'web') return null;
 

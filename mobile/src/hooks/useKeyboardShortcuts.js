@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
 /**
@@ -71,9 +71,11 @@ export const useEnterToSubmit = (onSubmit, disabled = false, multiline = false) 
   const disabledRef = useRef(disabled);
   const onSubmitRef = useRef(onSubmit);
 
-  // Update refs on every render
-  disabledRef.current = disabled;
-  onSubmitRef.current = onSubmit;
+  // Update refs before effects run
+  useLayoutEffect(() => {
+    disabledRef.current = disabled;
+    onSubmitRef.current = onSubmit;
+  });
 
   useKeyboardShortcuts({
     [multiline ? 'ctrl+enter' : 'enter']: () => {
@@ -91,8 +93,10 @@ export const useEnterToSubmit = (onSubmit, disabled = false, multiline = false) 
 export const useEscapeToClose = (onEscape) => {
   const onEscapeRef = useRef(onEscape);
 
-  // Update ref on every render
-  onEscapeRef.current = onEscape;
+  // Update ref before effects run
+  useLayoutEffect(() => {
+    onEscapeRef.current = onEscape;
+  });
 
   useKeyboardShortcuts({
     'Escape': () => onEscapeRef.current(),

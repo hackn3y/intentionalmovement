@@ -127,7 +127,7 @@ const UpgradePrompt = ({
               </View>
 
               <View style={styles.featuresContainer}>
-                <Text style={styles.featuresTitle}>What's included:</Text>
+                <Text style={styles.featuresTitle}>What&apos;s included:</Text>
                 {tier.features.map((feature, index) => (
                   <View key={index} style={styles.featureRow}>
                     <Ionicons
