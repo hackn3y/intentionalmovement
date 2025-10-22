@@ -167,6 +167,24 @@ exports.createCheckoutSession = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Create checkout session error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      statusCode: error.statusCode,
+      userId: req.user?.id,
+      userEmail: req.user?.email,
+      requestBody: req.body
+    });
+
+    // Send more detailed error response
+    if (error.type === 'StripeInvalidRequestError') {
+      return res.status(400).json({
+        error: 'Payment configuration error. Please contact support.',
+        details: error.message
+      });
+    }
+
     next(error);
   }
 };
