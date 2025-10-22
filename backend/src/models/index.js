@@ -28,6 +28,7 @@ const ChallengeParticipant = require('./ChallengeParticipant')(sequelize);
 const Subscription = require('./Subscription')(sequelize);
 const Report = require('./Report')(sequelize);
 const ProgramReview = require('./ProgramReview')(sequelize);
+const Notification = require('./Notification')(sequelize);
 const AuditLog = require('./AuditLog')(sequelize);
 const DailyContent = require('./DailyContent')(sequelize);
 const UserStreak = require('./UserStreak')(sequelize);
@@ -132,6 +133,11 @@ DailyCheckIn.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 DailyContent.hasMany(DailyCheckIn, { foreignKey: 'dailyContentId', as: 'checkIns' });
 DailyCheckIn.belongsTo(DailyContent, { foreignKey: 'dailyContentId', as: 'dailyContent' });
 
+// Notifications
+User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications' });
+Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Notification.belongsTo(User, { foreignKey: 'fromUserId', as: 'fromUser' });
+
 module.exports = {
   sequelize,
   User,
@@ -150,6 +156,7 @@ module.exports = {
   Subscription,
   Report,
   ProgramReview,
+  Notification,
   AuditLog,
   DailyContent,
   UserStreak,

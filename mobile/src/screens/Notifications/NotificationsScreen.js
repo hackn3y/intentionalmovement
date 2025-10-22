@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,23 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
+  Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '../../context/ThemeContext';
 import { SIZES, FONT_SIZES } from '../../config/constants';
-import api from '../../services/api';
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  deleteNotification as deleteNotificationAction,
+  markAllNotificationsAsRead as markAllAsReadAction,
+  deleteAllReadNotifications as deleteAllReadAction,
+  addNotification,
+} from '../../store/slices/notificationsSlice';
+import socketService from '../../services/socketService';
 
 /**
  * Notifications Screen - Shows all app notifications except messages
@@ -19,87 +31,134 @@ import api from '../../services/api';
 const NotificationsScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const styles = getStyles(colors);
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const dispatch = useDispatch();
+
+  const { notifications, loading, refreshing, unreadCount } = useSelector(
+    (state) => state.notifications
+  );
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    dispatch(fetchNotifications({ limit: 50, offset: 0 }));
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      // TODO: Implement actual API call when backend endpoint is ready
-      // const response = await api.get('/notifications');
-      // setNotifications(response.data.notifications);
+    // Set up Socket.io listener for real-time notifications
+    const handleNewNotification = (notification) => {
+      console.log('New notification received:', notification);
+      dispatch(addNotification(notification));
+    };
 
-      // Mock data for now
-      setNotifications([
-        {
-          id: '1',
-          type: 'follow',
-          user: { username: 'jane_doe', profileImage: null },
-          message: 'started following you',
-          createdAt: new Date().toISOString(),
-          read: false,
-        },
-        {
-          id: '2',
-          type: 'like',
-          user: { username: 'john_smith', profileImage: null },
-          message: 'liked your post',
-          createdAt: new Date(Date.now() - 3600000).toISOString(),
-          read: false,
-        },
-        {
-          id: '3',
-          type: 'comment',
-          user: { username: 'alex_wellness', profileImage: null },
-          message: 'commented on your post',
-          createdAt: new Date(Date.now() - 7200000).toISOString(),
-          read: true,
-        },
-        {
-          id: '4',
-          type: 'achievement',
-          message: 'You unlocked a new achievement: 7-Day Streak!',
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          read: true,
-        },
-      ]);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+    socketService.onNotification(handleNewNotification);
+
+    // ESC key support for web
+    const handleKeyPress = (event) => {
+      if (Platform.OS === 'web' && event.key === 'Escape') {
+        navigation.goBack();
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      window.addEventListener('keydown', handleKeyPress);
+    }
+
+    // Cleanup
+    return () => {
+      socketService.offNotification();
+      if (Platform.OS === 'web') {
+        window.removeEventListener('keydown', handleKeyPress);
+      }
+    };
+  }, [dispatch, navigation]);
+
+  const handleRefresh = () => {
+    dispatch(fetchNotifications({ limit: 50, offset: 0 }));
+  };
+
+  const handleDeleteNotification = (notificationId) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Delete this notification?')) {
+        dispatch(deleteNotificationAction(notificationId));
+      }
+    } else {
+      Alert.alert(
+        'Delete Notification',
+        'Are you sure you want to delete this notification?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => dispatch(deleteNotificationAction(notificationId)),
+          },
+        ]
+      );
     }
   };
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchNotifications();
+  const handleMarkAllAsRead = () => {
+    if (unreadCount === 0) return;
+    dispatch(markAllAsReadAction());
   };
 
-  const handleNotificationPress = (notification) => {
-    // Mark as read
-    // TODO: API call to mark notification as read
+  const handleClearAll = () => {
+    const readCount = notifications.filter((n) => n.isRead).length;
+    if (readCount === 0) {
+      Alert.alert('No Read Notifications', 'There are no read notifications to clear.');
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Clear ${readCount} read notification${readCount !== 1 ? 's' : ''}?`)) {
+        dispatch(deleteAllReadAction());
+      }
+    } else {
+      Alert.alert(
+        'Clear Read Notifications',
+        `Clear ${readCount} read notification${readCount !== 1 ? 's' : ''}?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Clear',
+            style: 'destructive',
+            onPress: () => dispatch(deleteAllReadAction()),
+          },
+        ]
+      );
+    }
+  };
+
+  const handleNotificationPress = async (notification) => {
+    // Mark as read if unread
+    if (!notification.isRead) {
+      dispatch(markNotificationAsRead(notification.id));
+    }
 
     // Navigate based on notification type
     switch (notification.type) {
       case 'follow':
-        navigation.navigate('ProfileTab', {
-          screen: 'Profile',
-          params: { username: notification.user?.username },
-        });
+        if (notification.fromUser) {
+          navigation.navigate('ProfileTab', {
+            screen: 'Profile',
+            params: { username: notification.fromUser.username },
+          });
+        }
         break;
       case 'like':
       case 'comment':
-        // Navigate to post detail
-        // navigation.navigate('PostDetail', { postId: notification.postId });
+        // Navigate to post detail if actionUrl contains post ID
+        if (notification.data?.postId) {
+          // navigation.navigate('PostDetail', { postId: notification.data.postId });
+        }
         break;
       case 'achievement':
         navigation.navigate('ProfileTab', { screen: 'Achievements' });
+        break;
+      case 'program':
+      case 'purchase':
+        if (notification.data?.programId) {
+          navigation.navigate('ProgramsTab', {
+            screen: 'ProgramDetail',
+            params: { id: notification.data.programId },
+          });
+        }
         break;
       default:
         break;
@@ -117,7 +176,15 @@ const NotificationsScreen = ({ navigation }) => {
       case 'achievement':
         return { name: 'trophy', color: colors.warning };
       case 'program':
+      case 'purchase':
+      case 'subscription':
         return { name: 'book', color: colors.accent };
+      case 'daily_content':
+        return { name: 'calendar', color: colors.info };
+      case 'challenge':
+        return { name: 'flame', color: colors.warning };
+      case 'system':
+        return { name: 'information-circle', color: colors.info };
       default:
         return { name: 'notifications', color: colors.primary };
     }
@@ -142,30 +209,49 @@ const NotificationsScreen = ({ navigation }) => {
     const icon = getNotificationIcon(item.type);
 
     return (
-      <TouchableOpacity
-        style={[
-          styles.notificationItem,
-          !item.read && styles.unreadNotification,
-        ]}
-        onPress={() => handleNotificationPress(item)}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.iconContainer, { backgroundColor: icon.color + '20' }]}>
-          <Ionicons name={icon.name} size={24} color={icon.color} />
-        </View>
+      <View style={styles.notificationWrapper}>
+        <TouchableOpacity
+          style={[
+            styles.notificationItem,
+            !item.isRead && styles.unreadNotification,
+          ]}
+          onPress={() => handleNotificationPress(item)}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.iconContainer, { backgroundColor: icon.color + '20' }]}>
+            <Ionicons name={icon.name} size={24} color={icon.color} />
+          </View>
 
-        <View style={styles.notificationContent}>
-          <Text style={styles.notificationText}>
-            {item.user && (
-              <Text style={styles.username}>@{item.user.username} </Text>
-            )}
-            {item.message}
-          </Text>
-          <Text style={styles.timeText}>{formatTime(item.createdAt)}</Text>
-        </View>
+          <View style={styles.notificationContent}>
+            <Text style={[
+              styles.notificationTitle,
+              !item.isRead && styles.notificationTitleUnread
+            ]}>
+              {item.title}
+            </Text>
+            <Text style={[
+              styles.notificationText,
+              !item.isRead && styles.notificationTextUnread
+            ]}>
+              {item.fromUser && (
+                <Text style={styles.username}>@{item.fromUser.username} </Text>
+              )}
+              {item.message}
+            </Text>
+            <Text style={styles.timeText}>{formatTime(item.createdAt)}</Text>
+          </View>
 
-        {!item.read && <View style={styles.unreadDot} />}
-      </TouchableOpacity>
+          {!item.isRead && <View style={styles.unreadDot} />}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteNotification(item.id)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="trash-outline" size={20} color={colors.danger} />
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -181,6 +267,36 @@ const NotificationsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Header Actions */}
+      {notifications.length > 0 && (
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={handleMarkAllAsRead}
+            disabled={unreadCount === 0}
+            style={[styles.headerButton, unreadCount === 0 && styles.headerButtonDisabled]}
+          >
+            <Ionicons
+              name="checkmark-done-outline"
+              size={20}
+              color={unreadCount === 0 ? colors.textSecondary : colors.primary}
+            />
+            <Text style={[styles.headerButtonText, unreadCount === 0 && styles.headerButtonTextDisabled]}>
+              Mark All Read
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleClearAll}
+            style={styles.headerButton}
+          >
+            <Ionicons name="trash-outline" size={20} color={colors.danger} />
+            <Text style={[styles.headerButtonText, { color: colors.danger }]}>
+              Clear Read
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <FlatList
         data={notifications}
         renderItem={renderNotification}
@@ -207,22 +323,63 @@ const getStyles = (colors) =>
       flex: 1,
       backgroundColor: colors.background,
     },
+    headerActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: SIZES.sm,
+      paddingHorizontal: SIZES.md,
+      backgroundColor: colors.card,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    headerButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: SIZES.xs,
+      paddingHorizontal: SIZES.md,
+      borderRadius: SIZES.sm,
+      backgroundColor: colors.background,
+    },
+    headerButtonDisabled: {
+      opacity: 0.5,
+    },
+    headerButtonText: {
+      marginLeft: SIZES.xs,
+      fontSize: FONT_SIZES.sm,
+      fontWeight: '600',
+      color: colors.primary,
+    },
+    headerButtonTextDisabled: {
+      color: colors.textSecondary,
+    },
     listContainer: {
       paddingVertical: SIZES.sm,
     },
     emptyListContainer: {
       flexGrow: 1,
     },
-    notificationItem: {
+    notificationWrapper: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: SIZES.md,
       backgroundColor: colors.card,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
+    notificationItem: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: SIZES.md,
+    },
+    deleteButton: {
+      padding: SIZES.md,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     unreadNotification: {
-      backgroundColor: colors.primary + '08',
+      backgroundColor: colors.primary + '15',
+      borderLeftWidth: 3,
+      borderLeftColor: colors.primary,
     },
     iconContainer: {
       width: 48,
@@ -235,10 +392,24 @@ const getStyles = (colors) =>
     notificationContent: {
       flex: 1,
     },
-    notificationText: {
+    notificationTitle: {
       fontSize: FONT_SIZES.md,
+      fontWeight: '600',
       color: colors.text,
+      marginBottom: SIZES.xxs,
+    },
+    notificationTitleUnread: {
+      fontWeight: '700',
+      color: colors.text,
+    },
+    notificationText: {
+      fontSize: FONT_SIZES.sm,
+      color: colors.textSecondary,
       marginBottom: SIZES.xs,
+    },
+    notificationTextUnread: {
+      color: colors.text,
+      opacity: 0.9,
     },
     username: {
       fontWeight: 'bold',
@@ -249,11 +420,16 @@ const getStyles = (colors) =>
       color: colors.textSecondary,
     },
     unreadDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
       backgroundColor: colors.primary,
       marginLeft: SIZES.sm,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.8,
+      shadowRadius: 4,
+      elevation: 3,
     },
     emptyContainer: {
       flex: 1,

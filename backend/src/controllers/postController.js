@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { Post, User, Comment, Like, Follow, Report } = require('../models');
 const response = require('../utils/response');
 const AchievementService = require('../services/achievementService');
+const { createNotification } = require('./notificationController');
 
 // Get feed (paginated)
 exports.getFeed = async (req, res, next) => {
@@ -309,6 +310,23 @@ exports.likePost = async (req, res, next) => {
     // Increment like count
     await post.increment('likeCount');
 
+    // Get user who liked the post for notification
+    const liker = await User.findByPk(userId, {
+      attributes: ['id', 'username', 'displayName']
+    });
+
+    // Create notification for post owner
+    if (liker) {
+      await createNotification({
+        userId: post.userId,
+        type: 'like',
+        title: 'Post Liked',
+        message: `${liker.displayName || liker.username} liked your post`,
+        data: { postId: id, likerId: userId },
+        fromUserId: userId
+      });
+    }
+
     // Check for engagement achievements (for the post author)
     AchievementService.checkEngagementAchievements(post.userId).catch(err => {
       console.error('Achievement check error:', err);
@@ -393,6 +411,29 @@ exports.addComment = async (req, res, next) => {
         }
       ]
     });
+
+    // Create notification for post owner (don't notify if commenting on own post)
+    if (post.userId !== req.user.id) {
+      const commenter = await User.findByPk(req.user.id, {
+        attributes: ['id', 'username', 'displayName']
+      });
+
+      if (commenter) {
+        // Truncate comment content for notification
+        const truncatedContent = content.length > 50
+          ? content.substring(0, 50) + '...'
+          : content;
+
+        await createNotification({
+          userId: post.userId,
+          type: 'comment',
+          title: 'New Comment',
+          message: `${commenter.displayName || commenter.username} commented on your post: "${truncatedContent}"`,
+          data: { postId: id, commentId: comment.id, commenterId: req.user.id },
+          fromUserId: req.user.id
+        });
+      }
+    }
 
     res.status(201).json({
       message: 'Comment added successfully',

@@ -14,6 +14,7 @@ const subscriptionRoutes = require('./subscriptions');
 const adminRoutes = require('./admin');
 const dailyContentRoutes = require('./dailyContent');
 const adminSetupRoutes = require('./admin-setup');
+const notificationRoutes = require('./notifications');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -28,5 +29,6 @@ router.use('/subscriptions', subscriptionRoutes);
 router.use('/admin', adminRoutes);
 router.use('/daily-content', dailyContentRoutes);
 router.use('/admin-setup', adminSetupRoutes);
+router.use('/notifications', notificationRoutes);
 
 module.exports = router;

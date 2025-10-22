@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const { User, Follow, Post, Purchase, Program, Achievement, UserAchievement } = require('../models');
 const AchievementService = require('../services/achievementService');
 const s3Service = require('../services/s3Service');
+const { createNotification } = require('./notificationController');
 
 // Safe attributes that exist in production database
 const SAFE_USER_ATTRIBUTES = ['id', 'firebaseUid', 'email', 'username', 'displayName', 'bio', 'profileImage', 'coverImage', 'movementGoals', 'createdAt', 'updatedAt'];
@@ -234,6 +235,23 @@ exports.followUser = async (req, res, next) => {
       followerId: currentUserId,
       followingId: id
     });
+
+    // Get follower info for notification
+    const follower = await User.findByPk(currentUserId, {
+      attributes: ['id', 'username', 'displayName']
+    });
+
+    // Create notification for the user being followed
+    if (follower) {
+      await createNotification({
+        userId: id,
+        type: 'follow',
+        title: 'New Follower',
+        message: `${follower.displayName || follower.username} started following you`,
+        data: { followerId: currentUserId },
+        fromUserId: currentUserId
+      });
+    }
 
     // Check for social achievements (for the user being followed)
     AchievementService.checkSocialAchievements(id).catch(err => {
