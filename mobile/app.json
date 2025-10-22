@@ -7,7 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
-      "**/*"
+      "assets/fonts/*",
+      "assets/images/*",
+      "assets/*.png"
     ],
     "ios": {
       "supportsTablet": true,
