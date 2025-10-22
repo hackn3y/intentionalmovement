@@ -120,13 +120,6 @@ const ProfileScreen = ({ route, navigation }) => {
   };
 
   /**
-   * Navigate to settings
-   */
-  const handleSettings = () => {
-    navigation.navigate('Settings');
-  };
-
-  /**
    * Render header with profile info
    */
   const renderHeader = () => {
@@ -196,20 +189,12 @@ const ProfileScreen = ({ route, navigation }) => {
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
           {isOwnProfile ? (
-            <>
-              <Button
-                title="Edit Profile"
-                variant="outline"
-                onPress={handleEditProfile}
-                style={styles.actionButton}
-              />
-              <Button
-                title="Settings"
-                variant="outline"
-                onPress={handleSettings}
-                style={styles.actionButton}
-              />
-            </>
+            <Button
+              title="Edit Profile"
+              variant="outline"
+              onPress={handleEditProfile}
+              style={styles.actionButton}
+            />
           ) : (
             <>
               <Button
