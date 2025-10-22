@@ -91,7 +91,7 @@ const DashboardHomeScreen = ({ navigation }) => {
       gradient: ['#3b82f6', '#60a5fa'],
       onPress: () => navigation.navigate('MessagesTab'),
     },
-    // PERSONAL SETTINGS (Priority 4)
+    // PERSONAL (Priority 4)
     {
       id: 'profile',
       title: 'My Profile',
@@ -103,15 +103,6 @@ const DashboardHomeScreen = ({ navigation }) => {
         screen: 'Profile',
         params: { userId: null },
       }),
-    },
-    {
-      id: 'settings',
-      title: 'Settings',
-      subtitle: 'Privacy & Preferences',
-      icon: 'settings',
-      color: '#64748b', // Slate
-      gradient: ['#64748b', '#94a3b8'],
-      onPress: () => navigation.navigate('Settings'),
     },
     {
       id: 'achievements',

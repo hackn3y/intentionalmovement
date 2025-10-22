@@ -1,5 +1,7 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
 import DashboardHomeScreen from '../screens/Main/DashboardHomeScreen';
 import FeedScreen from '../screens/Main/FeedScreen';
 import PostDetailScreen from '../screens/Posts/PostDetailScreen';
@@ -51,9 +53,17 @@ const HomeStack = () => {
       <Stack.Screen
         name="Home"
         component={DashboardHomeScreen}
-        options={{
+        options={({ navigation }) => ({
           title: 'Intentional Movement',
-        }}
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Settings')}
+              style={{ marginRight: 15 }}
+            >
+              <Ionicons name="settings-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name="Feed"
