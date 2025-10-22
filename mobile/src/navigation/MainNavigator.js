@@ -1,19 +1,34 @@
-import React, { useEffect } from 'react';
-import { Text, View, Image } from 'react-native';
+import React, { useEffect, lazy, Suspense } from 'react';
+import { Text, View, Image, ActivityIndicator } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSelector, useDispatch } from 'react-redux';
-import { COLORS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 import { fetchConversations, addMessageFromSocket } from '../store/slices/messagesSlice';
 import { addNotification, fetchUnreadCount } from '../store/slices/notificationsSlice';
 import socketService from '../services/socketService';
-import HomeStack from './HomeStack';
-import MessageStack from './MessageStack';
-import NotificationStack from './NotificationStack';
-import ProfileStack from './ProfileStack';
-import PostStack from './PostStack';
+
+// Lazy load stack navigators for better performance
+const HomeStack = lazy(() => import('./HomeStack'));
+const MessageStack = lazy(() => import('./MessageStack'));
+const NotificationStack = lazy(() => import('./NotificationStack'));
+const ProfileStack = lazy(() => import('./ProfileStack'));
+const PostStack = lazy(() => import('./PostStack'));
 
 const Tab = createBottomTabNavigator();
+
+// Wrapper component for lazy-loaded stacks
+const LazyStackWrapper = ({ Stack }) => {
+  const { colors } = useTheme();
+  return (
+    <Suspense fallback={
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    }>
+      <Stack />
+    </Suspense>
+  );
+};
 
 /**
  * Main tab navigator
@@ -90,7 +105,7 @@ const MainNavigator = () => {
       {/* IMC (Home) Tab */}
       <Tab.Screen
         name="HomeTab"
-        component={HomeStack}
+        children={() => <LazyStackWrapper Stack={HomeStack} />}
         options={{
           tabBarLabel: 'IMC',
           tabBarIcon: ({ color, size, focused }) => {
@@ -139,7 +154,7 @@ const MainNavigator = () => {
       {/* Messages Tab */}
       <Tab.Screen
         name="MessagesTab"
-        component={MessageStack}
+        children={() => <LazyStackWrapper Stack={MessageStack} />}
         options={{
           tabBarLabel: 'Messages',
           tabBarIcon: ({ color, size }) => (
@@ -179,7 +194,7 @@ const MainNavigator = () => {
       {/* Community Tab */}
       <Tab.Screen
         name="CommunityTab"
-        component={PostStack}
+        children={() => <LazyStackWrapper Stack={PostStack} />}
         options={{
           tabBarLabel: 'Community',
           tabBarIcon: ({ color, size }) => (
@@ -191,7 +206,7 @@ const MainNavigator = () => {
       {/* Alerts Tab */}
       <Tab.Screen
         name="NotificationsTab"
-        component={NotificationStack}
+        children={() => <LazyStackWrapper Stack={NotificationStack} />}
         options={{
           tabBarLabel: 'Alerts',
           tabBarIcon: ({ color, size }) => (
@@ -231,7 +246,7 @@ const MainNavigator = () => {
       {/* Profile Tab */}
       <Tab.Screen
         name="ProfileTab"
-        component={ProfileStack}
+        children={() => <LazyStackWrapper Stack={ProfileStack} />}
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color, size, focused }) => (

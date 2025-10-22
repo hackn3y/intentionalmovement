@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from '../store/slices/authSlice';
 import socketService from '../services/socketService';
-import AuthNavigator from './AuthNavigator';
-import MainNavigator from './MainNavigator';
 import LoadingSpinner from '../components/LoadingSpinner';
+
+// Lazy load navigators for code splitting
+const AuthNavigator = lazy(() => import('./AuthNavigator'));
+const MainNavigator = lazy(() => import('./MainNavigator'));
 
 /**
  * Root navigator component
@@ -74,7 +76,11 @@ const RootNavigator = () => {
     return <LoadingSpinner text="Loading..." />;
   }
 
-  return isAuthenticated ? <MainNavigator /> : <AuthNavigator />;
+  return (
+    <Suspense fallback={<LoadingSpinner text="Loading..." />}>
+      {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
+    </Suspense>
+  );
 };
 
 export default RootNavigator;
