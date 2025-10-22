@@ -4,13 +4,19 @@
 
 const axios = require('axios');
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = process.env.API_URL || 'http://localhost:3001/api';
 
-// Admin credentials
+// Admin credentials from environment variables
 const ADMIN_USER = {
-  email: 'admin@intentionalmovement.com',
-  password: 'SecureAdmin_dfe986665e36f3c2ddddf47b3a0e89e4'
+  email: process.env.ADMIN_EMAIL || 'admin@intentionalmovement.com',
+  password: process.env.ADMIN_PASSWORD
 };
+
+if (!ADMIN_USER.password) {
+  console.error('❌ ADMIN_PASSWORD environment variable is required');
+  console.error('Set it with: set ADMIN_PASSWORD=your_password');
+  process.exit(1);
+}
 
 let authToken = '';
 

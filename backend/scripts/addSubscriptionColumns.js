@@ -6,7 +6,11 @@ async function addSubscriptionColumns() {
 
   try {
     // Connect to production PostgreSQL database
-    const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:OmkxOKLVVUUiQzJJlWIPIxcZVHmHRObN@junction.proxy.rlwy.net:47299/railway';
+    const DATABASE_URL = process.env.DATABASE_URL;
+
+    if (!DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
 
     sequelize = new Sequelize(DATABASE_URL, {
       dialect: 'postgres',

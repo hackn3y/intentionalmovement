@@ -89,3 +89,8 @@ nul
 # Test artifacts and reports
 lighthouse*.json
 *.lighthouse.json
+
+# Utility scripts with potential credentials
+create-daily-content.js
+**/scripts/*-production.js
+**/scripts/*-production.bat
