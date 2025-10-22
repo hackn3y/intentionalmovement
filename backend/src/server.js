@@ -190,6 +190,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Temporary test routes for debugging Stripe
+app.use('/api/test', require('./routes/test'));
+
 // API Routes
 console.log('Loading API routes...');
 app.use('/api', routes);
