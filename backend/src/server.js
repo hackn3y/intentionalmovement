@@ -191,6 +191,7 @@ app.get('/health', (req, res) => {
 });
 
 // Temporary test routes for debugging Stripe
+// Force restart by adding timestamp comment: 2025-10-22T03:50:00Z
 app.use('/api/test', require('./routes/test'));
 
 // API Routes
