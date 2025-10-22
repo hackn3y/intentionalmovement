@@ -95,7 +95,7 @@ const DashboardHomeScreen = ({ navigation }) => {
     {
       id: 'profile',
       title: 'My Profile',
-      subtitle: 'Settings & Account',
+      subtitle: 'View & Edit Profile',
       icon: 'person-circle',
       color: '#6366f1', // Indigo
       gradient: ['#6366f1', '#818cf8'],
@@ -103,6 +103,15 @@ const DashboardHomeScreen = ({ navigation }) => {
         screen: 'Profile',
         params: { userId: null },
       }),
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      subtitle: 'Privacy & Preferences',
+      icon: 'settings',
+      color: '#64748b', // Slate
+      gradient: ['#64748b', '#94a3b8'],
+      onPress: () => navigation.navigate('Settings'),
     },
     {
       id: 'achievements',

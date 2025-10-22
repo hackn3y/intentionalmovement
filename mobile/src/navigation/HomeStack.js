@@ -8,6 +8,17 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import CommunityGuidelinesScreen from '../screens/Other/CommunityGuidelinesScreen';
 import FreeContentScreen from '../screens/Other/FreeContentScreen';
 import PersonalGoalsScreen from '../screens/Goals/PersonalGoalsScreen';
+
+// Settings Screens
+import SettingsScreen from '../screens/Other/SettingsScreen';
+import ChangePasswordScreen from '../screens/Other/ChangePasswordScreen';
+import PrivacySettingsScreen from '../screens/Other/PrivacySettingsScreen';
+import HelpCenterScreen from '../screens/Other/HelpCenterScreen';
+
+// Legal Screens
+import TermsOfServiceScreen from '../screens/Legal/TermsOfServiceScreen';
+import PrivacyPolicyScreen from '../screens/Legal/PrivacyPolicyScreen';
+
 import { COLORS } from '../config/constants';
 import { useTheme } from '../context/ThemeContext';
 
@@ -92,6 +103,48 @@ const HomeStack = () => {
         component={PersonalGoalsScreen}
         options={{
           title: 'Personal Goals',
+        }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: 'Settings',
+        }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: 'Change Password',
+        }}
+      />
+      <Stack.Screen
+        name="PrivacySettings"
+        component={PrivacySettingsScreen}
+        options={{
+          title: 'Privacy Settings',
+        }}
+      />
+      <Stack.Screen
+        name="HelpCenter"
+        component={HelpCenterScreen}
+        options={{
+          title: 'Help Center',
+        }}
+      />
+      <Stack.Screen
+        name="TermsOfService"
+        component={TermsOfServiceScreen}
+        options={{
+          title: 'Terms of Service',
+        }}
+      />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicyScreen}
+        options={{
+          title: 'Privacy Policy',
         }}
       />
     </Stack.Navigator>
