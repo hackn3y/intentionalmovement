@@ -4,6 +4,7 @@
  */
 
 const stripeService = require('../services/stripeService');
+const { User } = require('../models');
 
 // Test Stripe configuration
 exports.testStripeConfig = async (req, res) => {
@@ -50,6 +51,50 @@ exports.testStripeConfig = async (req, res) => {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Fix hackn3y user specifically
+exports.fixHackn3yUser = async (req, res) => {
+  try {
+    // Find hackn3y user
+    const user = await User.findOne({
+      where: { username: 'hackn3y' }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User hackn3y not found'
+      });
+    }
+
+    const oldCustomerId = user.stripeCustomerId;
+
+    // Clear the Stripe customer ID
+    await user.update({ stripeCustomerId: null });
+
+    // Force refresh the user instance
+    await user.reload();
+
+    res.json({
+      success: true,
+      message: 'Cleared Stripe customer ID for hackn3y',
+      oldCustomerId: oldCustomerId,
+      newCustomerId: null,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        stripeCustomerId: user.stripeCustomerId
+      }
+    });
+  } catch (error) {
+    console.error('Error fixing hackn3y user:', error);
     res.status(500).json({
       success: false,
       error: error.message
