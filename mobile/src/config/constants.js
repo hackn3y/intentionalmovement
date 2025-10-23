@@ -1,6 +1,7 @@
 // API Configuration
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api';
-export const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+// Use Railway production URL as fallback for web builds
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://intentionalmovement-production.up.railway.app/api';
+export const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'https://intentionalmovement-production.up.railway.app';
 
 // Stripe Configuration
 export const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_key';
