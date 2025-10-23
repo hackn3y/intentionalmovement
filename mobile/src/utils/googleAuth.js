@@ -6,7 +6,18 @@ import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
 // Enable dismissal of web browser on completion
-// Note: This may show a COOP warning in console on web browsers, but it's harmless
+// Suppress COOP warnings in console (they're harmless and expected)
+if (Platform.OS === 'web') {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    if (args[0]?.includes?.('Cross-Origin-Opener-Policy') ||
+        args[0]?.includes?.('window.close') ||
+        args[0]?.includes?.('window.closed')) {
+      return; // Suppress COOP warnings
+    }
+    originalWarn(...args);
+  };
+}
 WebBrowser.maybeCompleteAuthSession();
 
 // Google OAuth Client IDs - these should match your Firebase config
