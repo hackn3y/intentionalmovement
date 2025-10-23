@@ -28,8 +28,25 @@ if (process.env.NODE_ENV === 'production') {
       },
       compress: {
         drop_console: true, // Remove console.logs in production
+        drop_debugger: true,
         passes: 3,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
       },
+    },
+    // Use modern JavaScript target to reduce polyfills
+    babelTransformerPath: require.resolve('metro-react-native-babel-transformer'),
+  };
+
+  // Optimize code splitting
+  config.serializer = {
+    ...config.serializer,
+    // Create separate bundles for better caching
+    createModuleIdFactory: () => {
+      return (path) => {
+        // Use hashed IDs for better long-term caching
+        const crypto = require('crypto');
+        return crypto.createHash('md5').update(path).digest('hex').substring(0, 8);
+      };
     },
   };
 }
