@@ -1,5 +1,7 @@
 [build]
   # Expo web build configuration
+  # Note: Environment variables are hardcoded in source files as fallbacks
+  # because Netlify/Metro doesn't inject env vars properly during build
   command = "npm run build:pwa"
   publish = "dist"
 
