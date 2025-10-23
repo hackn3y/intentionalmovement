@@ -1,0 +1,29 @@
+[build]
+  # Expo web build configuration
+  command = "npm run build:pwa"
+  publish = "dist"
+
+[build.environment]
+  # Backend API URL (Railway production)
+  EXPO_PUBLIC_API_URL = "https://intentionalmovement-production.up.railway.app/api"
+  EXPO_PUBLIC_SOCKET_URL = "https://intentionalmovement-production.up.railway.app"
+
+  # Stripe Publishable Key (Test Mode)
+  EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_51SFT323X07qmIkXXctvIaClywgB7Pl0aattqiuUi7loMSvynlS4138PlplHMUVMQVQxOAd87ytOdkmWPV9CNlgI900PLL5dOeg"
+
+  # Firebase Configuration
+  EXPO_PUBLIC_FIREBASE_API_KEY = "AIzaSyDByO4848KZFWFq0SeH1iMPQu5u8ZJZHZg"
+  EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN = "intentional-movement-corp.firebaseapp.com"
+  EXPO_PUBLIC_FIREBASE_PROJECT_ID = "intentional-movement-corp"
+  EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET = "intentional-movement-corp.firebasestorage.app"
+  EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = "528044070931"
+  EXPO_PUBLIC_FIREBASE_APP_ID = "1:528044070931:web:dafa368852b5549c6947e6"
+
+  # Google OAuth Client ID
+  EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID = "528044070931-06pbpg4gj40daopug4b7plumibn3g353.apps.googleusercontent.com"
+
+# Single Page Application routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
