@@ -1,0 +1,15 @@
+[build]
+  # Admin dashboard build configuration
+  base = "admin-dashboard"
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  # React production build
+  NODE_ENV = "production"
+
+# Single Page Application routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
