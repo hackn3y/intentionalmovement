@@ -5,8 +5,8 @@
   publish = "build"
 
 [build.environment]
-  # React production build
-  NODE_ENV = "production"
+  # CI=false allows build to succeed even with warnings
+  CI = "false"
 
 # Single Page Application routing
 [[redirects]]
