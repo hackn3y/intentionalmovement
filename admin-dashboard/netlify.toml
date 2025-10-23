@@ -8,6 +8,17 @@
   # CI=false allows build to succeed even with warnings
   CI = "false"
 
+  # Firebase Configuration (for Google OAuth in admin)
+  REACT_APP_FIREBASE_API_KEY = "AIzaSyDByO4848KZFWFq0SeH1iMPQu5u8ZJZHZg"
+  REACT_APP_FIREBASE_AUTH_DOMAIN = "intentional-movement-corp.firebaseapp.com"
+  REACT_APP_FIREBASE_PROJECT_ID = "intentional-movement-corp"
+  REACT_APP_FIREBASE_STORAGE_BUCKET = "intentional-movement-corp.firebasestorage.app"
+  REACT_APP_FIREBASE_MESSAGING_SENDER_ID = "528044070931"
+  REACT_APP_FIREBASE_APP_ID = "1:528044070931:web:dafa368852b5549c6947e6"
+
+  # Backend API URL
+  REACT_APP_API_URL = "https://intentionalmovement-production.up.railway.app/api"
+
 # Single Page Application routing
 [[redirects]]
   from = "/*"
