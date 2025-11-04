@@ -33,8 +33,6 @@ if (process.env.NODE_ENV === 'production') {
         pure_funcs: ['console.log', 'console.info', 'console.debug'],
       },
     },
-    // Use modern JavaScript target to reduce polyfills
-    babelTransformerPath: require.resolve('metro-react-native-babel-transformer'),
   };
 
   // Optimize code splitting

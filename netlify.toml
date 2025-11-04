@@ -2,11 +2,14 @@
   # Set base directory to mobile folder
   base = "mobile"
   # Expo web build configuration
-  # Force fresh build on each deploy
-  command = "rm -rf dist node_modules/.cache && npm run build:pwa"
+  command = "npm run build:pwa"
   publish = "dist"
 
 [build.environment]
+  # Build environment
+  NODE_ENV = "production"
+  CI = "true"
+
   # These environment variables are set but also hardcoded in source as fallbacks
   # Backend API URL (Railway production)
   EXPO_PUBLIC_API_URL = "https://intentionalmovement-production.up.railway.app/api"
