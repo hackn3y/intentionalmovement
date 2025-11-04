@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting... - Intentional Movement</title>
+  <meta http-equiv="refresh" content="0;url=/">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      padding: 40px 20px;
+      max-width: 400px;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: #ec4899;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+    }
+    h1 {
+      color: #ec4899;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .spinner {
+      border: 3px solid #fce7f3;
+      border-top: 3px solid #ec4899;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #ec4899;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">IM</div>
+    <h1>Redirecting...</h1>
+    <p>Taking you to the main site</p>
+    <div class="spinner"></div>
+    <p style="font-size: 14px; color: #9ca3af;">If you're not redirected automatically,<br>
+    <a href="/">click here to continue</a></p>
+  </div>
+
+  <script>
+    // Force redirect to main site after a brief moment
+    setTimeout(function() {
+      window.location.href = '/';
+    }, 500);
+
+    // Clear any old cached URLs from localStorage
+    try {
+      localStorage.removeItem('lastVisitedUrl');
+    } catch(e) {}
+  </script>
+</body>
+</html>

@@ -41,6 +41,7 @@ const filesToCopy = [
   { src: '../web/service-worker.js', dest: 'service-worker.js' },
   { src: '../web/offline.html', dest: 'offline.html' },
   { src: '../public/_redirects', dest: '_redirects' },
+  { src: '../public/404.html', dest: '404.html' },
 ];
 
 filesToCopy.forEach(({ src, dest }) => {

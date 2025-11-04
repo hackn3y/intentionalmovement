@@ -211,10 +211,50 @@ console.log('Preparing to start server...');
 const startServer = async () => {
   try {
     console.log('Testing database connection...');
-    // Test database connection
-    await sequelize.authenticate();
-    console.log('Database connected!');
-    logger.info('Database connection established successfully.');
+    console.log('Environment:', process.env.NODE_ENV || 'development');
+
+    // Check if DATABASE_URL is set in production
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      console.error('FATAL ERROR: DATABASE_URL environment variable is not set!');
+      console.error('Please set DATABASE_URL in your Railway environment variables.');
+      console.error('Railway should automatically provide this when you link a PostgreSQL database.');
+      process.exit(1);
+    }
+
+    // Log database connection info (without sensitive data)
+    if (process.env.NODE_ENV === 'production') {
+      const dbUrl = process.env.DATABASE_URL;
+      if (dbUrl) {
+        const urlObj = new URL(dbUrl);
+        console.log(`Connecting to PostgreSQL at: ${urlObj.hostname}:${urlObj.port || 5432}`);
+      }
+    }
+
+    // Test database connection with retries
+    let retries = 3;
+    let lastError;
+
+    while (retries > 0) {
+      try {
+        await sequelize.authenticate();
+        console.log('✓ Database connected!');
+        logger.info('Database connection established successfully.');
+        break;
+      } catch (err) {
+        lastError = err;
+        retries--;
+
+        if (retries > 0) {
+          console.log(`Database connection failed, retrying... (${retries} attempts left)`);
+          console.log(`Error: ${err.message}`);
+          await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds before retry
+        }
+      }
+    }
+
+    if (retries === 0) {
+      throw lastError;
+    }
 
     // Sync database tables (safe - won't drop data or alter existing tables)
     // This ensures new tables are created when models are added
@@ -222,7 +262,7 @@ const startServer = async () => {
     try {
       // Use force:false (safe - only creates missing tables, won't modify existing ones)
       await sequelize.sync({ force: false });
-      console.log('Database synced!');
+      console.log('✓ Database synced!');
       logger.info('Database synchronized successfully.');
     } catch (syncError) {
       console.error('Database sync failed:', syncError.message);
@@ -239,8 +279,34 @@ const startServer = async () => {
       logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
     });
   } catch (error) {
-    console.error('FATAL: Unable to start server:', error);
+    console.error('FATAL: Unable to start server:', error.message);
     logger.error('Unable to start server:', error);
+
+    // Provide helpful error messages based on error type
+    if (error.message.includes('ETIMEDOUT')) {
+      console.error('\n=== DATABASE CONNECTION TIMEOUT ===');
+      console.error('The database connection timed out. Possible causes:');
+      console.error('1. DATABASE_URL is not set or is incorrect');
+      console.error('2. PostgreSQL database service is not running on Railway');
+      console.error('3. Database is not linked to your backend service');
+      console.error('4. Network/firewall issue blocking the connection');
+      console.error('\nTo fix this on Railway:');
+      console.error('1. Go to your Railway project dashboard');
+      console.error('2. Ensure you have a PostgreSQL database service created');
+      console.error('3. Link the database to your backend service (Settings → Connect)');
+      console.error('4. Verify DATABASE_URL variable appears in Variables tab');
+      console.error('5. Redeploy your backend service\n');
+    } else if (error.message.includes('ECONNREFUSED')) {
+      console.error('\n=== DATABASE CONNECTION REFUSED ===');
+      console.error('The database is refusing connections. Possible causes:');
+      console.error('1. PostgreSQL service is not running');
+      console.error('2. Wrong port in DATABASE_URL');
+      console.error('3. Database is still starting up\n');
+    } else if (error.message.includes('authentication failed')) {
+      console.error('\n=== DATABASE AUTHENTICATION FAILED ===');
+      console.error('Database credentials are incorrect. Check DATABASE_URL.\n');
+    }
+
     process.exit(1);
   }
 };
@@ -248,9 +314,32 @@ const startServer = async () => {
 console.log('Calling startServer()...');
 startServer();
 
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  logger.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection:', reason);
+  process.exit(1);
+});
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    sequelize.close();
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT signal received: closing HTTP server');
   server.close(() => {
     logger.info('HTTP server closed');
     sequelize.close();

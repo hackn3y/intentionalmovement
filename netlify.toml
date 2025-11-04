@@ -29,6 +29,19 @@
   # Google OAuth Client ID
   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID = "528044070931-06pbpg4gj40daopug4b7plumibn3g353.apps.googleusercontent.com"
 
+# PWA manifest
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Service worker
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 # Cache static assets for better performance
 [[headers]]
   for = "/static/*"
